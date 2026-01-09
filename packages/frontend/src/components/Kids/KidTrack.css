@@ -1,0 +1,246 @@
+.kid-track {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header */
+.kid-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.kid-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.kid-info {
+  flex: 1;
+}
+
+.kid-name {
+  margin: 0;
+  font-size: 20px;
+  color: var(--slate-700);
+}
+
+.sticker-count {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold-600);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.star-icon.filled {
+  color: var(--gold-500);
+  fill: var(--gold-500);
+}
+
+/* Track row - single line */
+.track-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 8px 0;
+}
+
+/* Background line */
+.track-row::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 21px;
+  right: 60px;
+  height: 4px;
+  background: var(--track-color, var(--slate-200));
+  border-radius: 2px;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* Sticker spots */
+.spot-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 3px solid var(--slate-200);
+  color: var(--slate-400);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 200ms ease;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.spot-circle.clickable {
+  cursor: pointer;
+}
+
+.spot-circle.clickable:hover {
+  transform: scale(1.1);
+}
+
+/* Next spot - pulsing */
+.spot-circle.next-spot {
+  border-color: var(--gold-300);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 158, 51, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(220, 158, 51, 0); }
+}
+
+/* Last earned - can remove */
+.spot-circle.last-earned:hover {
+  border-color: var(--orange-400);
+}
+
+.spot-number {
+  font-size: 11px;
+}
+
+/* Earned spots */
+.spot-circle.earned {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  border-color: var(--gold-500);
+  color: white;
+  box-shadow: 0 2px 6px rgba(220, 158, 51, 0.4);
+}
+
+.spot-circle.earned .star-icon {
+  fill: white;
+}
+
+/* Reward oval - rounded button style */
+.reward-oval {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 120px;
+  height: 42px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #f8f8f8, #f0f0f0);
+  border: 3px solid var(--slate-200);
+  border-radius: 21px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.reward-oval:hover {
+  border-color: var(--slate-300);
+  transform: scale(1.02);
+}
+
+.reward-oval .reward-text {
+  font-weight: 600;
+  color: var(--slate-600);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+/* Empty state */
+.reward-oval.empty {
+  border-style: dashed;
+}
+
+.reward-oval.empty .reward-text {
+  color: var(--slate-400);
+}
+
+/* Can claim state */
+.reward-oval.can-claim {
+  background: linear-gradient(135deg, #FF6B6B, #ee5a5a);
+  border-color: #FF6B6B;
+  animation: glowReward 1.5s ease-in-out infinite;
+}
+
+.reward-oval.can-claim .reward-text {
+  color: white;
+}
+
+.reward-oval.can-claim .check-icon {
+  color: white;
+}
+
+@keyframes glowReward {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 107, 107, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(255, 107, 107, 0.6); }
+}
+
+.reward-oval.can-claim:hover {
+  transform: scale(1.05);
+}
+
+/* Claimed rewards summary */
+.claimed-rewards {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--slate-100);
+}
+
+.claimed-label {
+  font-size: 12px;
+  color: var(--slate-400);
+  font-weight: 500;
+}
+
+.claimed-badge {
+  font-size: 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .spot-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .reward-oval {
+    min-width: 80px;
+    height: 32px;
+    padding: 0 10px;
+  }
+
+  .reward-oval .reward-text {
+    font-size: 12px;
+    max-width: 70px;
+  }
+}

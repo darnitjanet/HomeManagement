@@ -1,0 +1,64 @@
+.alphabet-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.alphabet-letter {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.alphabet-letter.active {
+  color: var(--slate-600);
+}
+
+.alphabet-letter.active:hover {
+  background: var(--slate-100);
+  color: var(--slate-700);
+  transform: scale(1.15);
+}
+
+.alphabet-letter.inactive {
+  color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.alphabet-letter:disabled {
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .alphabet-nav {
+    padding: 8px 12px;
+    gap: 2px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+
+  .alphabet-letter {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}

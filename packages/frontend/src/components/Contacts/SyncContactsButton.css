@@ -1,0 +1,97 @@
+.sync-contacts-button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.sync-contacts-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid var(--slate-500);
+  border-radius: 8px;
+  background: white;
+  color: var(--slate-600);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 48px;
+}
+
+.sync-contacts-button:hover {
+  background: var(--slate-500);
+  color: white;
+}
+
+.sync-contacts-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sync-contacts-button.syncing {
+  background: var(--gold-400);
+  border-color: var(--gold-500);
+  color: white;
+}
+
+.sync-contacts-button.success {
+  background: var(--slate-600);
+  border-color: var(--slate-600);
+  color: white;
+}
+
+.sync-contacts-button.error {
+  background: #b91c1c;
+  border-color: #991b1b;
+  color: white;
+}
+
+.sync-icon {
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sync-icon .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sync-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.last-sync {
+  font-size: 14px;
+  color: #718096;
+}
+
+.sync-error {
+  font-size: 14px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .sync-contacts-button-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sync-contacts-button {
+    width: 100%;
+  }
+}

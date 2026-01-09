@@ -1,0 +1,181 @@
+.loan-book-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.loan-book-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid var(--slate-100);
+  background: #5b768a;
+  border-radius: 16px 16px 0 0;
+}
+
+.loan-book-modal .modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loan-book-modal .close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 150ms ease;
+}
+
+.loan-book-modal .close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.loan-book-modal .modal-body {
+  padding: 24px;
+}
+
+.loan-book-modal .book-info {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--slate-50);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.loan-book-modal .book-cover {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loan-book-modal .book-details h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--slate-700);
+  font-weight: 600;
+}
+
+.loan-book-modal .book-details .author {
+  margin: 0;
+  font-size: 14px;
+  color: var(--slate-600);
+}
+
+.loan-book-modal .form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loan-book-modal label {
+  display: block;
+  font-weight: 600;
+  color: var(--slate-700);
+  font-size: 14px;
+}
+
+.loan-book-modal label.required::after {
+  content: ' *';
+  color: #e74c3c;
+}
+
+.loan-book-modal input,
+.loan-book-modal textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.loan-book-modal input:focus,
+.loan-book-modal textarea:focus {
+  outline: none;
+  border-color: #5b768a;
+}
+
+.loan-book-modal .modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 2px solid var(--slate-100);
+  margin-top: 20px;
+}
+
+.loan-book-modal .modal-footer button.outline {
+  background: white;
+  border: 2px solid var(--slate-300);
+  color: var(--slate-700);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.loan-book-modal .modal-footer button.outline:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-400);
+}
+
+.loan-book-modal .modal-footer button.primary {
+  background: #da6b34;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.loan-book-modal .modal-footer button.primary:hover {
+  background: #c55a2a;
+}
+
+.loan-book-modal .modal-footer button.primary:disabled {
+  background: var(--slate-300);
+  cursor: not-allowed;
+}
+
+.loan-book-modal .error-message {
+  padding: 12px 16px;
+  background: var(--orange-50);
+  border: 2px solid var(--orange-300);
+  border-radius: 8px;
+  color: var(--orange-700);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .loan-book-modal {
+    max-width: 100%;
+    margin: 0 16px;
+  }
+}

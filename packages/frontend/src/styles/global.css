@@ -1,0 +1,271 @@
+/* Global Styles - Custom Retro Geometric Color Scheme - Updated */
+:root {
+  /* Background & Neutrals */
+  --retro-cream: #ededed;
+  --retro-light-cream: #eed6aa;
+  --retro-peach: #fde2e2;
+
+  /* Slate Blue - Primary color (#5b768a) */
+  --slate-50: #f5f7f9;
+  --slate-100: #e8ecf0;
+  --slate-200: #d1dae3;
+  --slate-300: #a8b9ca;
+  --slate-400: #7f97b1;
+  --slate-500: #5b768a;
+  --slate-600: #4a6070;
+  --slate-700: #394857;
+  --slate-800: #28323d;
+  --slate-900: #171c24;
+
+  /* Burnt Orange - Primary accent (#da6b34) */
+  --orange-50: #fef5f1;
+  --orange-100: #fde8df;
+  --orange-200: #fbd1bf;
+  --orange-300: #f5a779;
+  --orange-400: #ef8955;
+  --orange-500: #da6b34;
+  --orange-600: #bc5829;
+  --orange-700: #8e4220;
+  --orange-800: #5f2c15;
+
+  /* Golden Mustard - Secondary accent (#dc9e33) */
+  --gold-50: #fefaf2;
+  --gold-100: #fdf3e0;
+  --gold-200: #fbe7c1;
+  --gold-300: #f6d082;
+  --gold-400: #edb74d;
+  --gold-500: #dc9e33;
+  --gold-600: #bf8529;
+  --gold-700: #8f641f;
+  --gold-800: #604314;
+
+  /* Sage/Green - keeping for variety */
+  --sage-50: #f7f9f5;
+  --sage-100: #eef3e9;
+  --sage-200: #dde7d3;
+  --sage-300: #c5d5a8;
+  --sage-400: #a8b896;
+  --sage-500: #8fa37d;
+  --sage-600: #738264;
+
+  /* Legacy green variables (mapped to slate for compatibility) */
+  --green-50: #f5f7f9;
+  --green-100: #e8ecf0;
+  --green-200: #d1dae3;
+  --green-300: #a8b9ca;
+  --green-400: #7f97b1;
+  --green-500: #5b768a;
+  --green-600: #4a6070;
+  --green-700: #394857;
+  --green-800: #28323d;
+  --green-900: #171c24;
+
+  /* Brown - Tertiary accent */
+  --brown-50: #f8f6f4;
+  --brown-100: #f1ede9;
+  --brown-200: #e3dbd3;
+  --brown-300: #c4b5a3;
+  --brown-400: #8b7355;
+  --brown-500: #6f5d47;
+  --brown-600: #5a4b39;
+
+  /* Neutrals - adjusted to work with retro palette */
+  --gray-50: #fafbfb;
+  --gray-100: #f5f6f7;
+  --gray-200: #e8eaec;
+  --gray-300: #d4d7db;
+  --gray-700: #4a5468;
+  --gray-800: #2d3748;
+  --gray-900: #1a202c;
+
+  /* Touch targets */
+  --touch-target-min: 48px;
+  --spacing-touch: 16px;
+
+  /* Typography */
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background: var(--retro-cream);
+  color: var(--gray-900);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Touch-optimized buttons */
+button {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 12px 24px;
+  font-size: var(--font-size-base);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 150ms ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button.primary {
+  background: var(--slate-500);
+  color: white;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  background: var(--slate-600);
+}
+
+button.secondary {
+  background: var(--orange-500);
+  color: white;
+  font-weight: 600;
+}
+
+button.secondary:hover {
+  background: var(--orange-600);
+}
+
+button.outline {
+  background: transparent;
+  border: 2px solid var(--slate-500);
+  color: var(--slate-600);
+  font-weight: 600;
+}
+
+button.outline:hover {
+  background: var(--slate-50);
+}
+
+/* Touch-optimized inputs */
+input, textarea, select {
+  min-height: var(--touch-target-min);
+  padding: 12px 16px;
+  font-size: var(--font-size-base);
+  border: 2px solid var(--gray-300);
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--slate-400);
+  box-shadow: 0 0 0 3px var(--slate-100);
+}
+
+/* FullCalendar customization - Retro theme */
+.fc {
+  font-family: inherit;
+}
+
+.fc .fc-button-primary {
+  background: var(--slate-500) !important;
+  border-color: var(--slate-600) !important;
+  min-height: var(--touch-target-min);
+  padding: 12px 20px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: white !important;
+}
+
+.fc .fc-button-primary:hover {
+  background: var(--slate-600) !important;
+  border-color: var(--slate-700) !important;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:focus {
+  background: var(--slate-700) !important;
+  border-color: var(--slate-700) !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button-active {
+  background: var(--orange-500) !important;
+  border-color: var(--orange-600) !important;
+}
+
+.fc .fc-toolbar-title {
+  font-size: var(--font-size-xl);
+  color: var(--slate-700);
+  font-weight: 700;
+}
+
+.fc .fc-daygrid-day-number {
+  font-size: var(--font-size-lg);
+  padding: 8px;
+  color: var(--slate-600);
+  font-weight: 500;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background: var(--retro-peach) !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background: var(--orange-500);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fc .fc-event {
+  cursor: pointer;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 15px;
+  border-radius: 4px;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.fc .fc-event:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fc .fc-event-title {
+  font-weight: 600;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-50);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-400);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-500);
+}

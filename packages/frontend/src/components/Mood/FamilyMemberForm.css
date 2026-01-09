@@ -1,0 +1,105 @@
+.family-member-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.family-member-modal .modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 2px solid var(--slate-100);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.family-member-modal .modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--slate-700);
+}
+
+.family-member-modal form {
+  padding: 1.5rem;
+}
+
+.avatar-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.preview-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.family-member-modal .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.family-member-modal label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--slate-700);
+}
+
+.family-member-modal input[type="text"],
+.family-member-modal input[type="date"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.family-member-modal input[type="text"]:focus,
+.family-member-modal input[type="date"]:focus {
+  outline: none;
+  border-color: var(--slate-500);
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.color-option {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-option:hover,
+.color-option:active {
+  transform: scale(1.1);
+}
+
+.color-option.selected {
+  border-color: var(--slate-700);
+  transform: scale(1.15);
+}
+
+.family-member-modal .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--slate-100);
+}

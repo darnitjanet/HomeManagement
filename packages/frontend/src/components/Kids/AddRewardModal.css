@@ -1,0 +1,48 @@
+.add-reward-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.reward-info {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  background: var(--gold-50);
+  border-radius: 8px;
+  text-align: center;
+  color: var(--slate-600);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 150ms ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--slate-500);
+}
+
+@media (max-width: 768px) {
+  .add-reward-modal {
+    max-width: 100%;
+    margin: 0 16px;
+  }
+}

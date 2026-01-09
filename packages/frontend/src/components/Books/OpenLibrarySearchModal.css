@@ -1,0 +1,515 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.openlibrary-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.openlibrary-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 2px solid var(--slate-100);
+  background: #5b768a;
+  border-radius: 16px 16px 0 0;
+}
+
+.openlibrary-modal .modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.openlibrary-modal .close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.openlibrary-modal .modal-body {
+  padding: 24px;
+}
+
+.openlibrary-modal .search-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.openlibrary-modal .search-form .search-input {
+  flex: 1;
+  padding: 14px 18px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.openlibrary-modal .search-form .search-input:focus {
+  outline: none;
+  border-color: #5b768a;
+}
+
+.openlibrary-modal .search-form button.primary {
+  background: #da6b34;
+  border: none;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .search-form button.primary:hover {
+  background: #c55a2a;
+}
+
+.openlibrary-modal .search-form button.primary:disabled {
+  background: var(--slate-300);
+  cursor: not-allowed;
+}
+
+.openlibrary-modal .search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.openlibrary-modal .search-result-card {
+  background: white;
+  border: 2px solid var(--slate-200);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .search-result-card:hover {
+  border-color: #5b768a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.openlibrary-modal .search-result-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.openlibrary-modal .search-result-card .no-cover {
+  width: 100%;
+  height: 220px;
+  background: var(--slate-200);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-500);
+  margin-bottom: 12px;
+}
+
+.openlibrary-modal .result-info h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: var(--slate-700);
+  font-weight: 600;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.openlibrary-modal .result-info .author {
+  margin: 0;
+  font-size: 13px;
+  color: var(--slate-600);
+}
+
+.openlibrary-modal .result-info .year {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--slate-500);
+}
+
+.openlibrary-modal .back-button {
+  background: transparent;
+  border: none;
+  color: var(--slate-600);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.openlibrary-modal .back-button:hover {
+  color: #5b768a;
+  text-decoration: underline;
+}
+
+.openlibrary-modal .book-details {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.openlibrary-modal .details-content {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.openlibrary-modal .detail-cover {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.openlibrary-modal .detail-cover-placeholder {
+  width: 100%;
+  height: 260px;
+  background: var(--slate-200);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-500);
+}
+
+.openlibrary-modal .detail-info h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: var(--slate-700);
+}
+
+.openlibrary-modal .detail-info .author {
+  font-size: 18px;
+  color: #5b768a;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.openlibrary-modal .detail-info .metadata {
+  color: var(--slate-600);
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.openlibrary-modal .detail-info .metadata span {
+  margin-right: 4px;
+}
+
+.openlibrary-modal .detail-info .subjects {
+  color: var(--slate-600);
+  font-size: 14px;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.openlibrary-modal .detail-info .description {
+  color: var(--slate-600);
+  font-size: 14px;
+  margin: 0 0 12px;
+  line-height: 1.6;
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--slate-50);
+  border-radius: 6px;
+}
+
+.openlibrary-modal .detail-info .isbn {
+  color: var(--slate-500);
+  font-size: 13px;
+  margin: 0;
+}
+
+.openlibrary-modal .add-form {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid var(--slate-100);
+}
+
+.openlibrary-modal .add-form h4 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: var(--slate-700);
+}
+
+.openlibrary-modal .add-form label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.openlibrary-modal .add-form select,
+.openlibrary-modal .add-form input[type="text"],
+.openlibrary-modal .add-form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.openlibrary-modal .add-form select:focus,
+.openlibrary-modal .add-form input[type="text"]:focus,
+.openlibrary-modal .add-form textarea:focus {
+  outline: none;
+  border-color: #5b768a;
+}
+
+.openlibrary-modal .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.openlibrary-modal .form-row label {
+  flex: 1;
+  min-width: 150px;
+}
+
+.openlibrary-modal .rating-field {
+  margin-bottom: 16px;
+}
+
+.openlibrary-modal .rating-label {
+  display: block;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 4px;
+}
+
+.openlibrary-modal .rating-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.openlibrary-modal .star-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--slate-300);
+  transition: all 150ms ease;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.openlibrary-modal .star-btn.filled {
+  color: #dc9e33;
+}
+
+.openlibrary-modal .star-btn:hover {
+  transform: scale(1.15);
+  color: #dc9e33;
+}
+
+.openlibrary-modal .clear-rating {
+  background: transparent;
+  border: none;
+  color: var(--slate-500);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+
+.openlibrary-modal .clear-rating:hover {
+  color: var(--slate-700);
+}
+
+.openlibrary-modal .tags-field {
+  margin-bottom: 16px;
+}
+
+.openlibrary-modal .tags-label {
+  display: block;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 8px;
+}
+
+.openlibrary-modal .tags-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.openlibrary-modal .tag-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 2px solid;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .tag-btn:hover {
+  transform: translateY(-1px);
+}
+
+.openlibrary-modal .modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 2px solid var(--slate-100);
+  margin-top: 16px;
+}
+
+.openlibrary-modal .modal-footer button.outline {
+  background: white;
+  border: 2px solid var(--slate-300);
+  color: var(--slate-700);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .modal-footer button.outline:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-400);
+}
+
+.openlibrary-modal .modal-footer button.primary {
+  background: #da6b34;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.openlibrary-modal .modal-footer button.primary:hover {
+  background: #c55a2a;
+}
+
+.openlibrary-modal .modal-footer button.primary:disabled {
+  background: var(--slate-300);
+  cursor: not-allowed;
+}
+
+.openlibrary-modal .error-message {
+  padding: 12px 16px;
+  background: var(--orange-50);
+  border: 2px solid var(--orange-300);
+  border-radius: 8px;
+  color: var(--orange-700);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .openlibrary-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .openlibrary-modal .modal-header {
+    border-radius: 0;
+  }
+
+  .openlibrary-modal .details-content {
+    grid-template-columns: 1fr;
+  }
+
+  .openlibrary-modal .detail-cover {
+    max-width: 180px;
+    margin: 0 auto;
+  }
+
+  .openlibrary-modal .form-row {
+    flex-direction: column;
+  }
+
+  .openlibrary-modal .form-row label {
+    min-width: 100%;
+  }
+
+  .openlibrary-modal .search-results {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+/* Scan ISBN Button */
+.scan-isbn-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 2px dashed #5b768a;
+  border-radius: 8px;
+  background: #f0f5f8;
+  color: #5b768a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scan-isbn-btn:hover {
+  background: #e1eaf0;
+  border-style: solid;
+}

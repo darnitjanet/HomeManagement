@@ -1,0 +1,399 @@
+.games-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.games-banner {
+  width: 100%;
+  margin-bottom: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.games-banner img {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.games-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.header-actions button.primary {
+  background: #5b768a;
+  border-color: #5b768a;
+}
+
+.header-actions button.primary:hover {
+  background: #4a6275;
+  border-color: #4a6275;
+}
+
+.games-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--slate-500);
+}
+
+.games-filters select {
+  padding: 12px 16px;
+  border: 2px solid var(--slate-200);
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+}
+
+.games-filters select:focus {
+  outline: none;
+  border-color: var(--slate-500);
+}
+
+.clear-filters {
+  background: var(--orange-500);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.clear-filters:hover {
+  background: var(--orange-600);
+  transform: translateY(-1px);
+}
+
+.results-count {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: var(--slate-700);
+  font-weight: 600;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.game-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 150ms ease;
+  border: 2px solid transparent;
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.game-card.on-loan {
+  border-color: var(--gold-300);
+  background: linear-gradient(135deg, white, var(--gold-50));
+}
+
+.game-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.game-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-btn,
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--slate-400);
+  transition: all 150ms ease;
+}
+
+.edit-btn:hover {
+  color: #5b768a;
+  transform: scale(1.1);
+}
+
+.delete-btn:hover {
+  color: var(--orange-500);
+  transform: scale(1.1);
+}
+
+.game-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.type-badge {
+  background: var(--slate-500);
+  color: white;
+}
+
+.condition-badge {
+  color: white;
+}
+
+.condition-badge.excellent {
+  background: #34a853;
+}
+
+.condition-badge.good {
+  background: var(--gold-500);
+}
+
+.condition-badge.fair {
+  background: var(--orange-500);
+}
+
+.condition-badge.poor {
+  background: var(--slate-400);
+}
+
+.platform-badge {
+  background: var(--slate-200);
+  color: var(--slate-700);
+}
+
+.game-info {
+  margin-bottom: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slate-600);
+  font-size: 14px;
+}
+
+.game-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tag-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.loan-status {
+  background: var(--gold-50);
+  border: 2px solid var(--gold-300);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.loan-status.overdue {
+  background: var(--orange-50);
+  border-color: var(--orange-300);
+}
+
+.loan-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slate-700);
+  margin-bottom: 4px;
+}
+
+.loan-days {
+  font-size: 14px;
+  color: var(--slate-600);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overdue-badge {
+  background: var(--orange-500);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.return-btn {
+  width: 100%;
+  background: var(--slate-500);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.return-btn:hover {
+  background: var(--slate-600);
+}
+
+.loan-btn {
+  width: 100%;
+  background: white;
+  color: var(--slate-700);
+  border: 2px solid var(--slate-200);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+  margin-top: 12px;
+}
+
+.loan-btn:hover {
+  border-color: var(--slate-500);
+  background: var(--slate-50);
+}
+
+.no-games {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--slate-600);
+}
+
+.no-games p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.error-message {
+  padding: 16px;
+  background: var(--orange-50);
+  border: 2px solid var(--orange-300);
+  border-radius: 8px;
+  color: var(--orange-700);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.games-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 64px;
+  height: 64px;
+  border: 4px solid var(--slate-200);
+  border-top-color: var(--slate-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .games-page {
+    padding: 16px;
+  }
+
+  .games-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .games-filters {
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .games-filters select {
+    width: 100%;
+  }
+
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+}
