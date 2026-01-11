@@ -1,4 +1,4 @@
-import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed } from 'lucide-react';
+import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale } from 'lucide-react';
 import { WeatherWidget } from '../Weather/WeatherWidget';
 import './HomePage.css';
 
@@ -61,6 +61,24 @@ export function HomePage({ onNavigate }: HomePageProps) {
       icon: MapPin,
       title: 'Travel Map',
       color: '#5b768a',
+    },
+    {
+      id: 'plants',
+      icon: Flower2,
+      title: 'Plant Care',
+      color: '#dc9e33',
+    },
+    {
+      id: 'family-rules',
+      icon: Scale,
+      title: 'Family Rules',
+      color: '#5b768a',
+    },
+    {
+      id: 'emergency',
+      icon: AlertTriangle,
+      title: 'Emergency Info',
+      color: '#da6b34',
     },
   ];
 

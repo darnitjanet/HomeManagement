@@ -659,6 +659,7 @@ export type NotificationType =
   | 'game_overdue'
   | 'bill_due'
   | 'warranty_expiring'
+  | 'plant_watering'
   | 'general_alert';
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -703,6 +704,10 @@ export interface NotificationPreferences {
   gameOverdueAlerts: boolean;
   billReminders: boolean;
   warrantyExpiringAlerts: boolean;
+  plantWateringAlerts: boolean;
+  vacationMode: boolean;
+  vacationStartDate?: string;
+  vacationEndDate?: string;
   calendarReminderMinutes: number;
   taskReminderMinutes: number;
   createdAt: string;
@@ -719,6 +724,10 @@ export interface UpdatePreferencesInput {
   gameOverdueAlerts?: boolean;
   billReminders?: boolean;
   warrantyExpiringAlerts?: boolean;
+  plantWateringAlerts?: boolean;
+  vacationMode?: boolean;
+  vacationStartDate?: string | null;
+  vacationEndDate?: string | null;
   calendarReminderMinutes?: number;
   taskReminderMinutes?: number;
 }

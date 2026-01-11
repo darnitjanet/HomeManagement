@@ -60,17 +60,65 @@ export function stopNotificationScheduler() {
  * Run the notification check
  * Generates notifications for due tasks, chores, calendar events, etc.
  */
+/**
+ * Check if vacation mode is currently active
+ */
+async function isVacationModeActive(): Promise<boolean> {
+  try {
+    const prefs = await notificationService.getPreferences();
+    if (!prefs || !prefs.vacationMode) {
+      return false;
+    }
+
+    // If vacation mode is on, check date range if specified
+    const today = new Date().toISOString().split('T')[0];
+    const startDate = prefs.vacationStartDate;
+    const endDate = prefs.vacationEndDate;
+
+    // If no dates specified, vacation mode is always active when enabled
+    if (!startDate && !endDate) {
+      return true;
+    }
+
+    // Check if today is within the vacation period
+    if (startDate && today < startDate) {
+      return false; // Vacation hasn't started yet
+    }
+    if (endDate && today > endDate) {
+      // Vacation has ended, auto-disable vacation mode
+      await notificationService.updatePreferences({
+        vacationMode: false,
+        vacationStartDate: null,
+        vacationEndDate: null,
+      });
+      console.log('🏖️ Vacation mode auto-disabled (end date passed)');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function runNotificationCheck() {
   try {
+    // Check if vacation mode is active
+    if (await isVacationModeActive()) {
+      console.log('🏖️ Vacation mode active - skipping notification check');
+      return;
+    }
+
     const taskCount = await notificationService.generateTaskDueNotifications();
     const choreCount = await notificationService.generateChoreDueNotifications();
     const calendarCount = await notificationService.generateCalendarReminders();
     const warrantyCount = await notificationService.generateWarrantyExpiringNotifications();
+    const plantCount = await notificationService.generatePlantWateringNotifications();
     // Game overdue check runs less frequently (handled separately)
 
-    const total = taskCount + choreCount + calendarCount + warrantyCount;
+    const total = taskCount + choreCount + calendarCount + warrantyCount + plantCount;
     if (total > 0) {
-      console.log(`✅ Created ${total} notifications (tasks: ${taskCount}, chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount})`);
+      console.log(`✅ Created ${total} notifications (tasks: ${taskCount}, chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount}, plants: ${plantCount})`);
     }
   } catch (error: any) {
     console.error('❌ Notification check error:', error.message);
@@ -82,6 +130,12 @@ async function runNotificationCheck() {
  */
 async function sendDailyDigest() {
   try {
+    // Check if vacation mode is active
+    if (await isVacationModeActive()) {
+      console.log('🏖️ Vacation mode active - skipping daily digest');
+      return;
+    }
+
     const prefs = await notificationService.getPreferences();
 
     if (!prefs || !prefs.digestEnabled || !prefs.digestEmail) {

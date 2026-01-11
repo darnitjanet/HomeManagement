@@ -200,10 +200,6 @@ export function PantryInventory() {
 
   return (
     <div className="pantry-page">
-      <div className="pantry-banner">
-        <img src="/Pantry.png" alt="Pantry" />
-      </div>
-
       <div className="pantry-header">
         <h1><Package size={32} /> Pantry Inventory</h1>
       </div>

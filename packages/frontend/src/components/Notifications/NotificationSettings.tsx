@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Mail, Clock, Bell, Calendar, CheckSquare, Sparkles, Gamepad2, Receipt, Send } from 'lucide-react';
+import { X, Mail, Clock, Bell, Calendar, CheckSquare, Sparkles, Gamepad2, Receipt, Send, Palmtree, Droplets, ShieldAlert } from 'lucide-react';
 import { useNotificationStore, useToast } from '../../stores/useNotificationStore';
 import { notificationsApi } from '../../services/api';
 import './NotificationSettings.css';
@@ -21,6 +21,11 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
     choreDueAlerts: true,
     gameOverdueAlerts: true,
     billReminders: true,
+    plantWateringAlerts: true,
+    warrantyExpiringAlerts: true,
+    vacationMode: false,
+    vacationStartDate: '',
+    vacationEndDate: '',
     calendarReminderMinutes: 30,
     taskReminderMinutes: 60,
   });
@@ -44,6 +49,11 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
         choreDueAlerts: preferences.choreDueAlerts,
         gameOverdueAlerts: preferences.gameOverdueAlerts,
         billReminders: preferences.billReminders,
+        plantWateringAlerts: preferences.plantWateringAlerts ?? true,
+        warrantyExpiringAlerts: preferences.warrantyExpiringAlerts ?? true,
+        vacationMode: preferences.vacationMode || false,
+        vacationStartDate: preferences.vacationStartDate || '',
+        vacationEndDate: preferences.vacationEndDate || '',
         calendarReminderMinutes: preferences.calendarReminderMinutes,
         taskReminderMinutes: preferences.taskReminderMinutes,
       });
@@ -102,6 +112,61 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
         </div>
 
         <div className="settings-content">
+          {/* Vacation Mode Section */}
+          <div className={`settings-section vacation-section ${localPrefs.vacationMode ? 'active' : ''}`}>
+            <h3>
+              <Palmtree size={18} />
+              Vacation Mode
+            </h3>
+            <p className="settings-description">
+              Pause all notifications while you're away. They'll resume automatically when vacation ends.
+            </p>
+
+            <div className="settings-row">
+              <label className="settings-toggle vacation-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.vacationMode}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, vacationMode: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label">Enable vacation mode</span>
+              </label>
+            </div>
+
+            {localPrefs.vacationMode && (
+              <div className="vacation-dates">
+                <div className="settings-row">
+                  <label className="settings-input-label">Start Date (optional)</label>
+                  <input
+                    type="date"
+                    className="settings-input"
+                    value={localPrefs.vacationStartDate}
+                    onChange={(e) =>
+                      setLocalPrefs({ ...localPrefs, vacationStartDate: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="settings-row">
+                  <label className="settings-input-label">End Date (optional)</label>
+                  <input
+                    type="date"
+                    className="settings-input"
+                    value={localPrefs.vacationEndDate}
+                    onChange={(e) =>
+                      setLocalPrefs({ ...localPrefs, vacationEndDate: e.target.value })
+                    }
+                  />
+                </div>
+                <p className="vacation-note">
+                  Leave dates empty to manually control when vacation mode ends.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Daily Digest Section */}
           <div className="settings-section">
             <h3>
@@ -250,6 +315,32 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
                 <span className="toggle-slider"></span>
                 <Receipt size={16} />
                 <span className="toggle-label">Bill reminders</span>
+              </label>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.plantWateringAlerts}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, plantWateringAlerts: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <Droplets size={16} />
+                <span className="toggle-label">Plant watering reminders</span>
+              </label>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.warrantyExpiringAlerts}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, warrantyExpiringAlerts: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <ShieldAlert size={16} />
+                <span className="toggle-label">Warranty expiration alerts</span>
               </label>
             </div>
           </div>

@@ -757,6 +757,11 @@ export const notificationsApi = {
     choreDueAlerts?: boolean;
     gameOverdueAlerts?: boolean;
     billReminders?: boolean;
+    plantWateringAlerts?: boolean;
+    warrantyExpiringAlerts?: boolean;
+    vacationMode?: boolean;
+    vacationStartDate?: string | null;
+    vacationEndDate?: string | null;
     calendarReminderMinutes?: number;
     taskReminderMinutes?: number;
   }) => api.put('/notifications/preferences', data),
@@ -840,6 +845,182 @@ export const travelApi = {
   togglePackingItem: (id: number) => api.patch(`/travel/packing/${id}/toggle`),
   deletePackingItem: (id: number) => api.delete(`/travel/packing/${id}`),
   clearPackingList: (tripId: number) => api.delete(`/travel/trips/${tripId}/packing`),
+};
+
+// Plants API
+export const plantsApi = {
+  // Get all plants
+  getAllPlants: (includeInactive?: boolean) =>
+    api.get('/plants', { params: { includeInactive } }),
+
+  // Get single plant
+  getPlant: (id: number) => api.get(`/plants/${id}`),
+
+  // Get plants needing water
+  getPlantsNeedingWater: () => api.get('/plants/needs-water'),
+
+  // Get plants needing water soon
+  getPlantsNeedingWaterSoon: (days?: number) =>
+    api.get('/plants/needs-water-soon', { params: { days } }),
+
+  // Get plant statistics
+  getStats: () => api.get('/plants/stats'),
+
+  // Get common species list
+  getCommonSpecies: () => api.get('/plants/species'),
+
+  // Get care suggestion for a species
+  getCareSuggestion: (species?: string) =>
+    api.get('/plants/care-suggestion', { params: { species } }),
+
+  // Create plant
+  createPlant: (data: {
+    name: string;
+    species?: string;
+    location?: string;
+    watering_frequency_days?: number;
+    last_watered?: string;
+    sunlight_needs?: string;
+    image_url?: string;
+    notes?: string;
+    care_instructions?: string;
+  }) => api.post('/plants', data),
+
+  // Update plant
+  updatePlant: (id: number, data: {
+    name?: string;
+    species?: string | null;
+    location?: string | null;
+    watering_frequency_days?: number;
+    last_watered?: string | null;
+    sunlight_needs?: string | null;
+    image_url?: string | null;
+    notes?: string | null;
+    care_instructions?: string | null;
+    is_active?: boolean;
+  }) => api.put(`/plants/${id}`, data),
+
+  // Delete plant
+  deletePlant: (id: number) => api.delete(`/plants/${id}`),
+
+  // Water a plant
+  waterPlant: (id: number, notes?: string) =>
+    api.post(`/plants/${id}/water`, { notes }),
+
+  // Get watering history
+  getWateringHistory: (id: number, limit?: number) =>
+    api.get(`/plants/${id}/history`, { params: { limit } }),
+};
+
+// Meal Plan API
+export const mealPlanApi = {
+  // Get meal plan for a specific week
+  getMealPlan: (weekStart: string) =>
+    api.get('/meal-plans', { params: { weekStart } }),
+
+  // Get current week's meal plan
+  getCurrentMealPlan: () => api.get('/meal-plans/current'),
+
+  // Add or update a meal plan entry
+  addEntry: (weekStart: string, data: {
+    day_of_week: number;
+    meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    recipe_id?: number | null;
+    custom_meal?: string | null;
+    notes?: string | null;
+    servings?: number;
+  }) => api.post('/meal-plans/entries', data, { params: { weekStart } }),
+
+  // Update a meal plan entry
+  updateEntry: (id: number, data: {
+    recipe_id?: number | null;
+    custom_meal?: string | null;
+    notes?: string | null;
+    servings?: number;
+  }) => api.put(`/meal-plans/entries/${id}`, data),
+
+  // Delete a meal plan entry
+  deleteEntry: (id: number) => api.delete(`/meal-plans/entries/${id}`),
+
+  // Clear all entries for a week
+  clearWeek: (weekStart: string) =>
+    api.delete('/meal-plans/clear', { params: { weekStart } }),
+
+  // Copy meal plan from one week to another
+  copyWeek: (fromWeek: string, toWeek: string) =>
+    api.post('/meal-plans/copy', { fromWeek, toWeek }),
+
+  // Generate shopping list from meal plan
+  generateShoppingList: (weekStart: string) =>
+    api.get('/meal-plans/shopping-list', { params: { weekStart } }),
+};
+
+// Emergency API (Contacts, Info, Family Rules)
+export const emergencyApi = {
+  // Emergency Contacts
+  getAllContacts: () => api.get('/emergency/contacts'),
+  createContact: (data: {
+    name: string;
+    relationship?: string;
+    phone?: string;
+    phone_secondary?: string;
+    email?: string;
+    address?: string;
+    notes?: string;
+    priority?: number;
+  }) => api.post('/emergency/contacts', data),
+  updateContact: (id: number, data: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+    phone_secondary?: string;
+    email?: string;
+    address?: string;
+    notes?: string;
+    priority?: number;
+    is_active?: boolean;
+  }) => api.put(`/emergency/contacts/${id}`, data),
+  deleteContact: (id: number) => api.delete(`/emergency/contacts/${id}`),
+
+  // Emergency Info
+  getAllInfo: (category?: string) =>
+    api.get('/emergency/info', { params: category ? { category } : {} }),
+  createInfo: (data: {
+    category: string;
+    label: string;
+    value: string;
+    notes?: string;
+    priority?: number;
+  }) => api.post('/emergency/info', data),
+  updateInfo: (id: number, data: {
+    category?: string;
+    label?: string;
+    value?: string;
+    notes?: string;
+    priority?: number;
+    is_active?: boolean;
+  }) => api.put(`/emergency/info/${id}`, data),
+  deleteInfo: (id: number) => api.delete(`/emergency/info/${id}`),
+
+  // Family Rules
+  getAllRules: (category?: string) =>
+    api.get('/emergency/rules', { params: category ? { category } : {} }),
+  createRule: (data: {
+    title: string;
+    description?: string;
+    category?: string;
+    priority?: number;
+  }) => api.post('/emergency/rules', data),
+  updateRule: (id: number, data: {
+    title?: string;
+    description?: string;
+    category?: string;
+    priority?: number;
+    is_active?: boolean;
+  }) => api.put(`/emergency/rules/${id}`, data),
+  deleteRule: (id: number) => api.delete(`/emergency/rules/${id}`),
+  reorderRules: (orderedIds: number[]) =>
+    api.post('/emergency/rules/reorder', { orderedIds }),
 };
 
 export default api;

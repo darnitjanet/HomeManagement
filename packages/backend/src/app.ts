@@ -24,6 +24,9 @@ import moodRoutes from './routes/mood.routes';
 import booksRoutes from './routes/books.routes';
 import travelRoutes from './routes/travel.routes';
 import pantryRoutes from './routes/pantry.routes';
+import plantsRoutes from './routes/plants.routes';
+import mealPlanRoutes from './routes/meal-plan.routes';
+import emergencyRoutes from './routes/emergency.routes';
 
 // Import session store (will be implemented)
 const SQLiteStore = require('connect-sqlite3')(session);
@@ -87,6 +90,9 @@ export function createApp(): Express {
   app.use('/api/books', booksRoutes);
   app.use('/api/travel', travelRoutes);
   app.use('/api/pantry', pantryRoutes);
+  app.use('/api/plants', plantsRoutes);
+  app.use('/api/meal-plans', mealPlanRoutes);
+  app.use('/api/emergency', emergencyRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {

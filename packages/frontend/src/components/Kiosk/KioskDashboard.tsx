@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Clock,
   Sun,
@@ -20,9 +20,11 @@ import {
   MicOff,
   Check,
   AlertCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi } from '../../services/api';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { EmergencyInfo } from '../Emergency/EmergencyInfo';
 import './KioskDashboard.css';
 
 interface KioskDashboardProps {
@@ -100,6 +102,15 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [voiceResult, setVoiceResult] = useState<{ success: boolean; message: string } | null>(null);
   const [voiceProcessing, setVoiceProcessing] = useState(false);
 
+  // Emergency info modal
+  const [showEmergency, setShowEmergency] = useState(false);
+
+  // Sleep mode state
+  const [isSleeping, setIsSleeping] = useState(false);
+  const [clockPosition, setClockPosition] = useState({ x: 50, y: 50 });
+  const sleepTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const SLEEP_DELAY = 2 * 60 * 1000; // 2 minutes of inactivity
+
   const {
     isListening,
     transcript,
@@ -118,6 +129,54 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Sleep mode - reset timer on activity
+  const resetSleepTimer = useCallback(() => {
+    if (isSleeping) {
+      setIsSleeping(false);
+    }
+    if (sleepTimeoutRef.current) {
+      clearTimeout(sleepTimeoutRef.current);
+    }
+    sleepTimeoutRef.current = setTimeout(() => {
+      setIsSleeping(true);
+    }, SLEEP_DELAY);
+  }, [isSleeping, SLEEP_DELAY]);
+
+  // Set up activity listeners for sleep mode
+  useEffect(() => {
+    const events = ['mousedown', 'mousemove', 'touchstart', 'touchmove', 'keydown'];
+
+    events.forEach((event) => {
+      window.addEventListener(event, resetSleepTimer);
+    });
+
+    // Start initial sleep timer
+    resetSleepTimer();
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, resetSleepTimer);
+      });
+      if (sleepTimeoutRef.current) {
+        clearTimeout(sleepTimeoutRef.current);
+      }
+    };
+  }, [resetSleepTimer]);
+
+  // Move clock position when sleeping
+  useEffect(() => {
+    if (!isSleeping) return;
+
+    const moveInterval = setInterval(() => {
+      setClockPosition({
+        x: 10 + Math.random() * 80, // 10-90% of screen width
+        y: 10 + Math.random() * 80, // 10-90% of screen height
+      });
+    }, 10000); // Move every 10 seconds
+
+    return () => clearInterval(moveInterval);
+  }, [isSleeping]);
 
   // Load data on mount and refresh periodically
   useEffect(() => {
@@ -475,6 +534,22 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
   return (
     <div className="kiosk-dashboard">
+      {/* Sleep Mode Overlay */}
+      {isSleeping && (
+        <div className="kiosk-sleep-overlay" onClick={resetSleepTimer}>
+          <div
+            className="sleep-clock"
+            style={{
+              left: `${clockPosition.x}%`,
+              top: `${clockPosition.y}%`,
+            }}
+          >
+            <div className="sleep-time">{formatTime(currentTime)}</div>
+            <div className="sleep-date">{formatDate(currentTime)}</div>
+          </div>
+        </div>
+      )}
+
       <button className="kiosk-exit-btn" onClick={onExit}>
         <X size={20} />
         <span>Exit</span>
@@ -662,9 +737,15 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       </div>
 
       <div className="kiosk-footer">
+        <button className="kiosk-emergency-btn" onClick={() => setShowEmergency(true)}>
+          <AlertTriangle size={20} />
+          Emergency Info
+        </button>
         <span>Last updated: {formatTime(new Date())}</span>
         {aiEnabled && <span className="ai-badge">AI Assisted</span>}
       </div>
+
+      {showEmergency && <EmergencyInfo onClose={() => setShowEmergency(false)} />}
 
       {/* Voice Input Button */}
       {voiceSupported && (

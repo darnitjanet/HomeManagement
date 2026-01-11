@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Clock, Users, Heart, ShoppingCart, Sparkles, Link } from 'lucide-react';
+import { Trash2, Clock, Users, Heart, ShoppingCart, Sparkles, Link, CalendarDays } from 'lucide-react';
 import { recipesApi } from '../../services/api';
 import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
 import { RecipeSuggestions } from './RecipeSuggestions';
 import { RecipeImport } from './RecipeImport';
+import { MealPlanner } from './MealPlanner';
 import './RecipesList.css';
 
 interface RecipeIngredient {
@@ -60,6 +61,7 @@ export function RecipesList() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showMealPlanner, setShowMealPlanner] = useState(false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -216,6 +218,10 @@ export function RecipesList() {
         <div className="header-actions">
           <button className="primary" onClick={() => setShowAddForm(true)}>
             + Add Recipe
+          </button>
+          <button className="secondary meal-planner-btn" onClick={() => setShowMealPlanner(true)}>
+            <CalendarDays size={18} />
+            Meal Plan
           </button>
           <button className="secondary import-btn" onClick={() => setShowImport(true)}>
             <Link size={18} />
@@ -413,6 +419,10 @@ export function RecipesList() {
           }}
           tags={tags}
         />
+      )}
+
+      {showMealPlanner && (
+        <MealPlanner onClose={() => setShowMealPlanner(false)} />
       )}
     </div>
   );

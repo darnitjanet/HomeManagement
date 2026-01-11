@@ -159,6 +159,14 @@ export class NotificationRepository {
       updates.bill_reminders = input.billReminders;
     if (input.warrantyExpiringAlerts !== undefined)
       updates.warranty_expiring_alerts = input.warrantyExpiringAlerts;
+    if (input.plantWateringAlerts !== undefined)
+      updates.plant_watering_alerts = input.plantWateringAlerts;
+    if (input.vacationMode !== undefined)
+      updates.vacation_mode = input.vacationMode;
+    if (input.vacationStartDate !== undefined)
+      updates.vacation_start_date = input.vacationStartDate;
+    if (input.vacationEndDate !== undefined)
+      updates.vacation_end_date = input.vacationEndDate;
     if (input.calendarReminderMinutes !== undefined)
       updates.calendar_reminder_minutes = input.calendarReminderMinutes;
     if (input.taskReminderMinutes !== undefined)
@@ -230,6 +238,10 @@ export class NotificationRepository {
       gameOverdueAlerts: !!row.game_overdue_alerts,
       billReminders: !!row.bill_reminders,
       warrantyExpiringAlerts: row.warranty_expiring_alerts !== false, // Default true
+      plantWateringAlerts: row.plant_watering_alerts !== false, // Default true
+      vacationMode: !!row.vacation_mode,
+      vacationStartDate: row.vacation_start_date || undefined,
+      vacationEndDate: row.vacation_end_date || undefined,
       calendarReminderMinutes: row.calendar_reminder_minutes,
       taskReminderMinutes: row.task_reminder_minutes,
       createdAt: row.created_at,

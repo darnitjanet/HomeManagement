@@ -13,6 +13,9 @@ import { MoodTracker } from './components/Mood/MoodTracker';
 import { BooksList } from './components/Books/BooksList';
 import { TravelMap } from './components/Travel/TravelMap';
 import { PantryInventory } from './components/Pantry/PantryInventory';
+import { PlantsList } from './components/Plants/PlantsList';
+import { FamilyRulesPage } from './components/FamilyRules/FamilyRulesPage';
+import { EmergencyManagement } from './components/Emergency/EmergencyManagement';
 import { HomePage } from './components/HomePage/HomePage';
 import { Header } from './components/Navigation/Header';
 import { KioskDashboard } from './components/Kiosk/KioskDashboard';
@@ -116,6 +119,9 @@ function App() {
         {currentPage === 'books' && <BooksList />}
         {currentPage === 'travel' && <TravelMap />}
         {currentPage === 'pantry' && <PantryInventory />}
+        {currentPage === 'plants' && <PlantsList />}
+        {currentPage === 'family-rules' && <FamilyRulesPage />}
+        {currentPage === 'emergency' && <EmergencyManagement />}
       </main>
       <ToastContainer />
     </div>

@@ -47,7 +47,11 @@
       "Bash(powershell \"Stop-Process -Id 25144 -Force\")",
       "Bash(test:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit - Home Management App\n\nFeatures:\n- Calendar with Google Calendar sync\n- Contacts with Google sync\n- Movies catalog \\(TMDB integration\\)\n- Games library with loan tracking\n- Kids rewards/sticker system\n- Shopping lists with AI categorization\n- Recipes with AI suggestions and URL import\n- Home assets/inventory with warranty tracking\n- Books library with Open Library integration\n- Tasks/Todos with energy-based prioritization\n- Chores management\n- Mood tracking\n- Travel map with trip logging\n- Pantry inventory with barcode scanning\n- Notifications system\n- Weather widget\n\nTech stack:\n- Backend: Node.js, Express, TypeScript, SQLite\n- Frontend: React, TypeScript, Vite\n- AI: Anthropic Claude for smart features\nEOF\n\\)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
     ]
   }
 }

@@ -279,6 +279,53 @@
   background: #fafafa;
 }
 
+/* Vacation Mode Section */
+.vacation-section {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.vacation-section.active {
+  background: #fef3c7;
+  border-color: #fbbf24;
+}
+
+.vacation-section h3 {
+  color: #5b768a;
+}
+
+.vacation-section.active h3 {
+  color: #b45309;
+}
+
+.vacation-toggle .toggle-label {
+  font-weight: 500;
+}
+
+.vacation-section.active .toggle-slider {
+  background: #f59e0b;
+}
+
+.vacation-dates {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #d1d5db;
+}
+
+.vacation-section.active .vacation-dates {
+  border-top-color: #fbbf24;
+}
+
+.vacation-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #92400e;
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 540px) {
   .settings-modal {

@@ -3,6 +3,7 @@ import { ChoreRepository } from '../repositories/chore.repository';
 import { GameRepository } from '../repositories/game.repository';
 import { CalendarRepository } from '../repositories/calendar.repository';
 import { AssetRepository } from '../repositories/asset.repository';
+import * as plantRepo from '../repositories/plant.repository';
 import * as todoRepo from '../repositories/todo.repository';
 import {
   Notification,
@@ -221,6 +222,32 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Create a plant watering notification
+   */
+  async createPlantWateringNotification(plant: {
+    id: number;
+    name: string;
+    location: string | null;
+    daysOverdue: number;
+  }): Promise<Notification> {
+    const locationStr = plant.location ? ` in ${plant.location}` : '';
+    const urgency = plant.daysOverdue > 0 ? 'overdue' : 'due today';
+    const message = plant.daysOverdue > 0
+      ? `"${plant.name}"${locationStr} is ${plant.daysOverdue} day${plant.daysOverdue > 1 ? 's' : ''} overdue for watering!`
+      : `"${plant.name}"${locationStr} needs watering today`;
+
+    return this.create({
+      type: 'plant_watering',
+      title: plant.daysOverdue > 0 ? 'Plant Needs Water!' : 'Water Your Plant',
+      message,
+      icon: 'droplets',
+      priority: plant.daysOverdue > 2 ? 'high' : 'normal',
+      entityType: 'plant',
+      entityId: plant.id,
+    });
+  }
+
   // =====================
   // BATCH NOTIFICATION GENERATION
   // =====================
@@ -367,6 +394,49 @@ export class NotificationService {
           name: asset.name,
           warrantyExpirationDate: asset.warrantyExpirationDate,
           daysUntilExpiration,
+        });
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Generate notifications for plants needing water
+   * Called by the scheduler
+   */
+  async generatePlantWateringNotifications(): Promise<number> {
+    const prefs = await this.notificationRepo.getPreferences();
+    if (prefs && !(prefs as any).plantWateringAlerts) {
+      return 0;
+    }
+
+    // Get plants that need water (due today or overdue)
+    const plantsNeedingWater = await plantRepo.getPlantsNeedingWater();
+    let count = 0;
+
+    for (const plant of plantsNeedingWater) {
+      // Check if we already have a notification for this plant today
+      const existing = await this.notificationRepo.findByEntity('plant', plant.id);
+      const today = new Date().toISOString().split('T')[0];
+      const hasRecentNotification = existing.some(
+        (n) => n.createdAt.split('T')[0] === today && n.type === 'plant_watering'
+      );
+
+      if (!hasRecentNotification) {
+        // Calculate days overdue
+        const nextWaterDate = plant.next_water_date ? new Date(plant.next_water_date) : new Date();
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        nextWaterDate.setHours(0, 0, 0, 0);
+        const daysOverdue = Math.floor((now.getTime() - nextWaterDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        await this.createPlantWateringNotification({
+          id: plant.id,
+          name: plant.name,
+          location: plant.location,
+          daysOverdue: Math.max(0, daysOverdue),
         });
         count++;
       }
