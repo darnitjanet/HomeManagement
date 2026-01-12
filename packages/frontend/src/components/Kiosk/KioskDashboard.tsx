@@ -616,22 +616,20 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
               <div className="weather-range">
                 H: {weather.high}° L: {weather.low}°
               </div>
+              {weatherAlerts.length > 0 && (
+                <div className="weather-alerts-inline">
+                  {weatherAlerts.slice(0, 2).map((alert, index) => (
+                    <div key={index} className={`weather-alert-inline ${alert.type}`}>
+                      <span>{alert.icon}</span>
+                      <span>{alert.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
-
-      {/* Weather Alerts */}
-      {weatherAlerts.length > 0 && (
-        <div className="weather-alerts">
-          {weatherAlerts.map((alert, index) => (
-            <div key={index} className={`weather-alert ${alert.type}`}>
-              <span className="alert-icon">{alert.icon}</span>
-              <span className="alert-message">{alert.message}</span>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* AI Nudge Banner */}
       {showNudge && nudge && (

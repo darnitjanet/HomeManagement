@@ -80,13 +80,14 @@
 /* Weather Section */
 .kiosk-weather {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   background: rgba(255, 255, 255, 0.1);
   padding: 16px 24px;
   border-radius: 16px;
   backdrop-filter: blur(10px);
   margin-top: 20px;
+  min-width: 350px;
 }
 
 .kiosk-weather .weather-icon {
@@ -128,46 +129,37 @@
   margin-top: 2px;
 }
 
-/* Weather Alerts */
-.weather-alerts {
+/* Weather Alerts (inline in weather widget) */
+.weather-alerts-inline {
+  margin-top: 8px;
   display: flex;
-  gap: 12px;
-  padding: 0 24px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.weather-alert {
+.weather-alert-inline {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-weight: 500;
 }
 
-.weather-alert.info {
-  background: rgba(59, 130, 246, 0.2);
+.weather-alert-inline.info {
+  background: rgba(59, 130, 246, 0.25);
   color: #93c5fd;
 }
 
-.weather-alert.warning {
-  background: rgba(245, 158, 11, 0.2);
+.weather-alert-inline.warning {
+  background: rgba(245, 158, 11, 0.25);
   color: #fcd34d;
 }
 
-.weather-alert.danger {
-  background: rgba(239, 68, 68, 0.2);
+.weather-alert-inline.danger {
+  background: rgba(239, 68, 68, 0.25);
   color: #fca5a5;
-}
-
-.alert-icon {
-  font-size: 18px;
-}
-
-.alert-message {
-  white-space: nowrap;
 }
 
 /* Content Section */
