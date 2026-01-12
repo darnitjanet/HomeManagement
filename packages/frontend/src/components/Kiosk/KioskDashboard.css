@@ -126,6 +126,48 @@
   margin-top: 2px;
 }
 
+/* Weather Alerts */
+.weather-alerts {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.weather-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.weather-alert.info {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.weather-alert.warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+}
+
+.weather-alert.danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.alert-icon {
+  font-size: 18px;
+}
+
+.alert-message {
+  white-space: nowrap;
+}
+
 /* Content Section */
 .kiosk-content {
   display: grid;

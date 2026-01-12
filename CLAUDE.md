@@ -24,6 +24,49 @@ Monorepo with packages:
 - SQLite with Knex.js migrations
 - Database file: `packages/backend/database/home_management.db`
 
+## Recent Work: Smart Weather Alerts (COMPLETED)
+
+Added intelligent weather alerts to the kiosk dashboard.
+
+**Features:**
+- Contextual alerts based on weather conditions
+- "Bring umbrella" for rain/drizzle
+- "Freeze warning" when low temp <= 32°F
+- "Heat advisory" when high temp >= 95°F
+- "Beautiful day" for nice weather
+- Color-coded by severity (info/warning/danger)
+
+**Files Modified:**
+- `packages/frontend/src/components/Kiosk/KioskDashboard.tsx` - getWeatherAlerts() function
+- `packages/frontend/src/components/Kiosk/KioskDashboard.css` - Alert styling
+
+---
+
+## Recent Work: Shopping List Store Integration (COMPLETED)
+
+Added "Send to Dillons" and "Send to Walmart" buttons to shopping list.
+
+**Features:**
+- Step-through modal to shop items one at a time
+- Opens store search in new browser tab for each item
+- Visual progress tracking (completed/current items)
+- Works with Pi kiosk setup (uses --start-fullscreen not --kiosk)
+
+**Files Modified:**
+- `packages/frontend/src/components/Shopping/ShoppingList.tsx`
+- `packages/frontend/src/components/Shopping/ShoppingList.css`
+
+---
+
+## Upcoming Features (IN PROGRESS)
+
+1. **Barcode Scanner** - Scan items to add to shopping list
+2. **Birthday Reminders** - Add birthdays to contacts, auto-create calendar events
+3. **Seasonal Task Reminders** - Recurring tasks with seasonal triggers
+4. **Package Tracking** - Track deliveries (paste tracking numbers or email integration)
+
+---
+
 ## Recent Work: Interactive Travel Map (COMPLETED)
 
 Interactive travel map to log visited places with comprehensive tracking.

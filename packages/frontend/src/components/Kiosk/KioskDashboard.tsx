@@ -515,6 +515,52 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     }
   };
 
+  const getWeatherAlerts = (): { message: string; icon: string; type: 'info' | 'warning' | 'danger' }[] => {
+    if (!weather) return [];
+    const alerts: { message: string; icon: string; type: 'info' | 'warning' | 'danger' }[] = [];
+    const desc = weather.description.toLowerCase();
+    const temp = weather.temperature;
+    const high = weather.high;
+    const low = weather.low;
+
+    // Rain alerts
+    if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) {
+      alerts.push({ message: 'Bring an umbrella today', icon: '☔', type: 'info' });
+    }
+
+    // Snow alerts
+    if (desc.includes('snow')) {
+      alerts.push({ message: 'Snow expected - drive safe', icon: '❄️', type: 'warning' });
+    }
+
+    // Storm alerts
+    if (desc.includes('thunder') || desc.includes('storm')) {
+      alerts.push({ message: 'Thunderstorms expected', icon: '⛈️', type: 'warning' });
+    }
+
+    // Temperature alerts
+    if (low <= 32) {
+      alerts.push({ message: 'Freeze warning tonight', icon: '🥶', type: 'danger' });
+    } else if (temp <= 40) {
+      alerts.push({ message: 'Bundle up - it\'s cold', icon: '🧥', type: 'info' });
+    }
+
+    if (high >= 95) {
+      alerts.push({ message: 'Heat advisory - stay hydrated', icon: '🥵', type: 'danger' });
+    } else if (high >= 85) {
+      alerts.push({ message: 'Hot day - drink water', icon: '💧', type: 'info' });
+    }
+
+    // Nice weather
+    if (alerts.length === 0 && desc.includes('clear') && temp >= 65 && temp <= 80) {
+      alerts.push({ message: 'Beautiful day to be outside!', icon: '🌞', type: 'info' });
+    }
+
+    return alerts;
+  };
+
+  const weatherAlerts = getWeatherAlerts();
+
   const getTimeOfDayEnergy = (): 'low' | 'medium' | 'high' => {
     const hour = new Date().getHours();
     if (hour >= 9 && hour < 12) return 'high';
@@ -574,6 +620,18 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         )}
       </div>
+
+      {/* Weather Alerts */}
+      {weatherAlerts.length > 0 && (
+        <div className="weather-alerts">
+          {weatherAlerts.map((alert, index) => (
+            <div key={index} className={`weather-alert ${alert.type}`}>
+              <span className="alert-icon">{alert.icon}</span>
+              <span className="alert-message">{alert.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* AI Nudge Banner */}
       {showNudge && nudge && (
