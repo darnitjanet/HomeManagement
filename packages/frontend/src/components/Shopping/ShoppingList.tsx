@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-// Icons replaced with unicode characters for better compatibility
+import { ShoppingCart, X, ExternalLink, ChevronRight, Check } from 'lucide-react';
 import { shoppingApi } from '../../services/api';
 import './ShoppingList.css';
 
@@ -58,6 +58,8 @@ export function ShoppingList() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState(1);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showWalmartModal, setShowWalmartModal] = useState(false);
+  const [walmartItemIndex, setWalmartItemIndex] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -187,6 +189,30 @@ export function ShoppingList() {
     window.print();
   };
 
+  const openWalmartShopping = () => {
+    if (items.length === 0) return;
+    setWalmartItemIndex(0);
+    setShowWalmartModal(true);
+  };
+
+  const openWalmartSearch = (itemName: string) => {
+    const searchUrl = `https://www.walmart.com/search?q=${encodeURIComponent(itemName)}`;
+    window.open(searchUrl, '_blank');
+  };
+
+  const nextWalmartItem = () => {
+    if (walmartItemIndex < items.length - 1) {
+      setWalmartItemIndex(walmartItemIndex + 1);
+    } else {
+      setShowWalmartModal(false);
+    }
+  };
+
+  const closeWalmartModal = () => {
+    setShowWalmartModal(false);
+    setWalmartItemIndex(0);
+  };
+
   // Group items by category for grocery list
   const groupedItems = items.reduce((acc, item) => {
     const category = item.category || 'Other';
@@ -234,6 +260,11 @@ export function ShoppingList() {
         >
           ♥ Favorites
         </button>
+        {items.length > 0 && (
+          <button className="action-btn walmart" onClick={openWalmartShopping}>
+            🛒 Send to Walmart
+          </button>
+        )}
         <button className="action-btn" onClick={handlePrint}>
           🖨 Print
         </button>
@@ -444,6 +475,80 @@ export function ShoppingList() {
           </ul>
         )}
       </div>
+
+      {/* Walmart Shopping Modal */}
+      {showWalmartModal && items.length > 0 && (
+        <div className="walmart-modal-overlay" onClick={closeWalmartModal}>
+          <div className="walmart-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="walmart-modal-header">
+              <h2>🛒 Send to Walmart</h2>
+              <button className="close-btn" onClick={closeWalmartModal}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="walmart-modal-progress">
+              Item {walmartItemIndex + 1} of {items.length}
+            </div>
+
+            <div className="walmart-item-card">
+              <div className="walmart-item-name">
+                {items[walmartItemIndex].name}
+              </div>
+              <div className="walmart-item-qty">
+                Quantity: {items[walmartItemIndex].quantity}
+              </div>
+              {items[walmartItemIndex].category && (
+                <div className="walmart-item-category">
+                  {items[walmartItemIndex].category}
+                </div>
+              )}
+            </div>
+
+            <div className="walmart-modal-actions">
+              <button
+                className="walmart-search-btn"
+                onClick={() => openWalmartSearch(items[walmartItemIndex].name)}
+              >
+                <ExternalLink size={20} />
+                Search on Walmart
+              </button>
+
+              <button
+                className="walmart-next-btn"
+                onClick={nextWalmartItem}
+              >
+                {walmartItemIndex < items.length - 1 ? (
+                  <>
+                    Next Item
+                    <ChevronRight size={20} />
+                  </>
+                ) : (
+                  <>
+                    <Check size={20} />
+                    Done
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="walmart-item-list">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`walmart-list-item ${index === walmartItemIndex ? 'current' : ''} ${index < walmartItemIndex ? 'completed' : ''}`}
+                  onClick={() => setWalmartItemIndex(index)}
+                >
+                  <span className="walmart-list-check">
+                    {index < walmartItemIndex ? '✓' : index === walmartItemIndex ? '→' : '○'}
+                  </span>
+                  <span className="walmart-list-name">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
