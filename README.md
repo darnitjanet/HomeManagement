@@ -89,13 +89,12 @@ The frontend will be available at `http://localhost:5173` and the backend at `ht
 
 ## Deployment to Raspberry Pi
 
-See [deployment guide](./docs/deployment.md) for detailed instructions.
-
-Quick deploy:
-```bash
-npm run build
-./scripts/deploy-pi.sh
-```
+See [Raspberry Pi Setup Guide](./RASPBERRY_PI_SETUP.md) for detailed instructions including:
+- Initial Pi setup
+- Installing Node.js and dependencies
+- Running the app with PM2
+- Touchscreen kiosk mode setup
+- Store button integration (Dillons/Walmart)
 
 ## License
 

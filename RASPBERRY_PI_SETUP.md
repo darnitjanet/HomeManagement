@@ -326,6 +326,114 @@ Now the app will automatically start when you power on the Pi!
 
 ---
 
+## Touchscreen Kiosk Setup (Optional)
+
+If you're using a touchscreen and want the Pi to display the app automatically in fullscreen:
+
+### Install Required Packages
+
+```bash
+sudo apt install -y chromium-browser unclutter
+```
+
+- **chromium-browser**: Web browser to display the app
+- **unclutter**: Hides the mouse cursor when not in use
+
+### Create Kiosk Startup Script
+
+```bash
+nano ~/kiosk.sh
+```
+
+Add this content:
+```bash
+#!/bin/bash
+
+# Wait for desktop to fully load
+sleep 10
+
+# Disable screen blanking
+xset s off
+xset -dpms
+xset s noblank
+
+# Hide mouse cursor after 3 seconds of inactivity
+unclutter -idle 3 &
+
+# Start Chromium in fullscreen mode
+# NOTE: Using --start-fullscreen instead of --kiosk to allow
+# the "Send to Dillons" and "Send to Walmart" buttons to open new tabs
+chromium-browser \
+  --start-fullscreen \
+  --disable-infobars \
+  --disable-session-crashed-bubble \
+  --disable-restore-session-state \
+  --noerrdialogs \
+  --disable-translate \
+  --no-first-run \
+  --fast \
+  --fast-start \
+  --disable-features=TranslateUI \
+  --check-for-update-interval=604800 \
+  http://localhost:3000
+```
+
+Make it executable:
+```bash
+chmod +x ~/kiosk.sh
+```
+
+### Auto-Start Kiosk on Boot
+
+```bash
+mkdir -p ~/.config/autostart
+nano ~/.config/autostart/kiosk.desktop
+```
+
+Add this content:
+```ini
+[Desktop Entry]
+Type=Application
+Name=Home Management Kiosk
+Exec=/home/pi/kiosk.sh
+X-GNOME-Autostart-enabled=true
+```
+
+### Prevent Screen Sleep
+
+Edit the lightdm config:
+```bash
+sudo nano /etc/lightdm/lightdm.conf
+```
+
+Find the `[Seat:*]` section and add:
+```ini
+xserver-command=X -s 0 -dpms
+```
+
+### About the Store Buttons
+
+The shopping list has **"Send to Dillons"** and **"Send to Walmart"** buttons that open the store's website to search for each item. For these to work:
+
+- Chromium must be installed
+- Use `--start-fullscreen` instead of `--kiosk` flag (kiosk mode blocks new tabs)
+- Press **F11** to toggle fullscreen if you need to see multiple tabs
+
+When you click a store button:
+1. A modal shows each shopping list item one at a time
+2. Click "Search on Dillons/Walmart" to open that item's search in a new tab
+3. Add the item to your cart on the store's website
+4. Click "Next Item" to continue through your list
+
+### Sleep Mode (Built Into App)
+
+The app has a built-in sleep mode to prevent screen burn-in:
+- After 2 minutes of inactivity, the screen dims and shows a moving clock
+- Tap anywhere to wake up the display
+- No additional configuration needed!
+
+---
+
 ## Future Updates
 
 ### If Using GitHub
