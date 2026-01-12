@@ -6,6 +6,9 @@ const router = Router();
 // AI Status
 router.get('/ai-status', shoppingController.getAIStatus);
 
+// Barcode lookup
+router.get('/barcode/:code', shoppingController.lookupBarcode);
+
 // Shopping Items
 router.get('/:listType/items', shoppingController.getItems);
 router.post('/:listType/items', shoppingController.addItem);

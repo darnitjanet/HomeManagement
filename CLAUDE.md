@@ -58,12 +58,33 @@ Added "Send to Dillons" and "Send to Walmart" buttons to shopping list.
 
 ---
 
+## Recent Work: Barcode Scanner (COMPLETED)
+
+Added barcode scanning to shopping list using USB barcode scanner.
+
+**Features:**
+- Scan button opens modal with input field
+- USB barcode scanners type barcode + Enter, auto-submits
+- Uses Open Food Facts API (free, no API key) to lookup products
+- Auto-categorizes products for grocery list
+- Shows success/error feedback
+- Works with handheld USB barcode scanners
+
+**Files Created/Modified:**
+- `packages/backend/src/services/barcode.service.ts` - Product lookup service
+- `packages/backend/src/controllers/shopping.controller.ts` - Added lookupBarcode endpoint
+- `packages/backend/src/routes/shopping.routes.ts` - Added barcode route
+- `packages/frontend/src/components/Shopping/ShoppingList.tsx` - Scan modal UI
+- `packages/frontend/src/components/Shopping/ShoppingList.css` - Scan modal styling
+- `packages/frontend/src/services/api.ts` - Added lookupBarcode API call
+
+---
+
 ## Upcoming Features (IN PROGRESS)
 
-1. **Barcode Scanner** - Scan items to add to shopping list
-2. **Birthday Reminders** - Add birthdays to contacts, auto-create calendar events
-3. **Seasonal Task Reminders** - Recurring tasks with seasonal triggers
-4. **Package Tracking** - Track deliveries (paste tracking numbers or email integration)
+1. **Birthday Reminders** - Add birthdays to contacts, auto-create calendar events
+2. **Seasonal Task Reminders** - Recurring tasks with seasonal triggers
+3. **Package Tracking** - Track deliveries (paste tracking numbers or email integration)
 
 ---
 

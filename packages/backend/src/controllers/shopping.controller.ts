@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ShoppingRepository } from '../repositories/shopping.repository';
 import { categorizeGroceryItem, isAIEnabled } from '../services/ai.service';
+import { lookupBarcode as lookupBarcodeService } from '../services/barcode.service';
 
 const shoppingRepo = new ShoppingRepository();
 
@@ -10,6 +11,25 @@ const shoppingRepo = new ShoppingRepository();
 
 export async function getAIStatus(_req: Request, res: Response) {
   res.json({ success: true, data: { aiEnabled: isAIEnabled() } });
+}
+
+// =====================
+// BARCODE LOOKUP
+// =====================
+
+export async function lookupBarcode(req: Request, res: Response) {
+  try {
+    const { code } = req.params;
+    if (!code) {
+      return res.status(400).json({ success: false, error: 'Barcode is required' });
+    }
+
+    const product = await lookupBarcodeService(code);
+    res.json({ success: true, data: product });
+  } catch (error: any) {
+    console.error('Barcode lookup error:', error);
+    res.status(500).json({ success: false, error: 'Failed to lookup barcode', message: error.message });
+  }
 }
 
 // =====================

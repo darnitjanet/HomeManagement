@@ -387,6 +387,10 @@ export const shoppingApi = {
     api.delete(`/shopping/${listType}/favorites/${id}`),
   addFavoriteToList: (listType: 'grocery' | 'other', id: number) =>
     api.post(`/shopping/${listType}/favorites/${id}/add`),
+
+  // Barcode lookup
+  lookupBarcode: (barcode: string) =>
+    api.get(`/shopping/barcode/${barcode}`),
 };
 
 // Pantry API

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ShoppingCart, X, ExternalLink, ChevronRight, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, X, ExternalLink, ChevronRight, Check, ScanBarcode } from 'lucide-react';
 import { shoppingApi } from '../../services/api';
 import './ShoppingList.css';
 
@@ -61,6 +61,13 @@ export function ShoppingList() {
   const [showStoreModal, setShowStoreModal] = useState(false);
   const [storeItemIndex, setStoreItemIndex] = useState(0);
   const [activeStore, setActiveStore] = useState<'walmart' | 'dillons'>('walmart');
+
+  // Barcode scanner state
+  const [showScanModal, setShowScanModal] = useState(false);
+  const [scanInput, setScanInput] = useState('');
+  const [scanStatus, setScanStatus] = useState<'ready' | 'scanning' | 'success' | 'error'>('ready');
+  const [scanResult, setScanResult] = useState<string>('');
+  const scanInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadData();
@@ -223,6 +230,68 @@ export function ShoppingList() {
     dillons: { name: 'Dillons', color: '#e31837', emoji: '🛒' },
   };
 
+  // Barcode scanner functions
+  const openScanModal = () => {
+    setShowScanModal(true);
+    setScanInput('');
+    setScanStatus('ready');
+    setScanResult('');
+    setTimeout(() => scanInputRef.current?.focus(), 100);
+  };
+
+  const closeScanModal = () => {
+    setShowScanModal(false);
+    setScanInput('');
+    setScanStatus('ready');
+    setScanResult('');
+  };
+
+  const handleScanSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scanInput.trim()) return;
+
+    setScanStatus('scanning');
+    try {
+      const response = await shoppingApi.lookupBarcode(scanInput.trim());
+      if (response.data.success && response.data.data.found) {
+        const product = response.data.data;
+        // Add the product to the shopping list
+        await shoppingApi.addItem('grocery', {
+          name: product.name,
+          quantity: 1,
+          category: product.category,
+        });
+        setScanStatus('success');
+        setScanResult(`Added: ${product.name}`);
+        loadData();
+        // Reset for next scan
+        setTimeout(() => {
+          setScanInput('');
+          setScanStatus('ready');
+          setScanResult('');
+          scanInputRef.current?.focus();
+        }, 1500);
+      } else {
+        setScanStatus('error');
+        setScanResult(`Product not found for barcode: ${scanInput}`);
+        setTimeout(() => {
+          setScanInput('');
+          setScanStatus('ready');
+          scanInputRef.current?.focus();
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Barcode lookup failed:', err);
+      setScanStatus('error');
+      setScanResult('Failed to lookup barcode');
+      setTimeout(() => {
+        setScanInput('');
+        setScanStatus('ready');
+        scanInputRef.current?.focus();
+      }, 2000);
+    }
+  };
+
   // Group items by category for grocery list
   const groupedItems = items.reduce((acc, item) => {
     const category = item.category || 'Other';
@@ -269,6 +338,10 @@ export function ShoppingList() {
           onClick={() => setShowFavorites(!showFavorites)}
         >
           ♥ Favorites
+        </button>
+        <button className="action-btn scan" onClick={openScanModal}>
+          <ScanBarcode size={18} />
+          Scan
         </button>
         {items.length > 0 && (
           <>
@@ -490,6 +563,59 @@ export function ShoppingList() {
           </ul>
         )}
       </div>
+
+      {/* Barcode Scanner Modal */}
+      {showScanModal && (
+        <div className="scan-modal-overlay" onClick={closeScanModal}>
+          <div className="scan-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="scan-modal-header">
+              <h2><ScanBarcode size={24} /> Scan Barcode</h2>
+              <button className="close-btn" onClick={closeScanModal}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="scan-modal-content">
+              <p className="scan-instructions">
+                Point your barcode scanner at a product, or type the barcode manually
+              </p>
+
+              <form onSubmit={handleScanSubmit} className="scan-form">
+                <input
+                  ref={scanInputRef}
+                  type="text"
+                  value={scanInput}
+                  onChange={(e) => setScanInput(e.target.value)}
+                  placeholder="Scan or enter barcode..."
+                  className="scan-input"
+                  autoFocus
+                  disabled={scanStatus === 'scanning'}
+                />
+                <button
+                  type="submit"
+                  className="scan-submit-btn"
+                  disabled={!scanInput.trim() || scanStatus === 'scanning'}
+                >
+                  {scanStatus === 'scanning' ? 'Looking up...' : 'Add Item'}
+                </button>
+              </form>
+
+              {scanResult && (
+                <div className={`scan-result ${scanStatus}`}>
+                  {scanStatus === 'success' && <Check size={20} />}
+                  {scanStatus === 'error' && <X size={20} />}
+                  {scanResult}
+                </div>
+              )}
+
+              <div className="scan-tip">
+                <strong>Tip:</strong> After scanning, the product will be automatically added to your grocery list.
+                Works best with food products.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Store Shopping Modal */}
       {showStoreModal && items.length > 0 && (
