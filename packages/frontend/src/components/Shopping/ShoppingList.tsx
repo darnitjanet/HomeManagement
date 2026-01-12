@@ -409,11 +409,11 @@ export function ShoppingList() {
           <button
             type="button"
             onClick={() => setNewItemQuantity(Math.max(1, newItemQuantity - 1))}
-            disabled={adding}
+            disabled={adding || newItemQuantity <= 1}
           >
             −
           </button>
-          <span>{newItemQuantity}</span>
+          <span className="qty-label">Qty: {newItemQuantity}</span>
           <button
             type="button"
             onClick={() => setNewItemQuantity(newItemQuantity + 1)}

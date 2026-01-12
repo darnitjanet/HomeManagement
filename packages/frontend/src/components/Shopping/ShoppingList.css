@@ -246,6 +246,11 @@
   font-weight: 600;
 }
 
+.quantity-input .qty-label {
+  min-width: 50px;
+  font-size: 14px;
+}
+
 .add-btn {
   display: flex;
   align-items: center;
