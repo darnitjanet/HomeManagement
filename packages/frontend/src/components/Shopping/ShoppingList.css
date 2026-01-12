@@ -58,24 +58,27 @@
 
 /* Actions */
 .shopping-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid var(--slate-200);
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 2px solid var(--slate-200);
   background: white;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--slate-600);
   cursor: pointer;
   transition: all 200ms ease;
+  min-height: 48px;
 }
 
 .action-btn:hover {
@@ -91,6 +94,7 @@
 
 .action-btn.danger {
   color: var(--red-500);
+  border-color: var(--red-200);
 }
 
 .action-btn.danger:hover {
@@ -459,6 +463,16 @@
     padding: 16px;
   }
 
+  .shopping-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
   .add-item-form {
     flex-direction: column;
   }
@@ -548,6 +562,7 @@
   background: #0071ce;
   color: white;
   border-color: #0071ce;
+  grid-column: span 2;
 }
 
 .action-btn.walmart:hover {
