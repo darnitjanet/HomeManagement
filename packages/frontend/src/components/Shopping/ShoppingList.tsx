@@ -405,42 +405,8 @@ export function ShoppingList() {
           className="item-input"
           disabled={adding}
         />
-        <div className="quantity-input">
-          <button
-            type="button"
-            onClick={() => setNewItemQuantity(Math.max(1, newItemQuantity - 1))}
-            disabled={adding || newItemQuantity <= 1}
-          >
-            −
-          </button>
-          <span className="qty-label">Qty: {newItemQuantity}</span>
-          <button
-            type="button"
-            onClick={() => setNewItemQuantity(newItemQuantity + 1)}
-            disabled={adding}
-          >
-            +
-          </button>
-        </div>
         <button type="submit" className="add-btn primary" disabled={adding}>
-          {adding ? (
-            <>
-              ✨ Adding...
-            </>
-          ) : (
-            <>
-              + Add
-            </>
-          )}
-        </button>
-        <button
-          type="button"
-          className="add-btn secondary"
-          onClick={handleAddFavorite}
-          title="Save as favorite"
-          disabled={adding}
-        >
-          ♡
+          {adding ? '✨ Adding...' : '+ Add'}
         </button>
       </form>
 
