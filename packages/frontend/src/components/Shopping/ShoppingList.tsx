@@ -58,8 +58,9 @@ export function ShoppingList() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState(1);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [showWalmartModal, setShowWalmartModal] = useState(false);
-  const [walmartItemIndex, setWalmartItemIndex] = useState(0);
+  const [showStoreModal, setShowStoreModal] = useState(false);
+  const [storeItemIndex, setStoreItemIndex] = useState(0);
+  const [activeStore, setActiveStore] = useState<'walmart' | 'dillons'>('walmart');
 
   useEffect(() => {
     loadData();
@@ -189,28 +190,37 @@ export function ShoppingList() {
     window.print();
   };
 
-  const openWalmartShopping = () => {
+  const openStoreShopping = (store: 'walmart' | 'dillons') => {
     if (items.length === 0) return;
-    setWalmartItemIndex(0);
-    setShowWalmartModal(true);
+    setActiveStore(store);
+    setStoreItemIndex(0);
+    setShowStoreModal(true);
   };
 
-  const openWalmartSearch = (itemName: string) => {
-    const searchUrl = `https://www.walmart.com/search?q=${encodeURIComponent(itemName)}`;
-    window.open(searchUrl, '_blank');
+  const openStoreSearch = (itemName: string) => {
+    const searchUrls = {
+      walmart: `https://www.walmart.com/search?q=${encodeURIComponent(itemName)}`,
+      dillons: `https://www.dillons.com/search?query=${encodeURIComponent(itemName)}&searchType=default_search`,
+    };
+    window.open(searchUrls[activeStore], '_blank');
   };
 
-  const nextWalmartItem = () => {
-    if (walmartItemIndex < items.length - 1) {
-      setWalmartItemIndex(walmartItemIndex + 1);
+  const nextStoreItem = () => {
+    if (storeItemIndex < items.length - 1) {
+      setStoreItemIndex(storeItemIndex + 1);
     } else {
-      setShowWalmartModal(false);
+      setShowStoreModal(false);
     }
   };
 
-  const closeWalmartModal = () => {
-    setShowWalmartModal(false);
-    setWalmartItemIndex(0);
+  const closeStoreModal = () => {
+    setShowStoreModal(false);
+    setStoreItemIndex(0);
+  };
+
+  const storeInfo = {
+    walmart: { name: 'Walmart', color: '#0071ce', emoji: '🛒' },
+    dillons: { name: 'Dillons', color: '#e31837', emoji: '🛒' },
   };
 
   // Group items by category for grocery list
@@ -261,9 +271,14 @@ export function ShoppingList() {
           ♥ Favorites
         </button>
         {items.length > 0 && (
-          <button className="action-btn walmart" onClick={openWalmartShopping}>
-            🛒 Send to Walmart
-          </button>
+          <>
+            <button className="action-btn dillons" onClick={() => openStoreShopping('dillons')}>
+              🛒 Dillons
+            </button>
+            <button className="action-btn walmart" onClick={() => openStoreShopping('walmart')}>
+              🛒 Walmart
+            </button>
+          </>
         )}
         <button className="action-btn" onClick={handlePrint}>
           🖨 Print
@@ -476,49 +491,53 @@ export function ShoppingList() {
         )}
       </div>
 
-      {/* Walmart Shopping Modal */}
-      {showWalmartModal && items.length > 0 && (
-        <div className="walmart-modal-overlay" onClick={closeWalmartModal}>
-          <div className="walmart-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="walmart-modal-header">
-              <h2>🛒 Send to Walmart</h2>
-              <button className="close-btn" onClick={closeWalmartModal}>
+      {/* Store Shopping Modal */}
+      {showStoreModal && items.length > 0 && (
+        <div className="store-modal-overlay" onClick={closeStoreModal}>
+          <div className="store-modal" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="store-modal-header"
+              style={{ background: storeInfo[activeStore].color }}
+            >
+              <h2>{storeInfo[activeStore].emoji} Send to {storeInfo[activeStore].name}</h2>
+              <button className="close-btn" onClick={closeStoreModal}>
                 <X size={24} />
               </button>
             </div>
 
-            <div className="walmart-modal-progress">
-              Item {walmartItemIndex + 1} of {items.length}
+            <div className="store-modal-progress">
+              Item {storeItemIndex + 1} of {items.length}
             </div>
 
-            <div className="walmart-item-card">
-              <div className="walmart-item-name">
-                {items[walmartItemIndex].name}
+            <div className="store-item-card">
+              <div className="store-item-name">
+                {items[storeItemIndex].name}
               </div>
-              <div className="walmart-item-qty">
-                Quantity: {items[walmartItemIndex].quantity}
+              <div className="store-item-qty">
+                Quantity: {items[storeItemIndex].quantity}
               </div>
-              {items[walmartItemIndex].category && (
-                <div className="walmart-item-category">
-                  {items[walmartItemIndex].category}
+              {items[storeItemIndex].category && (
+                <div className="store-item-category">
+                  {items[storeItemIndex].category}
                 </div>
               )}
             </div>
 
-            <div className="walmart-modal-actions">
+            <div className="store-modal-actions">
               <button
-                className="walmart-search-btn"
-                onClick={() => openWalmartSearch(items[walmartItemIndex].name)}
+                className="store-search-btn"
+                style={{ background: storeInfo[activeStore].color }}
+                onClick={() => openStoreSearch(items[storeItemIndex].name)}
               >
                 <ExternalLink size={20} />
-                Search on Walmart
+                Search on {storeInfo[activeStore].name}
               </button>
 
               <button
-                className="walmart-next-btn"
-                onClick={nextWalmartItem}
+                className="store-next-btn"
+                onClick={nextStoreItem}
               >
-                {walmartItemIndex < items.length - 1 ? (
+                {storeItemIndex < items.length - 1 ? (
                   <>
                     Next Item
                     <ChevronRight size={20} />
@@ -532,17 +551,17 @@ export function ShoppingList() {
               </button>
             </div>
 
-            <div className="walmart-item-list">
+            <div className="store-item-list">
               {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`walmart-list-item ${index === walmartItemIndex ? 'current' : ''} ${index < walmartItemIndex ? 'completed' : ''}`}
-                  onClick={() => setWalmartItemIndex(index)}
+                  className={`store-list-item ${index === storeItemIndex ? 'current' : ''} ${index < storeItemIndex ? 'completed' : ''}`}
+                  onClick={() => setStoreItemIndex(index)}
                 >
-                  <span className="walmart-list-check">
-                    {index < walmartItemIndex ? '✓' : index === walmartItemIndex ? '→' : '○'}
+                  <span className="store-list-check">
+                    {index < storeItemIndex ? '✓' : index === storeItemIndex ? '→' : '○'}
                   </span>
-                  <span className="walmart-list-name">{item.name}</span>
+                  <span className="store-list-name">{item.name}</span>
                 </div>
               ))}
             </div>

@@ -557,7 +557,7 @@
   }
 }
 
-/* Walmart button */
+/* Store buttons */
 .action-btn.walmart {
   background: #0071ce;
   color: white;
@@ -569,8 +569,19 @@
   border-color: #004f9a;
 }
 
-/* Walmart Modal */
-.walmart-modal-overlay {
+.action-btn.dillons {
+  background: #e31837;
+  color: white;
+  border-color: #e31837;
+}
+
+.action-btn.dillons:hover {
+  background: #c41230;
+  border-color: #c41230;
+}
+
+/* Store Modal */
+.store-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
@@ -581,7 +592,7 @@
   padding: 20px;
 }
 
-.walmart-modal {
+.store-modal {
   background: white;
   border-radius: 16px;
   width: 100%;
@@ -592,7 +603,7 @@
   flex-direction: column;
 }
 
-.walmart-modal-header {
+.store-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -601,12 +612,12 @@
   color: white;
 }
 
-.walmart-modal-header h2 {
+.store-modal-header h2 {
   margin: 0;
   font-size: 20px;
 }
 
-.walmart-modal-header .close-btn {
+.store-modal-header .close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 8px;
@@ -619,11 +630,11 @@
   cursor: pointer;
 }
 
-.walmart-modal-header .close-btn:hover {
+.store-modal-header .close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.walmart-modal-progress {
+.store-modal-progress {
   text-align: center;
   padding: 12px;
   background: #ffc220;
@@ -632,26 +643,26 @@
   font-size: 14px;
 }
 
-.walmart-item-card {
+.store-item-card {
   padding: 24px;
   text-align: center;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.walmart-item-name {
+.store-item-name {
   font-size: 24px;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 8px;
 }
 
-.walmart-item-qty {
+.store-item-qty {
   font-size: 16px;
   color: #6b7280;
   margin-bottom: 4px;
 }
 
-.walmart-item-category {
+.store-item-category {
   font-size: 12px;
   background: #e5e7eb;
   color: #4b5563;
@@ -660,14 +671,14 @@
   display: inline-block;
 }
 
-.walmart-modal-actions {
+.store-modal-actions {
   display: flex;
   gap: 12px;
   padding: 16px 20px;
   background: #f9fafb;
 }
 
-.walmart-search-btn {
+.store-search-btn {
   flex: 1;
   display: flex;
   align-items: center;
@@ -684,11 +695,11 @@
   transition: background 200ms ease;
 }
 
-.walmart-search-btn:hover {
+.store-search-btn:hover {
   background: #004f9a;
 }
 
-.walmart-next-btn {
+.store-next-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -704,18 +715,18 @@
   transition: background 200ms ease;
 }
 
-.walmart-next-btn:hover {
+.store-next-btn:hover {
   background: #b7832a;
 }
 
-.walmart-item-list {
+.store-item-list {
   flex: 1;
   overflow-y: auto;
   padding: 12px;
   max-height: 200px;
 }
 
-.walmart-list-item {
+.store-list-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -725,34 +736,34 @@
   transition: background 200ms ease;
 }
 
-.walmart-list-item:hover {
+.store-list-item:hover {
   background: #f3f4f6;
 }
 
-.walmart-list-item.current {
+.store-list-item.current {
   background: #dbeafe;
   font-weight: 600;
 }
 
-.walmart-list-item.completed {
+.store-list-item.completed {
   color: #9ca3af;
   text-decoration: line-through;
 }
 
-.walmart-list-check {
+.store-list-check {
   width: 20px;
   text-align: center;
   font-size: 14px;
 }
 
-.walmart-list-item.completed .walmart-list-check {
+.store-list-item.completed .store-list-check {
   color: #10b981;
 }
 
-.walmart-list-item.current .walmart-list-check {
+.store-list-item.current .store-list-check {
   color: #0071ce;
 }
 
-.walmart-list-name {
+.store-list-name {
   flex: 1;
 }
