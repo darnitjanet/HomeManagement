@@ -173,9 +173,10 @@
 /* Add item form */
 .add-item-form {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .item-input {
@@ -217,19 +218,22 @@
 .quantity-input {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px;
+  gap: 6px;
+  padding: 6px 8px;
   background: var(--slate-100);
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .quantity-input button {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
+  font-size: 18px;
+  font-weight: 600;
   background: white;
   border-radius: 6px;
   cursor: pointer;
@@ -479,29 +483,30 @@
   }
 
   .add-item-form {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .item-input {
     width: 100%;
+    flex: 1 1 100%;
   }
 
   .category-select {
     width: 100%;
   }
 
-  .add-item-form .quantity-input,
+  .add-item-form .quantity-input {
+    flex: 0 0 auto;
+  }
+
   .add-item-form .add-btn {
     flex: 1;
   }
 
-  .add-item-form > :last-child {
-    margin-left: 0;
-  }
-
   .add-item-form .add-btn.secondary {
     flex: 0;
-    padding: 10px;
+    padding: 10px 14px;
   }
 }
 
