@@ -58,27 +58,27 @@
 
 /* Actions */
 .shopping-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  display: flex;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .action-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 16px 12px;
   border: 2px solid var(--slate-200);
   background: white;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--slate-600);
   cursor: pointer;
   transition: all 200ms ease;
-  min-height: 48px;
+  min-height: 56px;
 }
 
 .action-btn:hover {
@@ -464,13 +464,13 @@
   }
 
   .shopping-actions {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    flex-wrap: wrap;
   }
 
   .action-btn {
-    padding: 12px 10px;
-    font-size: 14px;
+    min-height: 50px;
+    padding: 14px 10px;
+    font-size: 13px;
   }
 
   .add-item-form {
@@ -562,7 +562,6 @@
   background: #0071ce;
   color: white;
   border-color: #0071ce;
-  grid-column: span 2;
 }
 
 .action-btn.walmart:hover {
