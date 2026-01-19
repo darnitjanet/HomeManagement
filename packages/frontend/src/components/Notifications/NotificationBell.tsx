@@ -5,12 +5,16 @@ import {
   Check,
   CheckCheck,
   Calendar,
+  CalendarClock,
   CheckSquare,
   Sparkles,
   Gamepad2,
   Receipt,
   Settings,
   ShieldAlert,
+  Droplets,
+  Cake,
+  Package,
 } from 'lucide-react';
 import { useNotificationStore } from '../../stores/useNotificationStore';
 import type { Notification, NotificationType } from '../../stores/useNotificationStore';
@@ -24,6 +28,11 @@ const iconMap: Record<NotificationType, React.ComponentType<any>> = {
   game_overdue: Gamepad2,
   bill_due: Receipt,
   warranty_expiring: ShieldAlert,
+  plant_watering: Droplets,
+  birthday_reminder: Cake,
+  package_delivery: Package,
+  appointment_reminder: CalendarClock,
+  seasonal_task: Calendar,
   general_alert: Bell,
 };
 

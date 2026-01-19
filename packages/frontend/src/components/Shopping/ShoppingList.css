@@ -931,3 +931,165 @@
 .scan-tip strong {
   color: #374151;
 }
+
+/* Pantry Prompt Modal */
+.pantry-prompt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.pantry-prompt-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pantry-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background: #5b768a;
+  color: white;
+}
+
+.pantry-prompt-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.pantry-prompt-content {
+  padding: 1.5rem;
+}
+
+.pantry-prompt-content p {
+  margin: 0;
+  font-size: 1rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.pantry-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.pantry-prompt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.pantry-prompt-btn:active {
+  transform: scale(0.98);
+}
+
+.pantry-prompt-btn.yes {
+  background: #da6b34;
+  color: white;
+}
+
+.pantry-prompt-btn.yes:hover {
+  background: #c45e2c;
+}
+
+.pantry-prompt-btn.no {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.pantry-prompt-btn.no:hover {
+  background: #e5e7eb;
+}
+
+/* Toast notification */
+.shopping-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #5b768a;
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  max-width: 90%;
+}
+
+.shopping-toast.success {
+  background: #5b768a;
+}
+
+.shopping-toast.info {
+  background: #dc9e33;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.shopping-toast span {
+  flex: 1;
+  font-weight: 500;
+}
+
+.shopping-toast .toast-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.shopping-toast .toast-dismiss:hover {
+  color: white;
+}

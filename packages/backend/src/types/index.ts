@@ -109,6 +109,7 @@ export interface Contact {
   photoUrl?: string;
   notes?: string;
   rawData?: string;
+  birthday?: string; // Format: MM-DD
   isFavorite: boolean;
   lastSyncedAt?: string;
   createdAt: string;
@@ -660,6 +661,10 @@ export type NotificationType =
   | 'bill_due'
   | 'warranty_expiring'
   | 'plant_watering'
+  | 'birthday_reminder'
+  | 'package_delivery'
+  | 'seasonal_task'
+  | 'appointment_reminder'
   | 'general_alert';
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -705,6 +710,11 @@ export interface NotificationPreferences {
   billReminders: boolean;
   warrantyExpiringAlerts: boolean;
   plantWateringAlerts: boolean;
+  birthdayReminders: boolean;
+  packageDeliveryAlerts: boolean;
+  ttsEnabled: boolean;
+  ttsVolume: number;
+  motionDetectionEnabled: boolean;
   vacationMode: boolean;
   vacationStartDate?: string;
   vacationEndDate?: string;
@@ -725,6 +735,11 @@ export interface UpdatePreferencesInput {
   billReminders?: boolean;
   warrantyExpiringAlerts?: boolean;
   plantWateringAlerts?: boolean;
+  birthdayReminders?: boolean;
+  packageDeliveryAlerts?: boolean;
+  ttsEnabled?: boolean;
+  ttsVolume?: number;
+  motionDetectionEnabled?: boolean;
   vacationMode?: boolean;
   vacationStartDate?: string | null;
   vacationEndDate?: string | null;
@@ -968,4 +983,45 @@ export interface OpenLibraryWorkDetails {
   subject_places?: string[];
   subject_times?: string[];
   authors?: Array<{ author: { key: string } }>;
+}
+
+// Movie Watchlist Types
+export type WatchlistStatus = 'want_to_watch' | 'watched';
+
+export interface WatchlistItem {
+  id: number;
+  tmdbId?: number;
+  title: string;
+  posterUrl?: string;
+  releaseYear?: string;
+  genre?: string;
+  plot?: string;
+  status: WatchlistStatus;
+  myRating?: number; // 1-5 for watched items
+  watchedDate?: string;
+  priority: number; // 1-5
+  notes?: string;
+  addedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWatchlistItemInput {
+  tmdbId?: number;
+  title: string;
+  posterUrl?: string;
+  releaseYear?: string;
+  genre?: string;
+  plot?: string;
+  status?: WatchlistStatus;
+  priority?: number;
+  notes?: string;
+}
+
+export interface UpdateWatchlistItemInput {
+  status?: WatchlistStatus;
+  myRating?: number;
+  watchedDate?: string;
+  priority?: number;
+  notes?: string;
 }

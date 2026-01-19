@@ -10,6 +10,10 @@ export type NotificationType =
   | 'bill_due'
   | 'warranty_expiring'
   | 'plant_watering'
+  | 'birthday_reminder'
+  | 'package_delivery'
+  | 'seasonal_task'
+  | 'appointment_reminder'
   | 'general_alert';
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -43,6 +47,10 @@ export interface NotificationPreferences {
   billReminders: boolean;
   warrantyExpiringAlerts: boolean;
   plantWateringAlerts: boolean;
+  birthdayReminders: boolean;
+  ttsEnabled: boolean;
+  ttsVolume: number;
+  motionDetectionEnabled: boolean;
   vacationMode: boolean;
   vacationStartDate?: string;
   vacationEndDate?: string;

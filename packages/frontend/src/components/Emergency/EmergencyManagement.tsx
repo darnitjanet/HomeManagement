@@ -263,10 +263,26 @@ export function EmergencyManagement() {
               contacts.map((contact) => (
                 <div key={contact.id} className="contact-card">
                   <div className="contact-card-header">
-                    <h3>{contact.name}</h3>
-                    {contact.relationship && (
-                      <span className="relationship-badge">{contact.relationship}</span>
-                    )}
+                    <div className="contact-name-section">
+                      <h3>{contact.name}</h3>
+                      {contact.relationship && (
+                        <span className="relationship-badge">{contact.relationship}</span>
+                      )}
+                    </div>
+                    <div className="card-actions">
+                      <button
+                        className="action-btn edit"
+                        onClick={() => handleEditContact(contact)}
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        className="action-btn delete"
+                        onClick={() => handleDeleteContact(contact.id)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="contact-details">
@@ -299,21 +315,6 @@ export function EmergencyManagement() {
                   {contact.notes && (
                     <div className="contact-notes">{contact.notes}</div>
                   )}
-
-                  <div className="card-actions">
-                    <button
-                      className="action-btn edit"
-                      onClick={() => handleEditContact(contact)}
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      className="action-btn delete"
-                      onClick={() => handleDeleteContact(contact.id)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
                 </div>
               ))
             )}

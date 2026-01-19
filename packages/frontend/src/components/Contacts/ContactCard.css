@@ -12,7 +12,7 @@
 
 .contact-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -51,9 +51,7 @@
   font-weight: 600;
   margin: 0 0 4px 0;
   color: #1a202c;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
 }
 
 .contact-email,
@@ -65,47 +63,71 @@
   white-space: nowrap;
 }
 
+.contact-birthday {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #da6b34;
+  margin-top: 4px;
+}
+
 .contact-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 12px;
 }
 
-.edit-button,
-.delete-button,
-.favorite-button {
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: none;
-  background: transparent;
-  font-size: 20px;
   cursor: pointer;
   transition: all 0.2s;
-  flex-shrink: 0;
 }
 
-.edit-button:hover {
-  background: var(--slate-100);
+.action-btn.edit {
+  background: #eed6aa;
+  color: #5b768a;
 }
 
-.delete-button:hover {
-  background: #fee;
+.action-btn.edit:hover {
+  background: #5b768a;
+  color: white;
 }
 
-.favorite-button {
-  font-size: 24px;
+.action-btn.favorite {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
-.favorite-button:hover {
-  background: rgba(0, 0, 0, 0.05);
+.action-btn.favorite:hover {
+  background: #e5e7eb;
 }
 
-.favorite-button.active {
-  color: var(--gold-500);
+.action-btn.favorite.active {
+  background: #fef3c7;
+  color: #d97706;
 }
 
-.favorite-button:disabled {
+.action-btn.delete {
+  background: #fde2e2;
+  color: #1f2937;
+}
+
+.action-btn.delete:hover {
+  background: #fecaca;
+}
+
+.action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

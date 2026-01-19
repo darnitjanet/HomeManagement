@@ -187,6 +187,45 @@ export class ContactRepository {
   }
 
   /**
+   * Get contacts with upcoming birthdays
+   */
+  async getContactsWithUpcomingBirthdays(daysAhead: number = 7): Promise<(Contact & { daysUntil: number })[]> {
+    const contacts = await db('contacts')
+      .whereNotNull('birthday')
+      .where('birthday', '!=', '');
+
+    const today = new Date();
+    const upcoming: (Contact & { daysUntil: number })[] = [];
+
+    for (const contact of contacts) {
+      if (!contact.birthday) continue;
+
+      const [month, day] = contact.birthday.split('-').map(Number);
+      if (!month || !day) continue;
+
+      const thisYear = today.getFullYear();
+
+      // Create date for this year's birthday
+      let birthdayDate = new Date(thisYear, month - 1, day);
+
+      // If birthday already passed this year, check next year
+      if (birthdayDate < today) {
+        birthdayDate = new Date(thisYear + 1, month - 1, day);
+      }
+
+      const daysUntil = Math.ceil((birthdayDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysUntil >= 0 && daysUntil <= daysAhead) {
+        const mappedContact = this.mapFromDb(contact);
+        upcoming.push({ ...mappedContact, daysUntil });
+      }
+    }
+
+    // Sort by days until birthday
+    return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+  }
+
+  /**
    * Map database row to Contact
    */
   private mapFromDb(row: any): Contact {
@@ -201,6 +240,7 @@ export class ContactRepository {
       photoUrl: row.photo_url,
       notes: row.notes,
       rawData: row.raw_data,
+      birthday: row.birthday,
       isFavorite: Boolean(row.is_favorite),
       lastSyncedAt: row.last_synced_at,
       createdAt: row.created_at,
@@ -226,6 +266,7 @@ export class ContactRepository {
     if (contact.rawData !== undefined) dbData.raw_data = contact.rawData;
     if (contact.isFavorite !== undefined) dbData.is_favorite = contact.isFavorite;
     if (contact.lastSyncedAt !== undefined) dbData.last_synced_at = contact.lastSyncedAt;
+    if (contact.birthday !== undefined) dbData.birthday = contact.birthday;
 
     return dbData;
   }

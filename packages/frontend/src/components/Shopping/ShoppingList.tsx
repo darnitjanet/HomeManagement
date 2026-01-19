@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, X, ExternalLink, ChevronRight, Check, ScanBarcode } from 'lucide-react';
-import { shoppingApi } from '../../services/api';
+import { ShoppingCart, X, ExternalLink, ChevronRight, Check, ScanBarcode, Package, Undo2 } from 'lucide-react';
+import { shoppingApi, pantryApi } from '../../services/api';
 import './ShoppingList.css';
 
 type ListType = 'grocery' | 'other';
@@ -69,6 +69,12 @@ export function ShoppingList() {
   const [scanResult, setScanResult] = useState<string>('');
   const scanInputRef = useRef<HTMLInputElement>(null);
 
+  // Pantry prompt state
+  const [pantryPromptItem, setPantryPromptItem] = useState<ShoppingItem | null>(null);
+
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+
   useEffect(() => {
     loadData();
   }, [activeTab]);
@@ -111,11 +117,46 @@ export function ShoppingList() {
   };
 
   const handleCheckItem = async (id: number) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // For grocery items, show pantry prompt
+    if (activeTab === 'grocery') {
+      setPantryPromptItem(item);
+    } else {
+      // For other items, just remove
+      try {
+        await shoppingApi.removeItem(activeTab, id);
+        loadData();
+      } catch (err) {
+        console.error('Failed to remove item:', err);
+      }
+    }
+  };
+
+  const handlePantryPromptResponse = async (addToPantry: boolean) => {
+    if (!pantryPromptItem) return;
+
     try {
-      await shoppingApi.removeItem(activeTab, id);
+      // Remove from shopping list
+      await shoppingApi.removeItem('grocery', pantryPromptItem.id);
+
+      if (addToPantry) {
+        // Add to pantry
+        await pantryApi.createItem({
+          name: pantryPromptItem.name,
+          quantity: pantryPromptItem.quantity,
+          category: pantryPromptItem.category || undefined,
+        });
+        setToast({ message: `"${pantryPromptItem.name}" added to pantry`, type: 'success' });
+        setTimeout(() => setToast(null), 3000);
+      }
+
       loadData();
     } catch (err) {
-      console.error('Failed to remove item:', err);
+      console.error('Failed to process item:', err);
+    } finally {
+      setPantryPromptItem(null);
     }
   };
 
@@ -658,6 +699,47 @@ export function ShoppingList() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Pantry Prompt Modal */}
+      {pantryPromptItem && (
+        <div className="pantry-prompt-overlay" onClick={() => setPantryPromptItem(null)}>
+          <div className="pantry-prompt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pantry-prompt-header">
+              <Package size={24} />
+              <h3>Add to Pantry?</h3>
+            </div>
+            <div className="pantry-prompt-content">
+              <p>Would you like to add <strong>"{pantryPromptItem.name}"</strong> to your pantry inventory?</p>
+            </div>
+            <div className="pantry-prompt-actions">
+              <button
+                className="pantry-prompt-btn yes"
+                onClick={() => handlePantryPromptResponse(true)}
+              >
+                <Package size={18} />
+                Yes, add to Pantry
+              </button>
+              <button
+                className="pantry-prompt-btn no"
+                onClick={() => handlePantryPromptResponse(false)}
+              >
+                No, just remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`shopping-toast ${toast.type}`}>
+          <Package size={18} />
+          <span>{toast.message}</span>
+          <button className="toast-dismiss" onClick={() => setToast(null)}>
+            &times;
+          </button>
         </div>
       )}
     </div>

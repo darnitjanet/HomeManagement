@@ -19,7 +19,7 @@ export class GoogleContactsService {
         resourceName: 'people/me',
         pageSize,
         pageToken,
-        personFields: 'names,emailAddresses,phoneNumbers,photos,biographies,metadata,memberships',
+        personFields: 'names,emailAddresses,phoneNumbers,photos,biographies,metadata,memberships,birthdays',
         sortOrder: 'LAST_NAME_ASCENDING',
       });
 
@@ -41,7 +41,7 @@ export class GoogleContactsService {
     try {
       const response = await this.people.people.get({
         resourceName,
-        personFields: 'names,emailAddresses,phoneNumbers,photos,biographies,metadata',
+        personFields: 'names,emailAddresses,phoneNumbers,photos,biographies,metadata,birthdays',
       });
 
       return response.data;
@@ -153,6 +153,21 @@ export class GoogleContactsService {
   }
 
   /**
+   * Extract birthday from Google contact (returns MM-DD format)
+   */
+  extractBirthday(contact: any): string | undefined {
+    if (contact.birthdays && contact.birthdays.length > 0) {
+      const birthday = contact.birthdays[0];
+      if (birthday.date) {
+        const month = String(birthday.date.month).padStart(2, '0');
+        const day = String(birthday.date.day).padStart(2, '0');
+        return `${month}-${day}`;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Extract Google contact resource name (used as ID)
    */
   extractResourceName(contact: any): string {
@@ -194,6 +209,7 @@ export class GoogleContactsService {
     emails?: Array<{ value: string; type?: string }>;
     phones?: Array<{ value: string; type?: string }>;
     notes?: string;
+    birthday?: string; // MM-DD format
     etag: string; // Required for updates
   }) {
     try {
@@ -236,12 +252,25 @@ export class GoogleContactsService {
         }] : [];
       }
 
+      // Update birthday (MM-DD format)
+      if (data.birthday !== undefined) {
+        if (data.birthday) {
+          const [month, day] = data.birthday.split('-').map(Number);
+          requestBody.birthdays = [{
+            date: { month, day },
+          }];
+        } else {
+          requestBody.birthdays = [];
+        }
+      }
+
       // Determine which fields to update
       const updateFields: string[] = [];
       if (requestBody.names) updateFields.push('names');
       if (requestBody.emailAddresses) updateFields.push('emailAddresses');
       if (requestBody.phoneNumbers) updateFields.push('phoneNumbers');
       if (requestBody.biographies !== undefined) updateFields.push('biographies');
+      if (requestBody.birthdays !== undefined) updateFields.push('birthdays');
 
       const response = await this.people.people.updateContact({
         resourceName,

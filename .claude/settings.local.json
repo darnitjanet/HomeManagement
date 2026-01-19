@@ -51,7 +51,20 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit - Home Management App\n\nFeatures:\n- Calendar with Google Calendar sync\n- Contacts with Google sync\n- Movies catalog \\(TMDB integration\\)\n- Games library with loan tracking\n- Kids rewards/sticker system\n- Shopping lists with AI categorization\n- Recipes with AI suggestions and URL import\n- Home assets/inventory with warranty tracking\n- Books library with Open Library integration\n- Tasks/Todos with energy-based prioritization\n- Chores management\n- Mood tracking\n- Travel map with trip logging\n- Pantry inventory with barcode scanning\n- Notifications system\n- Weather widget\n\nTech stack:\n- Backend: Node.js, Express, TypeScript, SQLite\n- Frontend: React, TypeScript, Vite\n- AI: Anthropic Claude for smart features\nEOF\n\\)\")",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Plant Care, Meal Planner, Emergency Info, Family Rules, and Kiosk improvements\n\nNew Features:\n- Plant Care: Track plants, watering schedules, care suggestions, watering history\n- Meal Planner: Weekly meal planning integrated with recipes, shopping list generation\n- Emergency Info: Emergency contacts, important info \\(medical, home, insurance\\)\n- Family Rules: Manage family rules with categories and drag-to-reorder\n- Vacation Mode: Pause notifications during vacations\n\nKiosk Mode Improvements:\n- Compact layout to fit on one screen without scrolling\n- Sleep mode with dimmed moving clock after 2 min inactivity\n- Emergency Info button in kiosk footer\n\nUI Updates:\n- Added banner images for Plants, Family Rules, Emergency Info pages\n- Removed redundant text headers where banners exist\n- Added navigation tiles for new features on home page\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(del \"c:\\\\Users\\\\mrsja\\\\HomeManagement\\\\docs\\\\deployment.md\")",
+      "Bash(git restore:*)",
+      "Bash(powershell:*)",
+      "Bash(timeout /t)",
+      "Bash(timeout /t 5)",
+      "Bash(npx kill-port:*)",
+      "Bash(npm run build:backend:*)",
+      "Bash(timeout:*)",
+      "Bash(cd:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
     ]
   }
 }

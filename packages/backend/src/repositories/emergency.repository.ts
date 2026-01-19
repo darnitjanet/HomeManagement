@@ -10,6 +10,7 @@ export interface EmergencyContact {
   email: string | null;
   address: string | null;
   notes: string | null;
+  birthday: string | null; // Format: MM-DD
   priority: number;
   is_active: boolean;
   created_at: string;
@@ -24,6 +25,7 @@ export interface CreateEmergencyContactData {
   email?: string;
   address?: string;
   notes?: string;
+  birthday?: string; // Format: MM-DD
   priority?: number;
 }
 
@@ -92,6 +94,7 @@ export async function createEmergencyContact(data: CreateEmergencyContactData): 
     email: data.email || null,
     address: data.address || null,
     notes: data.notes || null,
+    birthday: data.birthday || null,
     priority: data.priority || 0,
     is_active: true,
   });
@@ -115,6 +118,39 @@ export async function updateEmergencyContact(
 export async function deleteEmergencyContact(id: number): Promise<boolean> {
   const deleted = await db('emergency_contacts').where({ id }).delete();
   return deleted > 0;
+}
+
+export async function getContactsWithUpcomingBirthdays(daysAhead: number = 7): Promise<EmergencyContact[]> {
+  const contacts = await db('emergency_contacts')
+    .whereNotNull('birthday')
+    .where({ is_active: true });
+
+  const today = new Date();
+  const upcoming: EmergencyContact[] = [];
+
+  for (const contact of contacts) {
+    if (!contact.birthday) continue;
+
+    const [month, day] = contact.birthday.split('-').map(Number);
+    const thisYear = today.getFullYear();
+
+    // Create date for this year's birthday
+    let birthdayDate = new Date(thisYear, month - 1, day);
+
+    // If birthday already passed this year, check next year
+    if (birthdayDate < today) {
+      birthdayDate = new Date(thisYear + 1, month - 1, day);
+    }
+
+    const daysUntil = Math.ceil((birthdayDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil >= 0 && daysUntil <= daysAhead) {
+      upcoming.push({ ...contact, daysUntil } as any);
+    }
+  }
+
+  // Sort by days until birthday
+  return upcoming.sort((a: any, b: any) => a.daysUntil - b.daysUntil);
 }
 
 // =====================

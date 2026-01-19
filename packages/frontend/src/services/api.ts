@@ -118,6 +118,12 @@ export const contactsApi = {
   // Sync stats
   getSyncStats: () => api.get('/contacts/sync/stats'),
   getSyncLogs: (limit?: number) => api.get('/contacts/sync/logs', { params: { limit } }),
+
+  // Birthdays
+  getUpcomingBirthdays: (days: number = 7) =>
+    api.get('/contacts/birthdays', { params: { days } }),
+  updateBirthday: (id: number, birthday: string | null) =>
+    api.put(`/contacts/${id}/birthday`, { birthday }),
 };
 
 // Movies API
@@ -1025,6 +1031,156 @@ export const emergencyApi = {
   deleteRule: (id: number) => api.delete(`/emergency/rules/${id}`),
   reorderRules: (orderedIds: number[]) =>
     api.post('/emergency/rules/reorder', { orderedIds }),
+};
+
+// Seasonal Tasks API
+export const seasonalTasksApi = {
+  getAll: () => api.get('/seasonal-tasks'),
+  getActive: () => api.get('/seasonal-tasks/active'),
+  getUpcoming: () => api.get('/seasonal-tasks/upcoming'),
+  getById: (id: number) => api.get(`/seasonal-tasks/${id}`),
+  create: (data: {
+    title: string;
+    description?: string;
+    category?: string;
+    seasons?: string[];
+    months?: number[];
+    reminder_day?: number;
+    reminder_days_before?: number;
+    priority?: string;
+    estimated_minutes?: number;
+  }) => api.post('/seasonal-tasks', data),
+  update: (id: number, data: {
+    title?: string;
+    description?: string;
+    category?: string;
+    seasons?: string[];
+    months?: number[];
+    reminder_day?: number;
+    reminder_days_before?: number;
+    priority?: string;
+    estimated_minutes?: number;
+    is_active?: boolean;
+  }) => api.put(`/seasonal-tasks/${id}`, data),
+  delete: (id: number) => api.delete(`/seasonal-tasks/${id}`),
+  markCompleted: (id: number) => api.post(`/seasonal-tasks/${id}/complete`),
+};
+
+// Gmail API (for package tracking email sync)
+export const gmailApi = {
+  getShippingEmails: (days?: number) =>
+    api.get('/gmail/shipping', { params: days ? { days } : {} }),
+  importEmail: (emailId: string) =>
+    api.post('/gmail/import', { emailId }),
+  syncFromEmail: (days?: number) =>
+    api.post('/gmail/sync', {}, { params: days ? { days } : {} }),
+};
+
+// Packages API
+export const packagesApi = {
+  getAll: (includeArchived?: boolean) =>
+    api.get('/packages', { params: { archived: includeArchived } }),
+  getActive: () => api.get('/packages/active'),
+  getArchived: () => api.get('/packages/archived'),
+  getArrivingSoon: (days?: number) =>
+    api.get('/packages/arriving-soon', { params: { days } }),
+  getStats: () => api.get('/packages/stats'),
+  getCarriers: () => api.get('/packages/carriers'),
+  getStatuses: () => api.get('/packages/statuses'),
+  getById: (id: number) => api.get(`/packages/${id}`),
+  create: (data: {
+    name: string;
+    tracking_number?: string;
+    carrier?: string;
+    status?: string;
+    order_date?: string;
+    expected_delivery?: string;
+    order_number?: string;
+    vendor?: string;
+    cost?: number;
+    notes?: string;
+    notify_on_delivery?: boolean;
+  }) => api.post('/packages', data),
+  update: (id: number, data: {
+    name?: string;
+    tracking_number?: string;
+    carrier?: string;
+    status?: string;
+    order_date?: string;
+    expected_delivery?: string;
+    actual_delivery?: string;
+    order_number?: string;
+    vendor?: string;
+    cost?: number;
+    notes?: string;
+    notify_on_delivery?: boolean;
+    is_archived?: boolean;
+  }) => api.put(`/packages/${id}`, data),
+  updateStatus: (id: number, status: string) =>
+    api.put(`/packages/${id}/status`, { status }),
+  archive: (id: number) => api.post(`/packages/${id}/archive`),
+  delete: (id: number) => api.delete(`/packages/${id}`),
+};
+
+// Smart Home API
+export const smartHomeApi = {
+  // Overall status
+  getStatus: () => api.get('/smart-home/status'),
+
+  // Govee lights
+  getGoveeDevices: () => api.get('/smart-home/govee/devices'),
+  controlGovee: (deviceId: string, action: {
+    model: string;
+    action: 'turn_on' | 'turn_off' | 'set_brightness' | 'set_color' | 'set_color_temp';
+    value?: number | { r: number; g: number; b: number };
+  }) => api.post(`/smart-home/govee/devices/${deviceId}/control`, action),
+
+  // Ecobee thermostat
+  getEcobeeThermostats: () => api.get('/smart-home/ecobee/thermostats'),
+  controlEcobee: (thermostatId: string, action: {
+    action: 'set_temperature' | 'set_mode' | 'resume_program';
+    value?: number | string;
+    holdType?: 'nextTransition' | 'indefinite' | 'holdHours';
+    holdHours?: number;
+  }) => api.post(`/smart-home/ecobee/thermostats/${thermostatId}/control`, action),
+
+  // Eufy cameras
+  getEufyCameras: () => api.get('/smart-home/eufy/cameras'),
+  getEufySnapshot: (cameraId: string) =>
+    api.get(`/smart-home/eufy/cameras/${cameraId}/snapshot`),
+};
+
+// Settings API
+export const settingsApi = {
+  getWifiCredentials: () => api.get('/settings/wifi'),
+};
+
+// Watchlist API
+export const watchlistApi = {
+  getAll: (status?: 'want_to_watch' | 'watched') =>
+    api.get('/watchlist', { params: status ? { status } : {} }),
+  getItem: (id: number) => api.get(`/watchlist/${id}`),
+  search: (query: string) => api.get('/watchlist/search', { params: { q: query } }),
+  addItem: (data: {
+    tmdbId?: number;
+    title: string;
+    posterUrl?: string;
+    releaseYear?: string;
+    genre?: string;
+    plot?: string;
+    priority?: number;
+    notes?: string;
+  }) => api.post('/watchlist', data),
+  updateItem: (id: number, data: {
+    status?: 'want_to_watch' | 'watched';
+    myRating?: number;
+    watchedDate?: string;
+    priority?: number;
+    notes?: string;
+  }) => api.put(`/watchlist/${id}`, data),
+  markAsWatched: (id: number, rating?: number, watchedDate?: string) =>
+    api.put(`/watchlist/${id}/watched`, { rating, watchedDate }),
+  deleteItem: (id: number) => api.delete(`/watchlist/${id}`),
 };
 
 export default api;

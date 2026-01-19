@@ -11,6 +11,7 @@ router.post('/sync', requireAuth, contactsController.syncContacts);
 router.get('/', contactsController.getAllContacts);
 router.get('/search', contactsController.searchContacts);
 router.get('/favorites', contactsController.getFavoriteContacts);
+router.get('/birthdays', contactsController.getUpcomingBirthdays);
 router.get('/tag/:tagId', contactsController.getContactsByTag);
 router.get('/:id', contactsController.getContact);
 
@@ -21,6 +22,7 @@ router.post('/', requireAuth, contactsController.createContact);
 router.put('/:id', requireAuth, contactsController.updateContactDetails);
 router.post('/:id/favorite', contactsController.toggleFavorite);
 router.put('/:id/notes', requireAuth, contactsController.updateNotes);
+router.put('/:id/birthday', contactsController.updateBirthday);
 router.post('/:id/tags', contactsController.addTagToContact);
 router.delete('/:id/tags/:tagId', contactsController.removeTagFromContact);
 

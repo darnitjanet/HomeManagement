@@ -5,6 +5,9 @@ import { CalendarRepository } from '../repositories/calendar.repository';
 import { AssetRepository } from '../repositories/asset.repository';
 import * as plantRepo from '../repositories/plant.repository';
 import * as todoRepo from '../repositories/todo.repository';
+import * as packageRepo from '../repositories/package.repository';
+import { ContactRepository } from '../repositories/contact.repository';
+import { seasonalTaskRepository } from '../repositories/seasonal-task.repository';
 import {
   Notification,
   CreateNotificationInput,
@@ -49,6 +52,7 @@ export class NotificationService {
   private gameRepo: GameRepository;
   private calendarRepo: CalendarRepository;
   private assetRepo: AssetRepository;
+  private contactRepo: ContactRepository;
 
   constructor() {
     this.notificationRepo = new NotificationRepository();
@@ -56,6 +60,7 @@ export class NotificationService {
     this.gameRepo = new GameRepository();
     this.calendarRepo = new CalendarRepository();
     this.assetRepo = new AssetRepository();
+    this.contactRepo = new ContactRepository();
   }
 
   // =====================
@@ -248,6 +253,52 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Create a package delivery notification
+   */
+  async createPackageDeliveryNotification(pkg: {
+    id: number;
+    name: string;
+    vendor: string | null;
+    expectedDelivery: string | null;
+    isToday: boolean;
+    isOverdue: boolean;
+  }): Promise<Notification> {
+    const vendorStr = pkg.vendor ? ` from ${pkg.vendor}` : '';
+    let message: string;
+    let title: string;
+    let priority: 'urgent' | 'high' | 'normal' | 'low' = 'normal';
+
+    if (pkg.isOverdue) {
+      title = 'Package May Be Delayed';
+      const dateStr = pkg.expectedDelivery
+        ? new Date(pkg.expectedDelivery).toLocaleDateString()
+        : '';
+      message = `"${pkg.name}"${vendorStr} was expected ${dateStr} but hasn't arrived`;
+      priority = 'high';
+    } else if (pkg.isToday) {
+      title = 'Package Arriving Today!';
+      message = `"${pkg.name}"${vendorStr} is expected to arrive today`;
+      priority = 'high';
+    } else {
+      title = 'Package Arriving Soon';
+      const dateStr = pkg.expectedDelivery
+        ? new Date(pkg.expectedDelivery).toLocaleDateString()
+        : 'soon';
+      message = `"${pkg.name}"${vendorStr} is expected ${dateStr}`;
+    }
+
+    return this.create({
+      type: 'package_delivery',
+      title,
+      message,
+      icon: 'package',
+      priority,
+      entityType: 'package',
+      entityId: pkg.id,
+    });
+  }
+
   // =====================
   // BATCH NOTIFICATION GENERATION
   // =====================
@@ -417,14 +468,13 @@ export class NotificationService {
     let count = 0;
 
     for (const plant of plantsNeedingWater) {
-      // Check if we already have a notification for this plant today
+      // Check if we already have an active (undismissed) notification for this plant
       const existing = await this.notificationRepo.findByEntity('plant', plant.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today && n.type === 'plant_watering'
+      const hasActiveNotification = existing.some(
+        (n) => n.type === 'plant_watering' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasActiveNotification) {
         // Calculate days overdue
         const nextWaterDate = plant.next_water_date ? new Date(plant.next_water_date) : new Date();
         const now = new Date();
@@ -443,6 +493,178 @@ export class NotificationService {
     }
 
     return count;
+  }
+
+  /**
+   * Generate notifications for packages arriving soon
+   * Called by the scheduler
+   */
+  async generatePackageDeliveryNotifications(): Promise<number> {
+    const prefs = await this.notificationRepo.getPreferences();
+    // Only skip if explicitly set to false
+    if (prefs && prefs.packageDeliveryAlerts === false) {
+      return 0;
+    }
+
+    // Get packages arriving today or tomorrow
+    const packagesForNotification = await packageRepo.getPackagesForNotification();
+    let count = 0;
+    const today = new Date().toISOString().split('T')[0];
+
+    for (const pkg of packagesForNotification) {
+      // Check if we already have a notification for this package today
+      const existing = await this.notificationRepo.findByEntity('package', pkg.id);
+      const hasRecentNotification = existing.some(
+        (n) => n.createdAt.split('T')[0] === today && n.type === 'package_delivery'
+      );
+
+      if (!hasRecentNotification) {
+        const isToday = pkg.expected_delivery === today;
+        const isOverdue = pkg.expected_delivery ? pkg.expected_delivery < today : false;
+
+        await this.createPackageDeliveryNotification({
+          id: pkg.id,
+          name: pkg.name,
+          vendor: pkg.vendor,
+          expectedDelivery: pkg.expected_delivery,
+          isToday,
+          isOverdue,
+        });
+
+        // Mark as notified
+        await packageRepo.markNotified(pkg.id);
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Generate notifications for upcoming birthdays
+   * Called by the scheduler
+   */
+  async generateBirthdayNotifications(): Promise<number> {
+    const prefs = await this.notificationRepo.getPreferences();
+    if (prefs && !(prefs as any).birthdayReminders) {
+      return 0;
+    }
+
+    // Get contacts with birthdays in the next 7 days
+    const upcomingBirthdays = await this.contactRepo.getContactsWithUpcomingBirthdays(7);
+    let count = 0;
+
+    for (const contact of upcomingBirthdays) {
+      // Check if we already have a notification for this contact today
+      const existing = await this.notificationRepo.findByEntity('contact', contact.id);
+      const today = new Date().toISOString().split('T')[0];
+      const hasRecentNotification = existing.some(
+        (n) => n.createdAt.split('T')[0] === today && n.type === 'birthday_reminder'
+      );
+
+      if (!hasRecentNotification) {
+        await this.createBirthdayNotification({
+          id: contact.id,
+          name: contact.displayName,
+          birthday: contact.birthday || '',
+          daysUntil: contact.daysUntil,
+        });
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  private async createBirthdayNotification(contact: {
+    id: number;
+    name: string;
+    birthday: string;
+    daysUntil: number;
+  }): Promise<void> {
+    let message: string;
+    if (contact.daysUntil === 0) {
+      message = `Today is ${contact.name}'s birthday!`;
+    } else if (contact.daysUntil === 1) {
+      message = `Tomorrow is ${contact.name}'s birthday!`;
+    } else {
+      message = `${contact.name}'s birthday is in ${contact.daysUntil} days (${contact.birthday})`;
+    }
+
+    await this.create({
+      type: 'birthday_reminder',
+      title: contact.daysUntil === 0 ? 'Birthday Today!' : 'Upcoming Birthday',
+      message,
+      icon: 'Cake',
+      priority: contact.daysUntil <= 1 ? 'high' : 'normal',
+      entityType: 'contact',
+      entityId: contact.id,
+    });
+  }
+
+  /**
+   * Generate notifications for seasonal tasks due
+   * Called by the scheduler
+   */
+  async generateSeasonalTaskNotifications(): Promise<number> {
+    const prefs = await this.notificationRepo.getPreferences();
+    if (prefs && !(prefs as any).seasonalTaskAlerts === false) {
+      // Default to enabled if not set
+    }
+
+    const upcomingTasks = await seasonalTaskRepository.getTasksNeedingReminders();
+    let count = 0;
+
+    for (const task of upcomingTasks) {
+      // Check if we already have a notification for this task today
+      const existing = await this.notificationRepo.findByEntity('seasonal_task', task.id);
+      const today = new Date().toISOString().split('T')[0];
+      const hasRecentNotification = existing.some(
+        (n) => n.createdAt.split('T')[0] === today && n.type === 'seasonal_task'
+      );
+
+      if (!hasRecentNotification) {
+        await this.createSeasonalTaskNotification({
+          id: task.id,
+          title: task.title,
+          category: task.category,
+          dueIn: task.dueIn,
+          estimatedMinutes: task.estimated_minutes,
+        });
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  private async createSeasonalTaskNotification(task: {
+    id: number;
+    title: string;
+    category: string;
+    dueIn: number;
+    estimatedMinutes: number | null;
+  }): Promise<void> {
+    let message: string;
+    const timeEstimate = task.estimatedMinutes ? ` (~${task.estimatedMinutes} min)` : '';
+
+    if (task.dueIn === 0) {
+      message = `${task.title} is due today!${timeEstimate}`;
+    } else if (task.dueIn === 1) {
+      message = `${task.title} is due tomorrow${timeEstimate}`;
+    } else {
+      message = `${task.title} is due in ${task.dueIn} days${timeEstimate}`;
+    }
+
+    await this.create({
+      type: 'seasonal_task',
+      title: `Seasonal Task: ${task.category}`,
+      message,
+      icon: 'Leaf',
+      priority: task.dueIn <= 1 ? 'high' : 'normal',
+      entityType: 'seasonal_task',
+      entityId: task.id,
+    });
   }
 
   /**

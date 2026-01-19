@@ -1,4 +1,4 @@
-import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale } from 'lucide-react';
+import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale, Leaf } from 'lucide-react';
 import { WeatherWidget } from '../Weather/WeatherWidget';
 import './HomePage.css';
 
@@ -15,21 +15,45 @@ export function HomePage({ onNavigate }: HomePageProps) {
       color: '#5b768a',
     },
     {
+      id: 'chores',
+      icon: ClipboardCheck,
+      title: 'Chores',
+      color: '#5b768a',
+    },
+    {
       id: 'contacts',
       icon: Users,
       title: 'Contacts',
       color: '#da6b34',
     },
     {
-      id: 'shopping',
-      icon: ShoppingCart,
-      title: 'Shopping',
+      id: 'emergency',
+      icon: AlertTriangle,
+      title: 'Emergency Info',
+      color: '#da6b34',
+    },
+    {
+      id: 'family-rules',
+      icon: Scale,
+      title: 'Family Rules',
+      color: '#5b768a',
+    },
+    {
+      id: 'kids',
+      icon: Star,
+      title: 'Kids Rewards',
       color: '#dc9e33',
     },
     {
-      id: 'recipes',
-      icon: ChefHat,
-      title: 'Recipes',
+      id: 'mood',
+      icon: Heart,
+      title: 'Mood Tracker',
+      color: '#da6b34',
+    },
+    {
+      id: 'packages',
+      icon: Package,
+      title: 'Packages',
       color: '#da6b34',
     },
     {
@@ -39,22 +63,28 @@ export function HomePage({ onNavigate }: HomePageProps) {
       color: '#dc9e33',
     },
     {
-      id: 'kids',
-      icon: Star,
-      title: 'Kids Rewards',
+      id: 'plants',
+      icon: Flower2,
+      title: 'Plant Care',
       color: '#dc9e33',
     },
     {
-      id: 'chores',
-      icon: ClipboardCheck,
-      title: 'Chores',
+      id: 'recipes',
+      icon: ChefHat,
+      title: 'Recipes',
+      color: '#da6b34',
+    },
+    {
+      id: 'seasonal-tasks',
+      icon: Leaf,
+      title: 'Seasonal Tasks',
       color: '#5b768a',
     },
     {
-      id: 'mood',
-      icon: Heart,
-      title: 'Mood Tracker',
-      color: '#da6b34',
+      id: 'shopping',
+      icon: ShoppingCart,
+      title: 'Shopping',
+      color: '#dc9e33',
     },
     {
       id: 'travel',
@@ -62,31 +92,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
       title: 'Travel Map',
       color: '#5b768a',
     },
-    {
-      id: 'plants',
-      icon: Flower2,
-      title: 'Plant Care',
-      color: '#dc9e33',
-    },
-    {
-      id: 'family-rules',
-      icon: Scale,
-      title: 'Family Rules',
-      color: '#5b768a',
-    },
-    {
-      id: 'emergency',
-      icon: AlertTriangle,
-      title: 'Emergency Info',
-      color: '#da6b34',
-    },
   ];
 
   const inventoryFeatures = [
     {
-      id: 'movies',
-      icon: Film,
-      title: 'Movies',
+      id: 'books',
+      icon: BookOpen,
+      title: 'Books',
       color: '#dc9e33',
     },
     {
@@ -96,16 +108,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
       color: '#5b768a',
     },
     {
-      id: 'books',
-      icon: BookOpen,
-      title: 'Books',
-      color: '#dc9e33',
-    },
-    {
       id: 'assets',
       icon: Box,
       title: 'Home Assets',
       color: '#5b768a',
+    },
+    {
+      id: 'movies',
+      icon: Film,
+      title: 'Movies',
+      color: '#dc9e33',
     },
   ];
 

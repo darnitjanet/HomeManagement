@@ -1,10 +1,11 @@
 import { google } from 'googleapis';
 
-// Scopes for Google Calendar and Contacts APIs
+// Scopes for Google Calendar, Contacts, and Gmail APIs
 export const SCOPES = [
   'https://www.googleapis.com/auth/calendar', // Read/write access to calendars
   'https://www.googleapis.com/auth/calendar.events', // Read/write access to events
   'https://www.googleapis.com/auth/contacts', // Read/write access to contacts
+  'https://www.googleapis.com/auth/gmail.readonly', // Read-only access to Gmail for package tracking
 ];
 
 // OAuth2 client - created lazily after env vars are loaded
@@ -34,12 +35,19 @@ export const oauth2Client = new Proxy({} as any, {
 
 // Generate authentication URL
 export function getAuthUrl(forceReauth: boolean = false): string {
-  return getOAuth2Client().generateAuthUrl({
+  const options: any = {
     access_type: 'offline', // Get refresh token
     scope: SCOPES,
-    prompt: forceReauth ? 'select_account consent' : 'consent', // Force consent screen to get refresh token
-    include_granted_scopes: true, // Include previously granted scopes
-  });
+    prompt: 'consent', // Always show consent to ensure all scopes are granted
+  };
+
+  // When forcing reauth, don't include previously granted scopes
+  // This forces Google to show the full consent screen
+  if (!forceReauth) {
+    options.include_granted_scopes = true;
+  }
+
+  return getOAuth2Client().generateAuthUrl(options);
 }
 
 // Exchange authorization code for tokens

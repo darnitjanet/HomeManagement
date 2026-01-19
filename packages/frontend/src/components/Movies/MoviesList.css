@@ -51,6 +51,25 @@
   border-color: #c78c2a;
 }
 
+.header-actions button.watchlist-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #5b768a;
+  border-color: #5b768a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.header-actions button.watchlist-btn:hover {
+  background: #4a6275;
+  border-color: #4a6275;
+}
+
 .movies-filters {
   display: flex;
   gap: 12px;

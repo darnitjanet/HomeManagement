@@ -27,6 +27,11 @@ import pantryRoutes from './routes/pantry.routes';
 import plantsRoutes from './routes/plants.routes';
 import mealPlanRoutes from './routes/meal-plan.routes';
 import emergencyRoutes from './routes/emergency.routes';
+import seasonalTaskRoutes from './routes/seasonal-task.routes';
+import packagesRoutes from './routes/packages.routes';
+import gmailRoutes from './routes/gmail.routes';
+import smartHomeRoutes from './routes/smart-home.routes';
+import watchlistRoutes from './routes/watchlist.routes';
 
 // Import session store (will be implemented)
 const SQLiteStore = require('connect-sqlite3')(session);
@@ -93,10 +98,30 @@ export function createApp(): Express {
   app.use('/api/plants', plantsRoutes);
   app.use('/api/meal-plans', mealPlanRoutes);
   app.use('/api/emergency', emergencyRoutes);
+  app.use('/api/seasonal-tasks', seasonalTaskRoutes);
+  app.use('/api/packages', packagesRoutes);
+  app.use('/api/gmail', gmailRoutes);
+  app.use('/api/smart-home', smartHomeRoutes);
+  app.use('/api/watchlist', watchlistRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // WiFi credentials for guest QR code
+  app.get('/api/settings/wifi', (req: Request, res: Response) => {
+    const ssid = process.env.WIFI_SSID;
+    const password = process.env.WIFI_PASSWORD;
+
+    if (!ssid) {
+      return res.json({ success: false, error: 'WiFi not configured' });
+    }
+
+    res.json({
+      success: true,
+      data: { ssid, password: password || '' }
+    });
   });
 
   // Serve static files in production (frontend build)

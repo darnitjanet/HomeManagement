@@ -1,11 +1,19 @@
 import cron from 'node-cron';
 import { NotificationService } from '../services/notification.service';
 import { EmailService } from '../services/email.service';
+import { GoogleGmailService } from '../services/google-gmail.service';
+import { parseMultipleEmails } from '../services/shipping-email-parser';
+import { parseMultipleAppointmentEmails, ParsedAppointment } from '../services/appointment-email-parser';
+import * as packageRepo from '../repositories/package.repository';
+import { NotificationRepository } from '../repositories/notification.repository';
+import { getOAuth2Client } from '../config/google';
+import { db } from '../config/database';
 
 // Store active cron tasks
 let notificationCheckTask: cron.ScheduledTask | null = null;
 let digestTask: cron.ScheduledTask | null = null;
 let cleanupTask: cron.ScheduledTask | null = null;
+let packageEmailSyncTask: cron.ScheduledTask | null = null;
 
 const notificationService = new NotificationService();
 const emailService = new EmailService();
@@ -34,10 +42,18 @@ export function initializeNotificationScheduler() {
     await runCleanup();
   });
 
+  // Sync shipping and appointment emails every hour
+  packageEmailSyncTask = cron.schedule('0 * * * *', async () => {
+    console.log('📦 Running email sync (packages & appointments)...');
+    await runPackageEmailSync();
+    await runAppointmentEmailSync();
+  });
+
   console.log('✅ Notification scheduler initialized');
   console.log('   - Notification check: Every 15 minutes (*/15 * * * *)');
   console.log('   - Daily digest: 7:00 AM (0 7 * * *)');
   console.log('   - Cleanup: 3:00 AM daily (0 3 * * *)');
+  console.log('   - Package email sync: Every hour (0 * * * *)');
 }
 
 /**
@@ -52,6 +68,9 @@ export function stopNotificationScheduler() {
   }
   if (cleanupTask) {
     cleanupTask.stop();
+  }
+  if (packageEmailSyncTask) {
+    packageEmailSyncTask.stop();
   }
   console.log('🛑 Stopped notification scheduler');
 }
@@ -114,11 +133,14 @@ async function runNotificationCheck() {
     const calendarCount = await notificationService.generateCalendarReminders();
     const warrantyCount = await notificationService.generateWarrantyExpiringNotifications();
     const plantCount = await notificationService.generatePlantWateringNotifications();
+    const birthdayCount = await notificationService.generateBirthdayNotifications();
+    const seasonalCount = await notificationService.generateSeasonalTaskNotifications();
+    const packageCount = await notificationService.generatePackageDeliveryNotifications();
     // Game overdue check runs less frequently (handled separately)
 
-    const total = taskCount + choreCount + calendarCount + warrantyCount + plantCount;
+    const total = taskCount + choreCount + calendarCount + warrantyCount + plantCount + birthdayCount + seasonalCount + packageCount;
     if (total > 0) {
-      console.log(`✅ Created ${total} notifications (tasks: ${taskCount}, chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount}, plants: ${plantCount})`);
+      console.log(`✅ Created ${total} notifications (tasks: ${taskCount}, chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount}, plants: ${plantCount}, birthdays: ${birthdayCount}, seasonal: ${seasonalCount}, packages: ${packageCount})`);
     }
   } catch (error: any) {
     console.error('❌ Notification check error:', error.message);
@@ -231,4 +253,241 @@ export async function triggerNotificationCheck() {
  */
 export async function triggerDailyDigest() {
   await sendDailyDigest();
+}
+
+/**
+ * Helper to get active user session with Google tokens
+ * Reads from the sessions.db file used by express-session
+ */
+async function getActiveUserSession(): Promise<any> {
+  try {
+    const path = require('path');
+    const knex = require('knex');
+
+    // Connect to the sessions database
+    const sessionsDb = knex({
+      client: 'sqlite3',
+      connection: {
+        filename: path.join(__dirname, '../../database/sessions.db'),
+      },
+      useNullAsDefault: true,
+    });
+
+    try {
+      const session = await sessionsDb('sessions')
+        .where('expired', '>', Date.now())
+        .orderBy('expired', 'desc')
+        .first();
+
+      if (!session) {
+        await sessionsDb.destroy();
+        return null;
+      }
+
+      // The session data is stored in the 'sess' column as JSON string
+      const sessionData = typeof session.sess === 'string'
+        ? JSON.parse(session.sess)
+        : session.sess;
+
+      await sessionsDb.destroy();
+
+      if (!sessionData.googleTokens) {
+        return null;
+      }
+
+      return {
+        id: session.sid,
+        googleTokens: sessionData.googleTokens,
+      };
+    } catch (err) {
+      await sessionsDb.destroy();
+      throw err;
+    }
+  } catch (error: any) {
+    console.error('Error getting active session:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Run package email sync - fetch shipping emails and import new packages
+ */
+async function runPackageEmailSync() {
+  try {
+    // Get the active session with OAuth tokens
+    const session = await getActiveUserSession();
+
+    if (!session || !session.googleTokens) {
+      console.log('⏭️  No active user session, skipping package email sync');
+      return;
+    }
+
+    // Set up OAuth client with stored tokens
+    const oauth2Client = getOAuth2Client();
+    oauth2Client.setCredentials(session.googleTokens);
+
+    // Fetch shipping emails from the last 30 days
+    const daysBack = 30;
+    const afterDate = new Date();
+    afterDate.setDate(afterDate.getDate() - daysBack);
+
+    const gmailService = new GoogleGmailService(oauth2Client);
+    const emails = await gmailService.getShippingEmails(afterDate);
+    const parsed = parseMultipleEmails(emails);
+
+    let imported = 0;
+    let skipped = 0;
+
+    for (const info of parsed) {
+      try {
+        // Check if already imported
+        const existing = await packageRepo.findByEmailId(info.emailId);
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        // Create the package
+        await packageRepo.createPackage({
+          name: info.itemDescription || 'Package from ' + (info.vendor || 'Unknown'),
+          tracking_number: info.trackingNumber || undefined,
+          carrier: info.carrier || undefined,
+          status: info.status,
+          expected_delivery: info.expectedDelivery || undefined,
+          order_number: info.orderNumber || undefined,
+          vendor: info.vendor || undefined,
+          email_id: info.emailId,
+        });
+
+        imported++;
+      } catch (err: any) {
+        console.error('Error importing email:', info.emailId, err.message);
+      }
+    }
+
+    if (imported > 0) {
+      console.log(`📦 Package email sync: imported ${imported} new packages (${skipped} already existed)`);
+    } else if (parsed.length > 0) {
+      console.log(`📦 Package email sync: no new packages (${skipped} already imported)`);
+    }
+  } catch (error: any) {
+    console.error('❌ Package email sync error:', error.message);
+  }
+}
+
+/**
+ * Manually trigger package email sync (for testing)
+ */
+export async function triggerPackageEmailSync() {
+  await runPackageEmailSync();
+}
+
+/**
+ * Run appointment email sync - fetch appointment emails and create notifications
+ */
+async function runAppointmentEmailSync() {
+  try {
+    // Get the active session with OAuth tokens
+    const session = await getActiveUserSession();
+
+    if (!session || !session.googleTokens) {
+      // Silent skip - no session
+      return;
+    }
+
+    // Set up OAuth client with stored tokens
+    const oauth2Client = getOAuth2Client();
+    oauth2Client.setCredentials(session.googleTokens);
+
+    // Fetch appointment emails from the last 14 days
+    const daysBack = 14;
+    const afterDate = new Date();
+    afterDate.setDate(afterDate.getDate() - daysBack);
+
+    const gmailService = new GoogleGmailService(oauth2Client);
+    const emails = await gmailService.getAppointmentEmails(afterDate);
+    const parsed = parseMultipleAppointmentEmails(emails);
+
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const dayAfter = new Date();
+    dayAfter.setDate(dayAfter.getDate() + 2);
+    const dayAfterStr = dayAfter.toISOString().split('T')[0];
+
+    let created = 0;
+
+    for (const appt of parsed) {
+      // Only create notifications for appointments within next 2 days
+      if (!appt.date || (appt.date !== today && appt.date !== tomorrowStr && appt.date !== dayAfterStr)) {
+        continue;
+      }
+
+      try {
+        const message = appt.description || appt.appointmentType || 'Appointment reminder';
+
+        // Check if we already created a notification for this appointment today
+        // Match on type, message content, and created today
+        const existing = await db('notifications')
+          .where('type', 'appointment_reminder')
+          .where('message', message)
+          .where('created_at', '>=', today)
+          .first();
+
+        if (existing) {
+          continue;
+        }
+
+        const isToday = appt.date === today;
+        const isTomorrow = appt.date === tomorrowStr;
+        const timeStr = appt.time ? ` at ${formatTime(appt.time)}` : '';
+        let title: string;
+        if (isToday) {
+          title = `Appointment Today${timeStr}`;
+        } else if (isTomorrow) {
+          title = `Appointment Tomorrow${timeStr}`;
+        } else {
+          title = `Appointment in 2 days${timeStr}`;
+        }
+
+        const notificationRepo = new NotificationRepository();
+        await notificationRepo.create({
+          type: 'appointment_reminder',
+          title,
+          message,
+          priority: isToday ? 'high' : 'normal',
+          entityType: 'appointment_email',
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+        });
+
+        created++;
+      } catch (err: any) {
+        console.error('Error creating appointment notification:', err.message);
+      }
+    }
+
+    if (created > 0) {
+      console.log(`📅 Appointment email sync: created ${created} notifications`);
+    }
+  } catch (error: any) {
+    console.error('❌ Appointment email sync error:', error.message);
+  }
+}
+
+/**
+ * Format time for display (24h to 12h)
+ */
+function formatTime(time: string): string {
+  const [hours, minutes] = time.split(':').map(Number);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+/**
+ * Manually trigger appointment email sync (for testing)
+ */
+export async function triggerAppointmentEmailSync() {
+  await runAppointmentEmailSync();
 }

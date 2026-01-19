@@ -116,6 +116,10 @@
   margin-bottom: 8px;
 }
 
+.weather-widget.expanded .weather-stats {
+  color: white;
+}
+
 .stat {
   display: flex;
   gap: 4px;
@@ -123,6 +127,11 @@
 
 .stat-label {
   opacity: 0.8;
+}
+
+.weather-widget.expanded .stat,
+.weather-widget.expanded .stat-label {
+  color: white;
 }
 
 .weather-extra {

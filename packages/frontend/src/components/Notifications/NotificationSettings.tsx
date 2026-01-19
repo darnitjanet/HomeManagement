@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Mail, Clock, Bell, Calendar, CheckSquare, Sparkles, Gamepad2, Receipt, Send, Palmtree, Droplets, ShieldAlert } from 'lucide-react';
+import { X, Mail, Clock, Bell, Calendar, CheckSquare, Sparkles, Gamepad2, Receipt, Send, Palmtree, Droplets, ShieldAlert, Cake, Volume2, Camera } from 'lucide-react';
 import { useNotificationStore, useToast } from '../../stores/useNotificationStore';
 import { notificationsApi } from '../../services/api';
 import './NotificationSettings.css';
@@ -23,6 +23,9 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
     billReminders: true,
     plantWateringAlerts: true,
     warrantyExpiringAlerts: true,
+    birthdayReminders: true,
+    ttsEnabled: true,
+    motionDetectionEnabled: false,
     vacationMode: false,
     vacationStartDate: '',
     vacationEndDate: '',
@@ -51,6 +54,9 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
         billReminders: preferences.billReminders,
         plantWateringAlerts: preferences.plantWateringAlerts ?? true,
         warrantyExpiringAlerts: preferences.warrantyExpiringAlerts ?? true,
+        birthdayReminders: preferences.birthdayReminders ?? true,
+        ttsEnabled: preferences.ttsEnabled ?? true,
+        motionDetectionEnabled: preferences.motionDetectionEnabled ?? false,
         vacationMode: preferences.vacationMode || false,
         vacationStartDate: preferences.vacationStartDate || '',
         vacationEndDate: preferences.vacationEndDate || '',
@@ -342,6 +348,46 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
                 <ShieldAlert size={16} />
                 <span className="toggle-label">Warranty expiration alerts</span>
               </label>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.birthdayReminders}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, birthdayReminders: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <Cake size={16} />
+                <span className="toggle-label">Birthday reminders</span>
+              </label>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.ttsEnabled}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, ttsEnabled: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <Volume2 size={16} />
+                <span className="toggle-label">Text-to-speech announcements</span>
+              </label>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={localPrefs.motionDetectionEnabled}
+                  onChange={(e) =>
+                    setLocalPrefs({ ...localPrefs, motionDetectionEnabled: e.target.checked })
+                  }
+                />
+                <span className="toggle-slider"></span>
+                <Camera size={16} />
+                <span className="toggle-label">Motion detection wake-up</span>
+              </label>
+              <p className="settings-hint">Uses camera to wake kiosk when you approach</p>
             </div>
           </div>
 

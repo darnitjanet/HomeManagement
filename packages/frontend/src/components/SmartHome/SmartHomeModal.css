@@ -1,0 +1,551 @@
+/* Smart Home Modal */
+.smart-home-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.smart-home-modal {
+  background: #eed6aa;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.smart-home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #5b768a;
+  color: white;
+}
+
+.smart-home-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.smart-home-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.smart-home-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading and Empty States */
+.smart-home-loading,
+.smart-home-empty {
+  padding: 40px;
+  text-align: center;
+  color: #5b768a;
+}
+
+/* Not Configured State */
+.smart-home-not-configured {
+  padding: 40px;
+  text-align: center;
+}
+
+.smart-home-not-configured p {
+  margin: 0 0 16px;
+  color: #5b768a;
+}
+
+.smart-home-hint {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.smart-home-not-configured ul {
+  text-align: left;
+  max-width: 400px;
+  margin: 16px auto;
+  padding-left: 20px;
+}
+
+.smart-home-not-configured li {
+  margin: 8px 0;
+  color: #444;
+}
+
+.smart-home-not-configured code {
+  background: rgba(91, 118, 138, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+/* Tabs */
+.smart-home-tabs {
+  display: flex;
+  background: rgba(91, 118, 138, 0.1);
+  padding: 8px;
+  gap: 8px;
+}
+
+.smart-home-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #5b768a;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.smart-home-tab:hover {
+  background: rgba(91, 118, 138, 0.15);
+}
+
+.smart-home-tab.active {
+  background: #5b768a;
+  color: white;
+}
+
+/* Content Area */
+.smart-home-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.smart-home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.smart-home-section-header h3 {
+  margin: 0;
+  color: #5b768a;
+}
+
+.smart-home-refresh {
+  background: none;
+  border: 1px solid #5b768a;
+  color: #5b768a;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.smart-home-refresh:hover:not(:disabled) {
+  background: #5b768a;
+  color: white;
+}
+
+.smart-home-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.smart-home-refresh .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Govee Devices */
+.govee-devices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.govee-device-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.govee-device-card.on {
+  background: linear-gradient(135deg, #fff9e6, #fff);
+  border: 1px solid #dc9e33;
+}
+
+.govee-device-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.govee-device-header .light-on {
+  color: #dc9e33;
+  filter: drop-shadow(0 0 4px #dc9e33);
+}
+
+.govee-device-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.govee-power-btn {
+  background: #e8e8e8;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.govee-power-btn:hover {
+  background: #d0d0d0;
+}
+
+.govee-power-btn.on {
+  background: #dc9e33;
+  color: white;
+}
+
+.govee-device-controls {
+  margin-top: 12px;
+}
+
+.govee-device-controls label {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.govee-brightness-slider {
+  width: 100%;
+  margin-bottom: 4px;
+  accent-color: #dc9e33;
+}
+
+.govee-brightness-value {
+  font-size: 0.85rem;
+  color: #5b768a;
+}
+
+.govee-device-status .offline {
+  font-size: 0.8rem;
+  color: #dc3545;
+}
+
+/* Ecobee Thermostats */
+.ecobee-thermostats {
+  display: grid;
+  gap: 16px;
+}
+
+.ecobee-thermostat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ecobee-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #5b768a;
+}
+
+.ecobee-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.ecobee-offline {
+  background: #fde2e2;
+  color: #dc3545;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.ecobee-current-temp {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.ecobee-current-temp .temp-value {
+  display: block;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.ecobee-current-temp .temp-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.ecobee-target-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.target-label {
+  font-size: 1rem;
+  color: #5b768a;
+  font-weight: 500;
+}
+
+.target-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.temp-adjust {
+  background: #5b768a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.temp-adjust:hover {
+  background: #4a6577;
+}
+
+.temp-adjust:active {
+  transform: scale(0.95);
+}
+
+.ecobee-humidity {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.ecobee-mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mode-btn {
+  background: #e8e8e8;
+  border: none;
+  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.mode-btn:hover {
+  background: #d0d0d0;
+}
+
+.mode-btn.active.heat {
+  background: #da6b34;
+  color: white;
+}
+
+.mode-btn.active.cool {
+  background: #3b82f6;
+  color: white;
+}
+
+.mode-btn.active.auto {
+  background: #22c55e;
+  color: white;
+}
+
+.mode-btn.active.off {
+  background: #6b7280;
+  color: white;
+}
+
+.ecobee-running {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+/* Eufy Cameras */
+.eufy-cameras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.eufy-camera-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.eufy-camera-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #5b768a;
+  color: white;
+}
+
+.eufy-camera-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.eufy-camera-status {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.eufy-camera-status.online {
+  background: rgba(34, 197, 94, 0.2);
+  color: #166534;
+}
+
+.eufy-camera-status.offline {
+  background: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.eufy-camera-preview {
+  aspect-ratio: 16/9;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eufy-camera-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eufy-camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #666;
+}
+
+.eufy-load-snapshot {
+  background: #5b768a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.eufy-load-snapshot:hover {
+  background: #4a6577;
+}
+
+.eufy-camera-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.eufy-motion {
+  color: #da6b34;
+  font-weight: 500;
+}
+
+.eufy-refresh-snapshot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  color: #5b768a;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.eufy-refresh-snapshot:hover {
+  background: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .smart-home-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .smart-home-tabs {
+    flex-wrap: wrap;
+  }
+
+  .smart-home-tab {
+    min-width: calc(50% - 4px);
+  }
+
+  .govee-devices-grid,
+  .eufy-cameras-grid {
+    grid-template-columns: 1fr;
+  }
+}

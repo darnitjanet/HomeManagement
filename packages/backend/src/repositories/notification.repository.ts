@@ -161,6 +161,16 @@ export class NotificationRepository {
       updates.warranty_expiring_alerts = input.warrantyExpiringAlerts;
     if (input.plantWateringAlerts !== undefined)
       updates.plant_watering_alerts = input.plantWateringAlerts;
+    if (input.birthdayReminders !== undefined)
+      updates.birthday_reminders = input.birthdayReminders;
+    if (input.packageDeliveryAlerts !== undefined)
+      updates.package_delivery_alerts = input.packageDeliveryAlerts;
+    if (input.ttsEnabled !== undefined)
+      updates.tts_enabled = input.ttsEnabled;
+    if (input.ttsVolume !== undefined)
+      updates.tts_volume = input.ttsVolume;
+    if (input.motionDetectionEnabled !== undefined)
+      updates.motion_detection_enabled = input.motionDetectionEnabled;
     if (input.vacationMode !== undefined)
       updates.vacation_mode = input.vacationMode;
     if (input.vacationStartDate !== undefined)
@@ -239,6 +249,11 @@ export class NotificationRepository {
       billReminders: !!row.bill_reminders,
       warrantyExpiringAlerts: row.warranty_expiring_alerts !== false, // Default true
       plantWateringAlerts: row.plant_watering_alerts !== false, // Default true
+      birthdayReminders: row.birthday_reminders !== false, // Default true
+      packageDeliveryAlerts: row.package_delivery_alerts !== false, // Default true
+      ttsEnabled: row.tts_enabled !== false, // Default true
+      ttsVolume: row.tts_volume ?? 0.8, // Default 80%
+      motionDetectionEnabled: !!row.motion_detection_enabled, // Default false (opt-in)
       vacationMode: !!row.vacation_mode,
       vacationStartDate: row.vacation_start_date || undefined,
       vacationEndDate: row.vacation_end_date || undefined,

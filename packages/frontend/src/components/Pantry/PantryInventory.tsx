@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, AlertTriangle, ChefHat, Package } from 'lucide-react';
-import { pantryApi, recipesApi } from '../../services/api';
+import { Plus, Search, AlertTriangle, ChefHat, Package, Barcode, Undo2, ShoppingCart } from 'lucide-react';
+import { pantryApi, recipesApi, shoppingApi } from '../../services/api';
 import { PantryItemForm } from './PantryItemForm';
+import { QuickScanModal } from './QuickScanModal';
 import './Pantry.css';
 
 interface PantryItem {
@@ -62,8 +63,16 @@ export function PantryInventory() {
   const [filterLocation, setFilterLocation] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'location'>('grid');
   const [showForm, setShowForm] = useState(false);
+  const [showQuickScan, setShowQuickScan] = useState(false);
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
   const [suggestingRecipes, setSuggestingRecipes] = useState(false);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info'; action?: () => void; actionLabel?: string } | null>(null);
+
+  // Undo state for deleted items
+  const [deletedItem, setDeletedItem] = useState<PantryItem | null>(null);
+  const [undoTimeout, setUndoTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadData();
@@ -123,12 +132,86 @@ export function PantryInventory() {
   };
 
   const handleDeleteItem = async (id: number) => {
-    if (!confirm('Delete this item?')) return;
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // Clear any existing undo timeout
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+
     try {
+      // Delete from pantry
       await pantryApi.deleteItem(id);
+
+      // Add to shopping list automatically
+      await shoppingApi.addItem('grocery', {
+        name: item.name,
+        quantity: 1,
+        category: item.category || undefined,
+      });
+
+      // Store deleted item for potential undo
+      setDeletedItem(item);
+
+      // Show toast with undo option
+      setToast({
+        message: `"${item.name}" added to shopping list`,
+        type: 'success',
+        action: () => handleUndoDelete(item),
+        actionLabel: 'Undo',
+      });
+
+      // Auto-hide toast after 5 seconds
+      const timeout = setTimeout(() => {
+        setToast(null);
+        setDeletedItem(null);
+      }, 5000);
+      setUndoTimeout(timeout);
+
       loadData();
     } catch (err) {
       console.error('Failed to delete item:', err);
+    }
+  };
+
+  const handleUndoDelete = async (item: PantryItem) => {
+    try {
+      // Re-add to pantry
+      await pantryApi.createItem({
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit || undefined,
+        category: item.category || undefined,
+        location: item.location || undefined,
+        expirationDate: item.expirationDate || undefined,
+        lowStockThreshold: item.lowStockThreshold || undefined,
+        notes: item.notes || undefined,
+      });
+
+      // Remove from shopping list (find and remove by name)
+      const shoppingRes = await shoppingApi.getItems('grocery');
+      if (shoppingRes.data.success) {
+        const shoppingItem = shoppingRes.data.data.find(
+          (si: any) => si.name.toLowerCase() === item.name.toLowerCase()
+        );
+        if (shoppingItem) {
+          await shoppingApi.removeItem('grocery', shoppingItem.id);
+        }
+      }
+
+      setToast({ message: `"${item.name}" restored to pantry`, type: 'info' });
+      setTimeout(() => setToast(null), 3000);
+
+      setDeletedItem(null);
+      if (undoTimeout) {
+        clearTimeout(undoTimeout);
+        setUndoTimeout(null);
+      }
+
+      loadData();
+    } catch (err) {
+      console.error('Failed to undo delete:', err);
     }
   };
 
@@ -226,6 +309,9 @@ export function PantryInventory() {
       <div className="pantry-actions">
         <button className="action-btn primary" onClick={handleAddItem}>
           <Plus size={18} /> Add Item
+        </button>
+        <button className="action-btn" onClick={() => setShowQuickScan(true)}>
+          <Barcode size={18} /> Quick Scan
         </button>
         <button
           className="action-btn"
@@ -361,6 +447,31 @@ export function PantryInventory() {
           onClose={() => { setShowForm(false); setEditingItem(null); }}
           onSave={handleFormSave}
         />
+      )}
+
+      {/* Quick scan modal */}
+      {showQuickScan && (
+        <QuickScanModal
+          onClose={() => setShowQuickScan(false)}
+          onComplete={loadData}
+        />
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`pantry-toast ${toast.type}`}>
+          <ShoppingCart size={18} />
+          <span>{toast.message}</span>
+          {toast.action && toast.actionLabel && (
+            <button className="toast-action" onClick={toast.action}>
+              <Undo2 size={16} />
+              {toast.actionLabel}
+            </button>
+          )}
+          <button className="toast-dismiss" onClick={() => setToast(null)}>
+            &times;
+          </button>
+        </div>
       )}
     </div>
   );

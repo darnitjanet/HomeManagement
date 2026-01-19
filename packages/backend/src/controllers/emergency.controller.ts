@@ -15,6 +15,17 @@ export async function getAllEmergencyContacts(req: Request, res: Response) {
   }
 }
 
+export async function getUpcomingBirthdays(req: Request, res: Response) {
+  try {
+    const days = parseInt(req.query.days as string) || 7;
+    const contacts = await emergencyRepo.getContactsWithUpcomingBirthdays(days);
+    res.json({ success: true, data: contacts });
+  } catch (error: any) {
+    console.error('Get upcoming birthdays error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 export async function createEmergencyContact(req: Request, res: Response) {
   try {
     const contact = await emergencyRepo.createEmergencyContact(req.body);

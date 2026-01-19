@@ -72,24 +72,43 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
           >
             Contacts
           </button>
-          <button
-            className={currentPage === 'tasks' ? 'active' : ''}
-            onClick={() => onNavigate('tasks')}
+          <div
+            className="nav-dropdown"
+            onMouseEnter={() => setShowInventoryMenu(true)}
+            onMouseLeave={() => setShowInventoryMenu(false)}
           >
-            Tasks
-          </button>
-          <button
-            className={currentPage === 'shopping' ? 'active' : ''}
-            onClick={() => onNavigate('shopping')}
-          >
-            Shopping
-          </button>
-          <button
-            className={currentPage === 'recipes' ? 'active' : ''}
-            onClick={() => onNavigate('recipes')}
-          >
-            Recipes
-          </button>
+            <button className={`dropdown-trigger ${isInventoryPage ? 'active' : ''}`}>
+              Inventory <ChevronDown size={14} />
+            </button>
+            {showInventoryMenu && (
+              <div className="dropdown-menu">
+                <button
+                  className={currentPage === 'books' ? 'active' : ''}
+                  onClick={() => handleInventoryClick('books')}
+                >
+                  Books
+                </button>
+                <button
+                  className={currentPage === 'games' ? 'active' : ''}
+                  onClick={() => handleInventoryClick('games')}
+                >
+                  Games
+                </button>
+                <button
+                  className={currentPage === 'assets' ? 'active' : ''}
+                  onClick={() => handleInventoryClick('assets')}
+                >
+                  Home Assets
+                </button>
+                <button
+                  className={currentPage === 'movies' ? 'active' : ''}
+                  onClick={() => handleInventoryClick('movies')}
+                >
+                  Movies
+                </button>
+              </div>
+            )}
+          </div>
           <button
             className={currentPage === 'kids' ? 'active' : ''}
             onClick={() => onNavigate('kids')}
@@ -103,48 +122,29 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
             Mood
           </button>
           <button
+            className={currentPage === 'recipes' ? 'active' : ''}
+            onClick={() => onNavigate('recipes')}
+          >
+            Recipes
+          </button>
+          <button
+            className={currentPage === 'shopping' ? 'active' : ''}
+            onClick={() => onNavigate('shopping')}
+          >
+            Shopping
+          </button>
+          <button
+            className={currentPage === 'tasks' ? 'active' : ''}
+            onClick={() => onNavigate('tasks')}
+          >
+            Tasks
+          </button>
+          <button
             className={currentPage === 'travel' ? 'active' : ''}
             onClick={() => onNavigate('travel')}
           >
             Travel
           </button>
-          <div
-            className="nav-dropdown"
-            onMouseEnter={() => setShowInventoryMenu(true)}
-            onMouseLeave={() => setShowInventoryMenu(false)}
-          >
-            <button className={`dropdown-trigger ${isInventoryPage ? 'active' : ''}`}>
-              Inventory <ChevronDown size={14} />
-            </button>
-            {showInventoryMenu && (
-              <div className="dropdown-menu">
-                <button
-                  className={currentPage === 'movies' ? 'active' : ''}
-                  onClick={() => handleInventoryClick('movies')}
-                >
-                  Movies
-                </button>
-                <button
-                  className={currentPage === 'games' ? 'active' : ''}
-                  onClick={() => handleInventoryClick('games')}
-                >
-                  Games
-                </button>
-                <button
-                  className={currentPage === 'books' ? 'active' : ''}
-                  onClick={() => handleInventoryClick('books')}
-                >
-                  Books
-                </button>
-                <button
-                  className={currentPage === 'assets' ? 'active' : ''}
-                  onClick={() => handleInventoryClick('assets')}
-                >
-                  Home Assets
-                </button>
-              </div>
-            )}
-          </div>
         </nav>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Star, Trash2 } from 'lucide-react';
+import { Pencil, Star, Trash2, Cake } from 'lucide-react';
 import { contactsApi } from '../../services/api';
 import './ContactCard.css';
 
@@ -13,6 +13,7 @@ export interface Contact {
   phones?: Array<{ value: string; type?: string }>;
   photoUrl?: string;
   notes?: string;
+  birthday?: string;
   isFavorite: boolean;
   lastSyncedAt?: string;
   createdAt: string;
@@ -48,6 +49,7 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
   const [editEmail, setEditEmail] = useState(contact.emails?.[0]?.value || '');
   const [editPhone, setEditPhone] = useState(contact.phones?.[0]?.value || '');
   const [editNotes, setEditNotes] = useState(contact.notes || '');
+  const [editBirthday, setEditBirthday] = useState(contact.birthday || '');
 
   const handleToggleFavorite = async () => {
     setIsUpdating(true);
@@ -126,6 +128,12 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
       return;
     }
 
+    // Validate birthday format if provided
+    if (editBirthday.trim() && !/^\d{2}-\d{2}$/.test(editBirthday.trim())) {
+      alert('Birthday must be in MM-DD format (e.g., 03-15)');
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const emails = editEmail.trim() ? [{ value: editEmail.trim() }] : [];
@@ -139,6 +147,11 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
         phones,
         notes: editNotes.trim() || undefined,
       });
+
+      // Update birthday separately (it syncs to Google)
+      if (editBirthday.trim() !== (contact.birthday || '')) {
+        await contactsApi.updateBirthday(contact.id, editBirthday.trim() || null);
+      }
 
       setIsEditingContact(false);
       onUpdate();
@@ -157,6 +170,7 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
     setEditEmail(contact.emails?.[0]?.value || '');
     setEditPhone(contact.phones?.[0]?.value || '');
     setEditNotes(contact.notes || '');
+    setEditBirthday(contact.birthday || '');
     setIsEditingContact(false);
   };
 
@@ -184,32 +198,12 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
           {contact.phones && contact.phones.length > 0 && (
             <div className="contact-phone">{contact.phones[0].value}</div>
           )}
-        </div>
-        <div className="contact-actions">
-          <button
-            className="edit-button"
-            onClick={() => setIsEditingContact(true)}
-            disabled={isUpdating}
-            title="Edit contact"
-          >
-            <Pencil size={18} />
-          </button>
-          <button
-            className={`favorite-button ${contact.isFavorite ? 'active' : ''}`}
-            onClick={handleToggleFavorite}
-            disabled={isUpdating}
-            title="Toggle favorite"
-          >
-            <Star size={18} fill={contact.isFavorite ? 'currentColor' : 'none'} />
-          </button>
-          <button
-            className="delete-button"
-            onClick={handleDeleteContact}
-            disabled={isUpdating}
-            title="Delete contact"
-          >
-            <Trash2 size={18} />
-          </button>
+          {contact.birthday && (
+            <div className="contact-birthday">
+              <Cake size={14} />
+              <span>{contact.birthday}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -251,6 +245,13 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
             placeholder="Phone"
             value={editPhone}
             onChange={(e) => setEditPhone(e.target.value)}
+            disabled={isUpdating}
+          />
+          <input
+            type="text"
+            placeholder="Birthday (MM-DD)"
+            value={editBirthday}
+            onChange={(e) => setEditBirthday(e.target.value)}
             disabled={isUpdating}
           />
           <textarea
@@ -379,6 +380,33 @@ export function ContactCard({ contact, availableTags, onUpdate }: ContactCardPro
             )}
           </div>
         )}
+      </div>
+
+      <div className="contact-actions">
+        <button
+          className="action-btn edit"
+          onClick={() => setIsEditingContact(true)}
+          disabled={isUpdating}
+          title="Edit contact"
+        >
+          <Pencil size={18} />
+        </button>
+        <button
+          className={`action-btn favorite ${contact.isFavorite ? 'active' : ''}`}
+          onClick={handleToggleFavorite}
+          disabled={isUpdating}
+          title="Toggle favorite"
+        >
+          <Star size={18} fill={contact.isFavorite ? 'currentColor' : 'none'} />
+        </button>
+        <button
+          className="action-btn delete"
+          onClick={handleDeleteContact}
+          disabled={isUpdating}
+          title="Delete contact"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
     </div>
   );

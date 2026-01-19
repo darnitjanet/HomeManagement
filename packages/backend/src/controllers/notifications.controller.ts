@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { NotificationService } from '../services/notification.service';
 import { EmailService } from '../services/email.service';
+import { triggerPackageEmailSync, triggerAppointmentEmailSync } from '../schedulers/notification.scheduler';
 
 const notificationService = new NotificationService();
 const emailService = new EmailService();
@@ -245,6 +246,15 @@ export async function triggerNotificationCheck(req: Request, res: Response) {
     const choresCreated = await notificationService.generateChoreDueNotifications();
     const gamesCreated = await notificationService.generateGameOverdueNotifications();
     const calendarCreated = await notificationService.generateCalendarReminders();
+    const warrantyCreated = await notificationService.generateWarrantyExpiringNotifications();
+    const plantCreated = await notificationService.generatePlantWateringNotifications();
+    const birthdayCreated = await notificationService.generateBirthdayNotifications();
+    const seasonalCreated = await notificationService.generateSeasonalTaskNotifications();
+    const packageCreated = await notificationService.generatePackageDeliveryNotifications();
+
+    // Also trigger email sync for packages and appointments
+    await triggerPackageEmailSync();
+    await triggerAppointmentEmailSync();
 
     res.json({
       success: true,
@@ -255,6 +265,11 @@ export async function triggerNotificationCheck(req: Request, res: Response) {
           chores: choresCreated,
           games: gamesCreated,
           calendar: calendarCreated,
+          warranties: warrantyCreated,
+          plants: plantCreated,
+          birthdays: birthdayCreated,
+          seasonal: seasonalCreated,
+          packages: packageCreated,
         },
       },
     });

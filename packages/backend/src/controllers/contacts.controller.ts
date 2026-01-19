@@ -623,3 +623,92 @@ export async function getSyncLogs(req: Request, res: Response) {
     });
   }
 }
+
+/**
+ * Get contacts with upcoming birthdays
+ */
+export async function getUpcomingBirthdays(req: Request, res: Response) {
+  try {
+    const days = parseInt(req.query.days as string) || 7;
+    const contactRepo = new ContactRepository();
+    const contacts = await contactRepo.getContactsWithUpcomingBirthdays(days);
+
+    res.json({
+      success: true,
+      data: contacts,
+    });
+  } catch (error: any) {
+    console.error('Get upcoming birthdays error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve upcoming birthdays',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Update contact birthday
+ */
+export async function updateBirthday(req: Request, res: Response) {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const { id } = req.params;
+    const { birthday } = req.body;
+
+    // Validate birthday format (MM-DD)
+    if (birthday && !/^\d{2}-\d{2}$/.test(birthday)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid birthday format. Use MM-DD (e.g., 03-15)',
+      });
+    }
+
+    const contactRepo = new ContactRepository();
+    const contact = await contactRepo.getContact(parseInt(id));
+
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        error: 'Contact not found',
+      });
+    }
+
+    // Update locally first
+    await contactRepo.updateContact(parseInt(id), { birthday: birthday || null });
+
+    // If authenticated and contact is synced with Google, update in Google too
+    if (contact.googleContactId && authReq.googleAuth) {
+      try {
+        const { GoogleContactsService } = await import('../services/google-contacts.service');
+        const googleService = new GoogleContactsService(authReq.googleAuth);
+
+        // Get current contact from Google to get the etag
+        const googleContact = await googleService.getContact(contact.googleContactId);
+
+        // Update birthday in Google
+        await googleService.updateContact(contact.googleContactId, {
+          birthday: birthday || undefined,
+          etag: googleContact.etag,
+        });
+
+        console.log(`✅ Synced birthday to Google for contact ${contact.displayName}`);
+      } catch (syncError: any) {
+        console.warn('Failed to sync birthday to Google:', syncError.message);
+        // Local update still succeeded
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Birthday updated',
+    });
+  } catch (error: any) {
+    console.error('Update birthday error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update birthday',
+      message: error.message,
+    });
+  }
+}

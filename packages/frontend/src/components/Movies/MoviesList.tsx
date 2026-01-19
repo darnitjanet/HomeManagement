@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, List } from 'lucide-react';
 import { moviesApi } from '../../services/api';
 import { OMDbSearchModal } from './OMDbSearchModal';
 import { MovieForm } from './MovieForm';
+import { Watchlist } from './Watchlist';
 import './MoviesList.css';
 
 interface Movie {
@@ -45,6 +46,7 @@ export function MoviesList() {
   const [showOMDbModal, setShowOMDbModal] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
+  const [showWatchlist, setShowWatchlist] = useState(false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -179,6 +181,10 @@ export function MoviesList() {
     }
   }, [selectedGenre, selectedRating, selectedWatchedStatus, selectedFormat, selectedMpaaRating]);
 
+  if (showWatchlist) {
+    return <Watchlist onBack={() => setShowWatchlist(false)} />;
+  }
+
   if (loading && movies.length === 0) {
     return (
       <div className="movies-loading">
@@ -201,6 +207,10 @@ export function MoviesList() {
           </button>
           <button className="secondary" onClick={() => setShowManualForm(true)}>
             + Add Manually
+          </button>
+          <button className="watchlist-btn" onClick={() => setShowWatchlist(true)}>
+            <List size={18} />
+            My Watchlist
           </button>
         </div>
       </div>

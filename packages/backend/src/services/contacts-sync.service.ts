@@ -100,6 +100,7 @@ export class ContactsSyncService {
             phones: this.googleContactsService.extractPhones(googleContact),
             photoUrl: this.googleContactsService.extractPhotoUrl(googleContact),
             notes: this.googleContactsService.extractNotes(googleContact),
+            birthday: this.googleContactsService.extractBirthday(googleContact),
             rawData: JSON.stringify(googleContact),
             isFavorite: false,
             lastSyncedAt: new Date().toISOString(),
