@@ -13,7 +13,6 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
   const [activeInput, setActiveInput] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [layoutName, setLayoutName] = useState('default');
-  const [showButton, setShowButton] = useState(true);
 
   const handleKeyPress = useCallback((button: string) => {
     if (!activeInput) return;
@@ -77,7 +76,6 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
         }
         setActiveInput(inputEl);
         setIsVisible(true);
-        setShowButton(false);
       }
     };
 
@@ -148,7 +146,6 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
       if (!['file', 'checkbox', 'radio', 'submit', 'button', 'hidden', 'range'].includes(inputType)) {
         setActiveInput(focused as HTMLInputElement | HTMLTextAreaElement);
         setIsVisible(true);
-        setShowButton(false);
         return;
       }
     }
@@ -164,20 +161,18 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
           el.focus();
           setActiveInput(el);
           setIsVisible(true);
-          setShowButton(false);
           return;
         }
       }
     }
     // No input found, still show keyboard (user can tap an input after)
     setIsVisible(true);
-    setShowButton(false);
   }, []);
 
   return (
     <>
-      {/* Floating keyboard button */}
-      {showButton && !isVisible && (
+      {/* Floating keyboard button - always visible when keyboard is hidden */}
+      {!isVisible && (
         <button
           className="keyboard-toggle-btn"
           onClick={handleShowKeyboard}
@@ -200,7 +195,6 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
               onClick={() => {
                 setIsVisible(false);
                 setActiveInput(null);
-                setShowButton(true);
                 onClose?.();
               }}
             >
