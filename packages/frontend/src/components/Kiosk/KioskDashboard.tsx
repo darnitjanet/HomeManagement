@@ -937,12 +937,22 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
   const loadEvents = async () => {
     try {
-      // Get today's date range
+      // Get today's date range in local timezone
       const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-      const startStr = startOfDay.toISOString().split('T')[0];
-      const endStr = endOfDay.toISOString().split('T')[0];
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const date = today.getDate();
+
+      // Create start/end times explicitly in local timezone
+      const startOfDay = new Date(year, month, date, 0, 0, 0);
+      const endOfDay = new Date(year, month, date, 23, 59, 59);
+
+      // Format as YYYY-MM-DD for external calendars (use local date, not UTC)
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const startStr = `${year}-${pad(month + 1)}-${pad(date)}`;
+      const endStr = startStr; // Same day
+
+      console.log('[Kiosk Calendar] Fetching events for:', startStr, 'Local time:', today.toString());
 
       const allEvents: CalendarEvent[] = [];
 
