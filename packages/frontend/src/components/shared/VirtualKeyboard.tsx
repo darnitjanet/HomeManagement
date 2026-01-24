@@ -143,15 +143,33 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
     // Find the currently focused input or the first input on the page
     const focused = document.activeElement as HTMLElement;
     if (focused?.tagName === 'INPUT' || focused?.tagName === 'TEXTAREA') {
-      setActiveInput(focused as HTMLInputElement | HTMLTextAreaElement);
-    } else {
-      // Find the first visible text input
-      const firstInput = document.querySelector('input[type="text"], input[type="search"], input:not([type]), textarea') as HTMLInputElement | HTMLTextAreaElement;
-      if (firstInput) {
-        firstInput.focus();
-        setActiveInput(firstInput);
+      const inputType = (focused as HTMLInputElement).type;
+      // Only use if it's a text-like input
+      if (!['file', 'checkbox', 'radio', 'submit', 'button', 'hidden', 'range'].includes(inputType)) {
+        setActiveInput(focused as HTMLInputElement | HTMLTextAreaElement);
+        setIsVisible(true);
+        setShowButton(false);
+        return;
       }
     }
+    // Find the first visible text-like input
+    const allInputs = document.querySelectorAll('input, textarea');
+    for (const input of allInputs) {
+      const el = input as HTMLInputElement;
+      const inputType = el.type || 'text';
+      if (!['file', 'checkbox', 'radio', 'submit', 'button', 'hidden', 'range'].includes(inputType)) {
+        // Check if visible
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          el.focus();
+          setActiveInput(el);
+          setIsVisible(true);
+          setShowButton(false);
+          return;
+        }
+      }
+    }
+    // No input found, still show keyboard (user can tap an input after)
     setIsVisible(true);
     setShowButton(false);
   }, []);
