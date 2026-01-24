@@ -61,7 +61,8 @@
 .notification-dropdown {
   position: fixed;
   top: 70px;
-  right: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   width: min(360px, calc(100vw - 32px));
   max-height: calc(100vh - 100px);
   background: white;
