@@ -22,6 +22,7 @@ import { HomePage } from './components/HomePage/HomePage';
 import { Header } from './components/Navigation/Header';
 import { KioskDashboard } from './components/Kiosk/KioskDashboard';
 import { ToastContainer } from './components/Notifications';
+import { VirtualKeyboard } from './components/shared/VirtualKeyboard';
 import { authApi } from './services/api';
 import { useCalendarStore } from './stores/useCalendarStore';
 import './App.css';
@@ -128,6 +129,7 @@ function App() {
         {currentPage === 'packages' && <PackagesList />}
       </main>
       <ToastContainer />
+      <VirtualKeyboard />
     </div>
   );
 }
