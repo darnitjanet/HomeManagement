@@ -13,6 +13,7 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
   const [activeInput, setActiveInput] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [layoutName, setLayoutName] = useState('default');
+  const [showButton, setShowButton] = useState(true);
 
   const handleKeyPress = useCallback((button: string) => {
     if (!activeInput) return;
@@ -76,6 +77,7 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
         }
         setActiveInput(inputEl);
         setIsVisible(true);
+        setShowButton(false);
       }
     };
 
@@ -137,23 +139,59 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
     };
   }, [isVisible, handleKeyPress, layoutName]);
 
-  if (!isVisible) return null;
+  const handleShowKeyboard = useCallback(() => {
+    // Find the currently focused input or the first input on the page
+    const focused = document.activeElement as HTMLElement;
+    if (focused?.tagName === 'INPUT' || focused?.tagName === 'TEXTAREA') {
+      setActiveInput(focused as HTMLInputElement | HTMLTextAreaElement);
+    } else {
+      // Find the first visible text input
+      const firstInput = document.querySelector('input[type="text"], input[type="search"], input:not([type]), textarea') as HTMLInputElement | HTMLTextAreaElement;
+      if (firstInput) {
+        firstInput.focus();
+        setActiveInput(firstInput);
+      }
+    }
+    setIsVisible(true);
+    setShowButton(false);
+  }, []);
 
   return (
-    <div className="virtual-keyboard-overlay" ref={containerRef}>
-      <div className="virtual-keyboard-wrapper">
+    <>
+      {/* Floating keyboard button */}
+      {showButton && !isVisible && (
         <button
-          className="keyboard-close-btn"
-          onClick={() => {
-            setIsVisible(false);
-            setActiveInput(null);
-            onClose?.();
+          className="keyboard-toggle-btn"
+          onClick={handleShowKeyboard}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleShowKeyboard();
           }}
+          aria-label="Show keyboard"
         >
-          ✕
+          ⌨
         </button>
-        <div className="keyboard-container"></div>
-      </div>
-    </div>
+      )}
+
+      {/* Virtual keyboard overlay */}
+      {isVisible && (
+        <div className="virtual-keyboard-overlay" ref={containerRef}>
+          <div className="virtual-keyboard-wrapper">
+            <button
+              className="keyboard-close-btn"
+              onClick={() => {
+                setIsVisible(false);
+                setActiveInput(null);
+                setShowButton(true);
+                onClose?.();
+              }}
+            >
+              ✕
+            </button>
+            <div className="keyboard-container"></div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
