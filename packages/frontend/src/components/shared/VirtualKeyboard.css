@@ -1,0 +1,87 @@
+.virtual-keyboard-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: #f0f0f0;
+  border-top: 2px solid #5b768a;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.virtual-keyboard-wrapper {
+  position: relative;
+  max-width: 100%;
+  padding: 8px;
+}
+
+.keyboard-close-btn {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #da6b34;
+  color: white;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboard-close-btn:hover {
+  background: #c45a28;
+}
+
+.keyboard-container {
+  padding-top: 8px;
+}
+
+/* Override simple-keyboard styles */
+.simple-keyboard {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.simple-keyboard .hg-button {
+  height: 50px !important;
+  font-size: 18px !important;
+  background: white !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.simple-keyboard .hg-button:active,
+.simple-keyboard .hg-button:hover {
+  background: #eed6aa !important;
+}
+
+.simple-keyboard .hg-button-space {
+  min-width: 300px !important;
+}
+
+.simple-keyboard .hg-button-bksp,
+.simple-keyboard .hg-button-enter,
+.simple-keyboard .hg-button-shift {
+  background: #5b768a !important;
+  color: white !important;
+}
+
+.simple-keyboard .hg-button-bksp:active,
+.simple-keyboard .hg-button-enter:active,
+.simple-keyboard .hg-button-shift:active {
+  background: #4a6579 !important;
+}
+
+/* For touch devices - larger hit targets */
+@media (pointer: coarse) {
+  .simple-keyboard .hg-button {
+    height: 55px !important;
+    font-size: 20px !important;
+  }
+}
