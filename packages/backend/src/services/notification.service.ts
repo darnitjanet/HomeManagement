@@ -321,7 +321,7 @@ export class NotificationService {
       const existing = await this.notificationRepo.findByEntity('todo', task.id);
       const today = new Date().toISOString().split('T')[0];
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today
+        (n) => n.createdAt.substring(0, 10) === today
       );
 
       if (!hasRecentNotification) {
@@ -356,7 +356,7 @@ export class NotificationService {
       const existing = await this.notificationRepo.findByEntity('chore', chore.id);
       const today = new Date().toISOString().split('T')[0];
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today
+        (n) => n.createdAt.substring(0, 10) === today
       );
 
       if (!hasRecentNotification) {
@@ -429,7 +429,7 @@ export class NotificationService {
       const existing = await this.notificationRepo.findByEntity('asset', asset.id);
       const today = new Date().toISOString().split('T')[0];
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today && n.type === 'warranty_expiring'
+        (n) => n.createdAt.substring(0, 10) === today && n.type === 'warranty_expiring'
       );
 
       if (!hasRecentNotification) {
@@ -515,7 +515,7 @@ export class NotificationService {
       // Check if we already have a notification for this package today
       const existing = await this.notificationRepo.findByEntity('package', pkg.id);
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today && n.type === 'package_delivery'
+        (n) => n.createdAt.substring(0, 10) === today && n.type === 'package_delivery'
       );
 
       if (!hasRecentNotification) {
@@ -559,7 +559,7 @@ export class NotificationService {
       const existing = await this.notificationRepo.findByEntity('contact', contact.id);
       const today = new Date().toISOString().split('T')[0];
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today && n.type === 'birthday_reminder'
+        (n) => n.createdAt.substring(0, 10) === today && n.type === 'birthday_reminder'
       );
 
       if (!hasRecentNotification) {
@@ -620,7 +620,7 @@ export class NotificationService {
       const existing = await this.notificationRepo.findByEntity('seasonal_task', task.id);
       const today = new Date().toISOString().split('T')[0];
       const hasRecentNotification = existing.some(
-        (n) => n.createdAt.split('T')[0] === today && n.type === 'seasonal_task'
+        (n) => n.createdAt.substring(0, 10) === today && n.type === 'seasonal_task'
       );
 
       if (!hasRecentNotification) {
