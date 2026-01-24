@@ -3,7 +3,6 @@
   border-bottom: 3px solid var(--slate-700);
   padding: 16px 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
@@ -21,6 +20,9 @@
 }
 
 .header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,6 +32,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-left: auto;
 }
 
 .home-button {
