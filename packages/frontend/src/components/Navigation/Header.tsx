@@ -148,21 +148,23 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
         </nav>
       </div>
 
-      <SmartInput />
+      <div className="header-center">
+        <NotificationBell />
+      </div>
 
-      <WeatherWidget compact />
-
-      <NotificationBell />
-
-      {isAuthenticated ? (
-        <button className="logout-button outline" onClick={handleLogout}>
-          Logout
-        </button>
-      ) : (
-        <button className="login-button primary" onClick={handleLogin}>
-          Login with Google
-        </button>
-      )}
+      <div className="header-right">
+        <SmartInput />
+        <WeatherWidget compact />
+        {isAuthenticated ? (
+          <button className="logout-button outline" onClick={handleLogout}>
+            Logout
+          </button>
+        ) : (
+          <button className="login-button primary" onClick={handleLogin}>
+            Login with Google
+          </button>
+        )}
+      </div>
     </header>
   );
 }

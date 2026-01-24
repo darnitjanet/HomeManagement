@@ -20,6 +20,18 @@
   flex-wrap: wrap;
 }
 
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .home-button {
   background: transparent;
   border: none;
