@@ -30,7 +30,9 @@ import './App.css';
 function App() {
   const { isAuthenticated, setAuthenticated } = useCalendarStore();
   const [checking, setChecking] = useState(true);
-  const [currentPage, setCurrentPage] = useState('home');
+  // Check URL for kiosk mode on initial load
+  const initialPage = window.location.pathname === '/kiosk' ? 'kiosk' : 'home';
+  const [currentPage, setCurrentPage] = useState(initialPage);
 
   useEffect(() => {
     checkAuthStatus();
