@@ -1302,6 +1302,30 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         )}
 
         <button
+          className="kiosk-control-btn keyboard-btn"
+          onClick={() => {
+            // Create and focus a temporary input to trigger the virtual keyboard
+            const tempInput = document.createElement('input');
+            tempInput.type = 'text';
+            tempInput.style.position = 'fixed';
+            tempInput.style.bottom = '100px';
+            tempInput.style.left = '50%';
+            tempInput.style.transform = 'translateX(-50%)';
+            tempInput.style.fontSize = '18px';
+            tempInput.style.padding = '12px';
+            tempInput.style.zIndex = '9998';
+            tempInput.style.border = '2px solid #5b768a';
+            tempInput.style.borderRadius = '8px';
+            tempInput.placeholder = 'Type here...';
+            document.body.appendChild(tempInput);
+            tempInput.focus();
+          }}
+          title="Show Keyboard"
+        >
+          ⌨
+        </button>
+
+        <button
           className="kiosk-control-btn timer-btn"
           onClick={() => setShowTimerModal(true)}
           title="Set Timer"
