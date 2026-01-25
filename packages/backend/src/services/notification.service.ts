@@ -317,6 +317,11 @@ export class NotificationService {
     let count = 0;
 
     for (const task of tasks) {
+      // Skip subtasks - only notify for parent tasks
+      if (task.parent_id) {
+        continue;
+      }
+
       // Check if we already have a notification for this task today
       const existing = await this.notificationRepo.findByEntity('todo', task.id);
       const today = new Date().toISOString().split('T')[0];
@@ -732,10 +737,10 @@ export class NotificationService {
       tomorrow
     );
 
-    // Get tasks due today
+    // Get tasks due today (excluding subtasks)
     const tasks = await todoRepo.getTodaysTodos();
     const tasksDueToday = tasks
-      .filter((t) => t.due_date === today.toISOString().split('T')[0])
+      .filter((t) => !t.parent_id && t.due_date === today.toISOString().split('T')[0])
       .map((t) => ({
         id: t.id,
         title: t.title,

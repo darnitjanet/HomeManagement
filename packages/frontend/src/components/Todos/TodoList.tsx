@@ -95,11 +95,21 @@ export function TodoList() {
     due_date: '',
     context: 'anywhere',
   });
+  const [autoBreakdown, setAutoBreakdown] = useState(false);
+  const [creatingTask, setCreatingTask] = useState(false);
 
   useEffect(() => {
     loadTodos();
     checkAIStatus();
   }, [showCompleted]);
+
+  // Auto-expand subtasks by default
+  useEffect(() => {
+    const parentsWithSubtasks = Object.keys(subtasks).map(Number);
+    if (parentsWithSubtasks.length > 0) {
+      setExpandedTodos(new Set(parentsWithSubtasks));
+    }
+  }, [subtasks]);
 
   const checkAIStatus = async () => {
     try {
@@ -145,6 +155,7 @@ export function TodoList() {
   const handleAddTodo = async () => {
     if (!newTodo.title.trim()) return;
 
+    setCreatingTask(true);
     try {
       const response = await todosApi.createTodo({
         title: newTodo.title.trim(),
@@ -159,7 +170,28 @@ export function TodoList() {
       });
 
       if (response.data.success) {
-        setTodos([response.data.data, ...todos]);
+        const createdTodo = response.data.data;
+        setTodos([createdTodo, ...todos]);
+
+        // Auto-breakdown if checkbox was checked
+        if (autoBreakdown && aiEnabled) {
+          setBreakingDown(createdTodo.id);
+          try {
+            const breakdownResponse = await todosApi.breakdownTask(createdTodo.id);
+            if (breakdownResponse.data.success) {
+              setSubtasks((prev) => ({
+                ...prev,
+                [createdTodo.id]: breakdownResponse.data.data,
+              }));
+              setExpandedTodos((prev) => new Set([...prev, createdTodo.id]));
+            }
+          } catch (error) {
+            console.error('Failed to auto-breakdown task:', error);
+          } finally {
+            setBreakingDown(null);
+          }
+        }
+
         setNewTodo({
           title: '',
           description: '',
@@ -169,10 +201,13 @@ export function TodoList() {
           due_date: '',
           context: 'anywhere',
         });
+        setAutoBreakdown(false);
         setShowAddForm(false);
       }
     } catch (error) {
       console.error('Failed to create todo:', error);
+    } finally {
+      setCreatingTask(false);
     }
   };
 
@@ -378,11 +413,22 @@ export function TodoList() {
           </div>
 
           <div className="form-actions">
+            {aiEnabled && (
+              <label className="auto-breakdown-checkbox">
+                <input
+                  type="checkbox"
+                  checked={autoBreakdown}
+                  onChange={(e) => setAutoBreakdown(e.target.checked)}
+                />
+                <Sparkles size={14} />
+                Break down with AI
+              </label>
+            )}
             <button className="cancel-btn" onClick={() => setShowAddForm(false)}>
               Cancel
             </button>
-            <button className="save-btn" onClick={handleAddTodo}>
-              Add Task
+            <button className="save-btn" onClick={handleAddTodo} disabled={creatingTask}>
+              {creatingTask ? (autoBreakdown ? 'Creating & Breaking Down...' : 'Creating...') : 'Add Task'}
             </button>
           </div>
         </div>

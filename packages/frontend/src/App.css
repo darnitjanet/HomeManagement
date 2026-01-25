@@ -14,6 +14,7 @@
   -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on touch */
   scroll-behavior: smooth;
   overscroll-behavior: contain; /* Prevent pull-to-refresh */
+  touch-action: pan-y; /* Allow vertical touch scrolling */
 }
 
 /* Global touch scrolling improvements */

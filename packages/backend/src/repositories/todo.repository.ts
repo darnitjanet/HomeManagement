@@ -87,20 +87,30 @@ export async function getTodaysTodos(): Promise<Todo[]> {
     .orderBy('sort_order', 'asc');
 }
 
-// Get top priority todos for kiosk display (limited, not snoozed)
-export async function getKioskTodos(limit = 5): Promise<Todo[]> {
+// Extended Todo type with subtask counts for kiosk
+export interface KioskTodo extends Todo {
+  subtask_count: number;
+  completed_subtask_count: number;
+}
+
+// Get top priority todos for kiosk display (limited, not snoozed, with subtask counts)
+export async function getKioskTodos(limit = 5): Promise<KioskTodo[]> {
   const now = new Date().toISOString();
 
-  return db('todos')
-    .select('*')
-    .whereNull('completed_at')
-    .whereNull('parent_id') // Only top-level tasks for kiosk
+  return db('todos as t')
+    .select(
+      't.*',
+      db.raw('(SELECT COUNT(*) FROM todos WHERE parent_id = t.id) as subtask_count'),
+      db.raw('(SELECT COUNT(*) FROM todos WHERE parent_id = t.id AND completed_at IS NOT NULL) as completed_subtask_count')
+    )
+    .whereNull('t.completed_at')
+    .whereNull('t.parent_id') // Only top-level tasks for kiosk
     .where(function () {
-      this.whereNull('snoozed_until').orWhere('snoozed_until', '<', now);
+      this.whereNull('t.snoozed_until').orWhere('t.snoozed_until', '<', now);
     })
-    .orderByRaw('CASE priority WHEN "urgent" THEN 1 WHEN "high" THEN 2 WHEN "medium" THEN 3 WHEN "low" THEN 4 END')
-    .orderBy('due_date', 'asc')
-    .orderBy('sort_order', 'asc')
+    .orderByRaw('CASE t.priority WHEN "urgent" THEN 1 WHEN "high" THEN 2 WHEN "medium" THEN 3 WHEN "low" THEN 4 END')
+    .orderBy('t.due_date', 'asc')
+    .orderBy('t.sort_order', 'asc')
     .limit(limit);
 }
 

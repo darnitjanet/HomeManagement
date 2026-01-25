@@ -33,8 +33,11 @@ import {
   ShoppingCart,
   Wifi,
   UtensilsCrossed,
+  Star,
+  Gift,
+  RotateCcw,
 } from 'lucide-react';
-import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi } from '../../services/api';
+import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { useMotionDetection } from '../../hooks/useMotionDetection';
@@ -58,6 +61,9 @@ interface Todo {
   due_date: string | null;
   completed_at: string | null;
   context: string;
+  parent_id: number | null;
+  subtask_count?: number;
+  completed_subtask_count?: number;
 }
 
 interface Nudge {
@@ -108,6 +114,23 @@ interface MealPlanEntry {
   notes?: string;
 }
 
+interface KidReward {
+  id: number;
+  kidId: number;
+  name: string;
+  stickersRequired: number;
+  isClaimed: boolean;
+  claimedAt?: string;
+}
+
+interface Kid {
+  id: number;
+  name: string;
+  avatarColor: string;
+  stickerCount: number;
+  rewards: KidReward[];
+}
+
 interface KioskNotification {
   id: number;
   type: string;
@@ -139,10 +162,12 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [nudge, setNudge] = useState<Nudge | null>(null);
   const [showNudge, setShowNudge] = useState(false);
   const [completingTodo, setCompletingTodo] = useState<number | null>(null);
+  const [breakingDown, setBreakingDown] = useState<number | null>(null);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<BirthdayContact[]>([]);
   const [notifications, setNotifications] = useState<KioskNotification[]>([]);
   const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
+  const [kids, setKids] = useState<Kid[]>([]);
 
   // Voice input state
   const [voiceResult, setVoiceResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -842,7 +867,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   };
 
   const loadData = async () => {
-    await Promise.all([loadTodos(), loadWeather(), loadEvents(), loadBirthdays(), loadNotifications(), loadKioskPreferences(), loadMealPlan()]);
+    await Promise.all([loadTodos(), loadWeather(), loadEvents(), loadBirthdays(), loadNotifications(), loadKioskPreferences(), loadMealPlan(), loadKids()]);
     setLoading(false);
   };
 
@@ -891,6 +916,17 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     }
   };
 
+  const loadKids = async () => {
+    try {
+      const response = await kidsApi.getAllKids();
+      if (response.data.success) {
+        setKids(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to load kids:', error);
+    }
+  };
+
   const loadBirthdays = async () => {
     try {
       const response = await contactsApi.getUpcomingBirthdays(7);
@@ -921,7 +957,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
   const loadTodos = async () => {
     try {
-      const response = await todosApi.getKioskTodos(5);
+      const response = await todosApi.getKioskTodos(8);
       if (response.data.success) {
         setTodos(response.data.data);
       }
@@ -1078,6 +1114,26 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     } catch (error) {
       console.error('Failed to complete todo:', error);
       setCompletingTodo(null);
+    }
+  };
+
+  const handleBreakdown = async (todo: Todo) => {
+    if (!aiEnabled || breakingDown) return;
+    setBreakingDown(todo.id);
+
+    try {
+      const response = await todosApi.breakdownTask(todo.id);
+      if (response.data.success) {
+        // Reload todos to get updated subtask counts
+        loadTodos();
+        if (ttsEnabled && ttsSupported) {
+          speak(`Task broken down into ${response.data.data.length} steps`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to breakdown task:', error);
+    } finally {
+      setBreakingDown(null);
     }
   };
 
@@ -1592,6 +1648,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       )}
 
       <div className="kiosk-content">
+        <div className="kiosk-column-left">
         <div className="kiosk-section todos-section">
           <div className="section-header">
             <ListTodo size={28} />
@@ -1613,6 +1670,9 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
                 const EnergyIcon = ENERGY_ICONS[todo.energy_level];
                 const isEnergyMatch = todo.energy_level === currentEnergy;
                 const isCompleting = completingTodo === todo.id;
+                const isBreaking = breakingDown === todo.id;
+                const hasSubtasks = (todo.subtask_count ?? 0) > 0;
+                const canBreakdown = aiEnabled && !todo.parent_id && !hasSubtasks;
 
                 return (
                   <div
@@ -1653,8 +1713,28 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
                             {formatMinutes(todo.estimated_minutes)}
                           </span>
                         )}
+                        {hasSubtasks && (
+                          <span className="subtask-progress-tag">
+                            {todo.completed_subtask_count ?? 0}/{todo.subtask_count} steps
+                          </span>
+                        )}
                       </div>
                     </div>
+
+                    {canBreakdown && (
+                      <button
+                        className={`kiosk-breakdown-btn ${isBreaking ? 'breaking' : ''}`}
+                        onClick={() => handleBreakdown(todo)}
+                        disabled={isBreaking}
+                        title="Break into smaller steps"
+                      >
+                        {isBreaking ? (
+                          <RotateCcw size={20} className="spinning" />
+                        ) : (
+                          <Sparkles size={20} />
+                        )}
+                      </button>
+                    )}
 
                     {isEnergyMatch && (
                       <div className="energy-match-indicator" title="Good energy match!">
@@ -1666,6 +1746,62 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
               })}
             </div>
           )}
+        </div>
+
+        {/* Kids Rewards Display */}
+        {kids.length > 0 && (
+          <div className="kiosk-section kids-section">
+            <div className="section-header">
+              <Star size={28} />
+              <h2>Kids Rewards</h2>
+            </div>
+            <div className="kids-rewards-display">
+              {kids.map((kid) => {
+                // Find the next unclaimed reward
+                const nextReward = kid.rewards
+                  .filter(r => !r.isClaimed)
+                  .sort((a, b) => a.stickersRequired - b.stickersRequired)[0];
+                const progress = nextReward
+                  ? Math.min(100, (kid.stickerCount / nextReward.stickersRequired) * 100)
+                  : 100;
+
+                return (
+                  <div key={kid.id} className="kid-reward-card">
+                    <div
+                      className="kid-avatar"
+                      style={{ backgroundColor: kid.avatarColor }}
+                    >
+                      {kid.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="kid-info">
+                      <div className="kid-name">{kid.name}</div>
+                      <div className="kid-stickers">
+                        <Star size={16} className="sticker-icon" />
+                        <span>{kid.stickerCount} stickers</span>
+                      </div>
+                      {nextReward ? (
+                        <div className="kid-next-reward">
+                          <div className="reward-progress-bar">
+                            <div
+                              className="reward-progress-fill"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <div className="reward-goal">
+                            <Gift size={14} />
+                            <span>{nextReward.name} ({kid.stickerCount}/{nextReward.stickersRequired})</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="no-active-reward">No active reward goal</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         </div>
 
         <div className="kiosk-section events-section">
