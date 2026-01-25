@@ -1216,6 +1216,13 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   if (loading) {
     return (
       <div className="kiosk-dashboard">
+        {/* Hidden video element for motion detection - must always be rendered */}
+        <video
+          ref={motionVideoRef}
+          style={{ display: 'none' }}
+          playsInline
+          muted
+        />
         <div className="kiosk-loading">Loading...</div>
       </div>
     );
