@@ -187,9 +187,15 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [isSleeping, setIsSleeping] = useState(false);
   const [clockPosition, setClockPosition] = useState({ x: 50, y: 50 });
   const sleepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSleepingRef = useRef(false); // Ref to avoid callback recreation
   const wasSleepingRef = useRef(false);
   const sleepStartTimeRef = useRef<number | null>(null);
   const SLEEP_DELAY = 2 * 60 * 1000; // 2 minutes of inactivity
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isSleepingRef.current = isSleeping;
+  }, [isSleeping]);
 
   // Text-to-speech state
   const [ttsEnabled, setTtsEnabled] = useState(true);
@@ -563,8 +569,9 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   }, []);
 
   // Sleep mode - reset timer on activity
+  // Use ref for isSleeping to avoid recreating callback and causing effect loops
   const resetSleepTimer = useCallback(() => {
-    if (isSleeping) {
+    if (isSleepingRef.current) {
       setIsSleeping(false);
     }
     if (sleepTimeoutRef.current) {
@@ -573,7 +580,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     sleepTimeoutRef.current = setTimeout(() => {
       setIsSleeping(true);
     }, SLEEP_DELAY);
-  }, [isSleeping, SLEEP_DELAY]);
+  }, [SLEEP_DELAY]);
 
   // Keep ref updated for motion detection callback
   useEffect(() => {
