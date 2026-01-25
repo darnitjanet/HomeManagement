@@ -15,9 +15,11 @@
 }
 
 .settings-modal {
-  width: 100%;
+  width: calc(100% - 32px);
+  min-width: 320px;
   max-width: 500px;
   max-height: 90vh;
+  margin: 16px;
   background: white;
   border-radius: 16px;
   display: flex;
