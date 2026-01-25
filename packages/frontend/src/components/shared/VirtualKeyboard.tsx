@@ -14,68 +14,104 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [layoutName, setLayoutName] = useState('default');
 
+  // Helper to set input value in a way React recognizes
+  const setNativeValue = useCallback((element: HTMLInputElement | HTMLTextAreaElement, value: string) => {
+    const valueSetter = Object.getOwnPropertyDescriptor(
+      element.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype,
+      'value'
+    )?.set;
+    if (valueSetter) {
+      valueSetter.call(element, value);
+    }
+    // Trigger input event for React
+    const event = new Event('input', { bubbles: true });
+    element.dispatchEvent(event);
+  }, []);
+
   const handleKeyPress = useCallback((button: string) => {
     if (!activeInput) return;
 
+    // Focus the input to ensure we can get/set cursor position
+    activeInput.focus();
+
+    const start = activeInput.selectionStart ?? activeInput.value.length;
+    const end = activeInput.selectionEnd ?? activeInput.value.length;
+    const currentValue = activeInput.value;
+    let newValue = currentValue;
+    let newCursorPos = start;
+
     if (button === '{bksp}') {
-      const start = activeInput.selectionStart || 0;
-      const end = activeInput.selectionEnd || 0;
       if (start === end && start > 0) {
-        activeInput.value = activeInput.value.slice(0, start - 1) + activeInput.value.slice(end);
-        activeInput.setSelectionRange(start - 1, start - 1);
-      } else {
-        activeInput.value = activeInput.value.slice(0, start) + activeInput.value.slice(end);
-        activeInput.setSelectionRange(start, start);
+        newValue = currentValue.slice(0, start - 1) + currentValue.slice(end);
+        newCursorPos = start - 1;
+      } else if (start !== end) {
+        newValue = currentValue.slice(0, start) + currentValue.slice(end);
+        newCursorPos = start;
       }
     } else if (button === '{enter}') {
       if (activeInput.tagName === 'TEXTAREA') {
-        const start = activeInput.selectionStart || 0;
-        activeInput.value = activeInput.value.slice(0, start) + '\n' + activeInput.value.slice(start);
-        activeInput.setSelectionRange(start + 1, start + 1);
+        newValue = currentValue.slice(0, start) + '\n' + currentValue.slice(end);
+        newCursorPos = start + 1;
       } else {
         // Submit form or blur for regular inputs
         activeInput.blur();
         setIsVisible(false);
+        return;
       }
     } else if (button === '{space}') {
-      const start = activeInput.selectionStart || 0;
-      activeInput.value = activeInput.value.slice(0, start) + ' ' + activeInput.value.slice(start);
-      activeInput.setSelectionRange(start + 1, start + 1);
+      newValue = currentValue.slice(0, start) + ' ' + currentValue.slice(end);
+      newCursorPos = start + 1;
     } else if (button === '{shift}' || button === '{lock}') {
       setLayoutName(layoutName === 'default' ? 'shift' : 'default');
+      return;
     } else if (button === '{tab}') {
-      const start = activeInput.selectionStart || 0;
-      activeInput.value = activeInput.value.slice(0, start) + '\t' + activeInput.value.slice(start);
-      activeInput.setSelectionRange(start + 1, start + 1);
+      newValue = currentValue.slice(0, start) + '\t' + currentValue.slice(end);
+      newCursorPos = start + 1;
     } else if (!button.startsWith('{')) {
-      const start = activeInput.selectionStart || 0;
-      activeInput.value = activeInput.value.slice(0, start) + button + activeInput.value.slice(start);
-      activeInput.setSelectionRange(start + 1, start + 1);
+      newValue = currentValue.slice(0, start) + button + currentValue.slice(end);
+      newCursorPos = start + 1;
       // Reset to lowercase after typing with shift
       if (layoutName === 'shift') {
         setLayoutName('default');
       }
     }
 
-    // Trigger input event for React to pick up changes
-    const event = new Event('input', { bubbles: true });
-    activeInput.dispatchEvent(event);
-  }, [activeInput, layoutName]);
+    // Set value using native setter for React compatibility
+    setNativeValue(activeInput, newValue);
+
+    // Set cursor position after React has processed the change
+    requestAnimationFrame(() => {
+      activeInput.setSelectionRange(newCursorPos, newCursorPos);
+    });
+  }, [activeInput, layoutName, setNativeValue]);
 
   useEffect(() => {
+    const isTextInput = (el: HTMLElement): el is HTMLInputElement | HTMLTextAreaElement => {
+      if (el.tagName === 'TEXTAREA') return true;
+      if (el.tagName === 'INPUT') {
+        const inputType = (el as HTMLInputElement).type || 'text';
+        return !['file', 'checkbox', 'radio', 'submit', 'button', 'hidden', 'range'].includes(inputType);
+      }
+      return false;
+    };
+
     const handleFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        const inputEl = target as HTMLInputElement | HTMLTextAreaElement;
-        // Skip if it's a file input or other non-text input
-        if (inputEl.tagName === 'INPUT') {
-          const inputType = (inputEl as HTMLInputElement).type;
-          if (['file', 'checkbox', 'radio', 'submit', 'button', 'hidden'].includes(inputType)) {
-            return;
-          }
-        }
+      if (isTextInput(target)) {
+        setActiveInput(target);
+        setIsVisible(true);
+      }
+    };
+
+    // Also handle touch/click on inputs for better touchscreen support
+    const handleTouchOrClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Find closest input (in case clicking on a wrapper)
+      const inputEl = target.closest('input, textarea') as HTMLInputElement | HTMLTextAreaElement | null;
+      if (inputEl && isTextInput(inputEl)) {
         setActiveInput(inputEl);
         setIsVisible(true);
+        inputEl.focus();
       }
     };
 
@@ -84,7 +120,8 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
       // Don't hide if clicking on keyboard or input
       if (containerRef.current?.contains(target)) return;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-      // Check if clicking on a button or interactive element
+      if (target.closest('input, textarea')) return;
+      // Check if clicking on a button or interactive element - hide keyboard
       if (target.closest('button') || target.closest('a') || target.closest('[role="button"]')) {
         setIsVisible(false);
         setActiveInput(null);
@@ -92,10 +129,12 @@ export function VirtualKeyboard({ onClose }: VirtualKeyboardProps) {
     };
 
     document.addEventListener('focusin', handleFocus);
+    document.addEventListener('touchend', handleTouchOrClick);
     document.addEventListener('click', handleClickOutside);
 
     return () => {
       document.removeEventListener('focusin', handleFocus);
+      document.removeEventListener('touchend', handleTouchOrClick);
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
