@@ -908,7 +908,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const loadMealPlan = async () => {
     try {
       const response = await mealPlanApi.getCurrentMealPlan();
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setMealPlan(response.data.data.entries || []);
       }
     } catch (error) {
