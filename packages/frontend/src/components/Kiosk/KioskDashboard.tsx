@@ -42,7 +42,6 @@ import { useVoiceAssistant, type VoiceCommand } from '../../hooks/useVoiceAssist
 import { useBarcodeDetector } from '../../hooks/useBarcodeDetector';
 import { generateWakeAnnouncement } from '../../utils/announcementGenerator';
 import { EmergencyInfo } from '../Emergency/EmergencyInfo';
-import { VirtualKeyboard } from '../shared/VirtualKeyboard';
 import './KioskDashboard.css';
 
 interface KioskDashboardProps {
@@ -1898,8 +1897,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         </div>
       )}
 
-      {/* Virtual Keyboard for touch input */}
-      <VirtualKeyboard />
     </div>
   );
 }
