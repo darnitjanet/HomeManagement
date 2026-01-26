@@ -5,16 +5,20 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
 }
 
 .app-main {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll; /* Use scroll instead of auto for better touch support */
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on touch */
   scroll-behavior: smooth;
-  overscroll-behavior: contain; /* Prevent pull-to-refresh */
-  touch-action: pan-y; /* Allow vertical touch scrolling */
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
+  touch-action: pan-y pinch-zoom; /* Allow vertical scrolling and pinch zoom */
+  /* Ensure content can scroll */
+  min-height: 0;
+  position: relative;
 }
 
 /* Global touch scrolling improvements */
@@ -28,6 +32,7 @@
 .list-container {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  touch-action: pan-y;
 }
 
 .app-loading {
