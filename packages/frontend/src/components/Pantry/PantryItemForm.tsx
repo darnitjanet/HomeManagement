@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { X, ScanBarcode } from 'lucide-react';
 import { pantryApi } from '../../services/api';
 import { BarcodeScanner } from './BarcodeScanner';
@@ -112,6 +112,14 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
     }
   };
 
+  // Scroll input into view when focused (helps with on-screen keyboard)
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    // Small delay to let keyboard open first
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }, []);
+
   return (
     <div
       className="modal-overlay"
@@ -146,6 +154,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onFocus={handleFocus}
               placeholder="e.g., Milk, Eggs, Rice..."
               autoFocus
             />
@@ -160,11 +169,12 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
                 min="0"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                onFocus={handleFocus}
               />
             </div>
             <div className="form-group">
               <label>Unit</label>
-              <select value={unit} onChange={(e) => setUnit(e.target.value)}>
+              <select value={unit} onChange={(e) => setUnit(e.target.value)} onFocus={handleFocus}>
                 <option value="">Select unit</option>
                 {constants?.units.map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -176,7 +186,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
           <div className="form-row">
             <div className="form-group">
               <label>Category</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} onFocus={handleFocus}>
                 <option value="">Auto-detect</option>
                 {constants?.categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -185,7 +195,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
             </div>
             <div className="form-group">
               <label>Storage Location</label>
-              <select value={location} onChange={(e) => setLocation(e.target.value)}>
+              <select value={location} onChange={(e) => setLocation(e.target.value)} onFocus={handleFocus}>
                 <option value="">Select location</option>
                 {constants?.locations.map((l) => (
                   <option key={l} value={l}>{l}</option>
@@ -201,6 +211,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
                 type="date"
                 value={expirationDate}
                 onChange={(e) => setExpirationDate(e.target.value)}
+                onFocus={handleFocus}
               />
             </div>
             <div className="form-group">
@@ -209,6 +220,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
+                onFocus={handleFocus}
               />
             </div>
           </div>
@@ -221,6 +233,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
               min="0"
               value={lowStockThreshold}
               onChange={(e) => setLowStockThreshold(e.target.value)}
+              onFocus={handleFocus}
               placeholder="Optional"
             />
           </div>
@@ -230,6 +243,7 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              onFocus={handleFocus}
               placeholder="Brand, variety, or other details..."
               rows={2}
             />

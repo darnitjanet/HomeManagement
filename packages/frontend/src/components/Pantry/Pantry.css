@@ -647,6 +647,7 @@
 
 .pantry-form-modal form {
   padding: 1.5rem;
+  padding-bottom: 200px; /* Extra padding for on-screen keyboard */
 }
 
 .pantry-form-modal .form-group {
