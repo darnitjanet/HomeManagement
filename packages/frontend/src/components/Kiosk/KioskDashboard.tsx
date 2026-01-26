@@ -2070,19 +2070,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
                       className="wifi-qr-code"
                     />
                   </div>
-                  <div className="wifi-details">
-                    <div className="wifi-detail">
-                      <span className="wifi-label">Network:</span>
-                      <span className="wifi-value">{wifiCredentials.ssid}</span>
-                    </div>
-                    {wifiCredentials.password && (
-                      <div className="wifi-detail">
-                        <span className="wifi-label">Password:</span>
-                        <span className="wifi-value">{wifiCredentials.password}</span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="wifi-hint">Scan QR code with your phone's camera</p>
+                  <p className="wifi-hint">Scan with your phone's camera to connect</p>
                 </>
               )}
             </div>
