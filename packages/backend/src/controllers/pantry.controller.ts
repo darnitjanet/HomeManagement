@@ -379,8 +379,8 @@ function mapOpenFoodFactsCategory(tags: string[]): string | null {
   if (tagString.includes('canned') || tagString.includes('preserved')) {
     return 'Canned Goods';
   }
-  // Check beverages last since some products have misleading tags
-  if (tagString.includes('beverage') || tagString.includes('drink') || tagString.includes('juice') || tagString.includes('soda') || tagString.includes('water')) {
+  // Only categorize as beverages if explicitly tagged - too many false positives otherwise
+  if (tagString.includes('en:beverages') || tagString.includes('en:sodas') || tagString.includes('en:juices') || tagString.includes('en:soft-drinks')) {
     return 'Beverages';
   }
 
