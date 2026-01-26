@@ -3,10 +3,87 @@ import { X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { recipesApi } from '../../services/api';
 import './RecipeForm.css';
 
+// Helper to parse fractions like "1/4", "1 1/2", "2/3" to decimal
+function parseFraction(str: string): number | undefined {
+  if (!str || str.trim() === '') return undefined;
+
+  const trimmed = str.trim();
+
+  // Try parsing as plain number first
+  const asNumber = parseFloat(trimmed);
+  if (!isNaN(asNumber) && !trimmed.includes('/')) {
+    return asNumber;
+  }
+
+  // Handle mixed numbers like "1 1/2" or "2 3/4"
+  const mixedMatch = trimmed.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    const whole = parseInt(mixedMatch[1]);
+    const num = parseInt(mixedMatch[2]);
+    const denom = parseInt(mixedMatch[3]);
+    if (denom !== 0) {
+      return whole + num / denom;
+    }
+  }
+
+  // Handle simple fractions like "1/4" or "3/4"
+  const fractionMatch = trimmed.match(/^(\d+)\/(\d+)$/);
+  if (fractionMatch) {
+    const num = parseInt(fractionMatch[1]);
+    const denom = parseInt(fractionMatch[2]);
+    if (denom !== 0) {
+      return num / denom;
+    }
+  }
+
+  // If it's a number with fraction (like "1/4" parsed as NaN), return undefined
+  return isNaN(asNumber) ? undefined : asNumber;
+}
+
+// Helper to convert decimal to fraction string for display
+function decimalToFraction(decimal: number | undefined): string {
+  if (decimal === undefined || decimal === null) return '';
+
+  // Common fractions to check
+  const fractions: [number, string][] = [
+    [0.125, '1/8'],
+    [0.25, '1/4'],
+    [0.333, '1/3'],
+    [0.375, '3/8'],
+    [0.5, '1/2'],
+    [0.625, '5/8'],
+    [0.667, '2/3'],
+    [0.75, '3/4'],
+    [0.875, '7/8'],
+  ];
+
+  const whole = Math.floor(decimal);
+  const frac = decimal - whole;
+
+  // Check if it's close to a common fraction
+  for (const [value, str] of fractions) {
+    if (Math.abs(frac - value) < 0.01) {
+      if (whole === 0) {
+        return str;
+      }
+      return `${whole} ${str}`;
+    }
+  }
+
+  // If it's a whole number
+  if (Math.abs(frac) < 0.01) {
+    return whole.toString();
+  }
+
+  // Otherwise return the decimal
+  return decimal.toString();
+}
+
 interface RecipeIngredient {
   id?: number;
   name: string;
   quantity?: number;
+  quantityDisplay?: string; // For displaying/editing fractions
   unit?: string;
   preparation?: string;
   optional?: boolean;
@@ -85,7 +162,10 @@ export function RecipeForm({ onClose, onSave, recipe, tags, initialData }: Recip
       setNotes(recipe.notes || '');
       setImageUrl(recipe.imageUrl || '');
       setSourceUrl(recipe.sourceUrl || '');
-      setIngredients(recipe.ingredients || []);
+      setIngredients((recipe.ingredients || []).map(ing => ({
+        ...ing,
+        quantityDisplay: decimalToFraction(ing.quantity),
+      })));
       setSelectedTags(recipe.tags?.map((t) => t.id) || []);
     } else if (initialData) {
       // For AI-generated recipes
@@ -103,6 +183,7 @@ export function RecipeForm({ onClose, onSave, recipe, tags, initialData }: Recip
         setIngredients(
           initialData.ingredients.map((ing, idx) => ({
             ...ing,
+            quantityDisplay: decimalToFraction(ing.quantity),
             optional: ing.optional || false,
             sortOrder: idx,
           }))
@@ -116,7 +197,7 @@ export function RecipeForm({ onClose, onSave, recipe, tags, initialData }: Recip
       ...ingredients,
       {
         name: '',
-        quantity: undefined,
+        quantityDisplay: '',
         unit: '',
         preparation: '',
         optional: false,
@@ -172,7 +253,7 @@ export function RecipeForm({ onClose, onSave, recipe, tags, initialData }: Recip
           .filter((ing) => ing.name.trim())
           .map((ing, idx) => ({
             name: ing.name.trim(),
-            quantity: ing.quantity || undefined,
+            quantity: parseFraction(ing.quantityDisplay || ''),
             unit: ing.unit || undefined,
             preparation: ing.preparation || undefined,
             optional: ing.optional,
@@ -331,16 +412,12 @@ export function RecipeForm({ onClose, onSave, recipe, tags, initialData }: Recip
                   <div key={index} className="ingredient-row">
                     <GripVertical size={16} className="drag-handle" />
                     <input
-                      type="number"
+                      type="text"
                       className="quantity-input"
                       placeholder="Qty"
-                      value={ing.quantity || ''}
+                      value={ing.quantityDisplay || ''}
                       onChange={(e) =>
-                        handleUpdateIngredient(
-                          index,
-                          'quantity',
-                          e.target.value ? parseFloat(e.target.value) : undefined
-                        )
+                        handleUpdateIngredient(index, 'quantityDisplay', e.target.value)
                       }
                     />
                     <select
