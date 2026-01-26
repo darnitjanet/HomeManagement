@@ -1184,4 +1184,12 @@ export const watchlistApi = {
   deleteItem: (id: number) => api.delete(`/watchlist/${id}`),
 };
 
+// TTS API (backend text-to-speech using espeak-ng)
+export const ttsApi = {
+  speak: (text: string, options?: { speed?: number; pitch?: number; volume?: number; voice?: string }) =>
+    api.post('/tts/speak', { text, ...options }),
+  stop: () => api.post('/tts/stop'),
+  getStatus: () => api.get('/tts/status'),
+};
+
 export default api;

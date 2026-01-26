@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { ttsApi } from '../services/api';
 
-// Type definitions for Web Speech Synthesis API
 interface SpeechSynthesisOptions {
   rate?: number;      // 0.1 to 10, default 1
   pitch?: number;     // 0 to 2, default 1
   volume?: number;    // 0 to 1, default 1
-  voice?: SpeechSynthesisVoice | null;
 }
 
 interface UseSpeechSynthesisReturn {
@@ -13,7 +12,7 @@ interface UseSpeechSynthesisReturn {
   isPaused: boolean;
   isSupported: boolean;
   error: string | null;
-  voices: SpeechSynthesisVoice[];
+  voices: never[];  // Backend TTS doesn't have voice selection
   speak: (text: string, options?: SpeechSynthesisOptions) => void;
   stop: () => void;
   pause: () => void;
@@ -22,145 +21,123 @@ interface UseSpeechSynthesisReturn {
 
 export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speakingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isSupported = typeof window !== 'undefined' && !!window.speechSynthesis;
-
-  // Load available voices
+  // Check if backend TTS is available
   useEffect(() => {
-    if (!isSupported) return;
-
-    const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-      setVoices(availableVoices);
+    const checkTTS = async () => {
+      try {
+        const response = await ttsApi.getStatus();
+        setIsSupported(response.data?.data?.available ?? false);
+      } catch {
+        // If backend TTS not available, fall back to browser TTS
+        setIsSupported(typeof window !== 'undefined' && !!window.speechSynthesis);
+      }
     };
-
-    // Load voices immediately if available
-    loadVoices();
-
-    // Chrome loads voices asynchronously
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, [isSupported]);
+    checkTTS();
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (isSupported) {
-        window.speechSynthesis.cancel();
+      if (speakingTimeoutRef.current) {
+        clearTimeout(speakingTimeoutRef.current);
       }
     };
-  }, [isSupported]);
+  }, []);
 
-  const speak = useCallback((text: string, options: SpeechSynthesisOptions = {}) => {
-    if (!isSupported) {
-      setError('Speech synthesis is not supported in this browser.');
-      return;
+  const speak = useCallback(async (text: string, options: SpeechSynthesisOptions = {}) => {
+    if (!text) return;
+
+    setIsSpeaking(true);
+    setError(null);
+
+    try {
+      // Convert browser TTS options to backend TTS options
+      // Browser rate: 0.1-10 (1 = normal)
+      // espeak-ng speed: words per minute (default 175)
+      const speed = options.rate ? Math.round(175 * options.rate) : undefined;
+
+      // Browser pitch: 0-2 (1 = normal)
+      // espeak-ng pitch: 0-99 (50 = normal)
+      const pitch = options.pitch ? Math.round(options.pitch * 50) : undefined;
+
+      // Browser volume: 0-1
+      // espeak-ng amplitude: 0-200 (100 = normal)
+      const volume = options.volume !== undefined ? Math.round(options.volume * 100) : undefined;
+
+      await ttsApi.speak(text, { speed, pitch, volume });
+
+      // Estimate speaking duration (roughly 150 words per minute)
+      const wordCount = text.split(/\s+/).length;
+      const estimatedMs = Math.max(1000, (wordCount / 150) * 60 * 1000);
+
+      // Set speaking to false after estimated duration
+      speakingTimeoutRef.current = setTimeout(() => {
+        setIsSpeaking(false);
+      }, estimatedMs);
+
+    } catch (err) {
+      console.error('[TTS] Backend TTS error:', err);
+      setError('Failed to speak text');
+      setIsSpeaking(false);
+
+      // Fall back to browser TTS if available
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = options.rate ?? 1;
+          utterance.pitch = options.pitch ?? 1;
+          utterance.volume = options.volume ?? 1;
+
+          utterance.onend = () => setIsSpeaking(false);
+          utterance.onerror = () => setIsSpeaking(false);
+
+          setIsSpeaking(true);
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          // Browser TTS also failed
+        }
+      }
+    }
+  }, []);
+
+  const stop = useCallback(async () => {
+    try {
+      await ttsApi.stop();
+    } catch {
+      // Ignore errors on stop
     }
 
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    // Apply options
-    utterance.rate = options.rate ?? 1;
-    utterance.pitch = options.pitch ?? 1;
-    utterance.volume = options.volume ?? 1;
-
-    // Select voice - prefer a natural English voice
-    if (options.voice) {
-      utterance.voice = options.voice;
-    } else {
-      // Try to find a good default English voice
-      const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-      const preferredVoice = englishVoices.find(v =>
-        v.name.includes('Natural') ||
-        v.name.includes('Samantha') ||
-        v.name.includes('Google US')
-      ) || englishVoices[0];
-
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
+    // Also stop browser TTS if it was used as fallback
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      setIsPaused(false);
-      setError(null);
-    };
+    if (speakingTimeoutRef.current) {
+      clearTimeout(speakingTimeoutRef.current);
+    }
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      setIsPaused(false);
-    };
-
-    utterance.onerror = (event) => {
-      setIsSpeaking(false);
-      setIsPaused(false);
-
-      if (event.error === 'canceled') {
-        // User or code cancelled - not an error
-        return;
-      } else if (event.error === 'interrupted') {
-        // Interrupted by new speech - not an error
-        return;
-      } else if (event.error === 'audio-busy') {
-        setError('Audio device is busy. Please try again.');
-      } else if (event.error === 'network') {
-        setError('Network error occurred during speech synthesis.');
-      } else if (event.error === 'not-allowed') {
-        setError('Speech synthesis not allowed. Please check browser settings.');
-      } else {
-        setError(`Speech error: ${event.error}`);
-      }
-    };
-
-    utterance.onpause = () => {
-      setIsPaused(true);
-    };
-
-    utterance.onresume = () => {
-      setIsPaused(false);
-    };
-
-    utteranceRef.current = utterance;
-
-    // Chrome has a bug where long texts get cut off - workaround with chunking
-    // For now, speak directly. If issues arise, implement chunking.
-    window.speechSynthesis.speak(utterance);
-  }, [isSupported, voices]);
-
-  const stop = useCallback(() => {
-    if (!isSupported) return;
-    window.speechSynthesis.cancel();
     setIsSpeaking(false);
-    setIsPaused(false);
-  }, [isSupported]);
+  }, []);
 
   const pause = useCallback(() => {
-    if (!isSupported || !isSpeaking) return;
-    window.speechSynthesis.pause();
-  }, [isSupported, isSpeaking]);
+    // Backend TTS doesn't support pause - just stop
+    stop();
+  }, [stop]);
 
   const resume = useCallback(() => {
-    if (!isSupported || !isPaused) return;
-    window.speechSynthesis.resume();
-  }, [isSupported, isPaused]);
+    // Backend TTS doesn't support resume
+  }, []);
 
   return {
     isSpeaking,
-    isPaused,
+    isPaused: false,  // Backend TTS doesn't support pause
     isSupported,
     error,
-    voices,
+    voices: [],  // Backend TTS doesn't have voice selection
     speak,
     stop,
     pause,

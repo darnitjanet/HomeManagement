@@ -1891,6 +1891,16 @@
   margin: 0;
 }
 
+.wifi-not-configured {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.wifi-not-configured p {
+  margin: 8px 0;
+}
+
 .wifi-btn {
   background: rgba(255, 255, 255, 0.1) !important;
 }

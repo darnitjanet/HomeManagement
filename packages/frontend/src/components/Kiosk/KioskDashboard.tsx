@@ -949,12 +949,19 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const handleShowWifi = async () => {
     try {
       const response = await settingsApi.getWifiCredentials();
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setWifiCredentials(response.data.data);
+        setShowWifiModal(true);
+      } else {
+        // WiFi not configured - show placeholder modal
+        setWifiCredentials({ ssid: 'Not Configured', password: '' });
         setShowWifiModal(true);
       }
     } catch (error) {
       console.error('Failed to load WiFi credentials:', error);
+      // Show error state
+      setWifiCredentials({ ssid: 'Error loading WiFi', password: '' });
+      setShowWifiModal(true);
     }
   };
 
@@ -1360,17 +1367,16 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         )}
 
+        {/* Hey Cosmo disabled - speech recognition not working on Pi/Chromium
         <button
           className={`kiosk-control-btn cosmo-toggle ${heyCosmoEnabled ? 'active' : ''} ${!cosmoSupported ? 'unsupported' : ''}`}
           onClick={async () => {
             if (!cosmoSupported) {
-              // Show error message
               setCosmoResponse('Speech recognition not supported in this browser');
               setTimeout(() => setCosmoResponse(null), 3000);
               return;
             }
             if (!heyCosmoEnabled) {
-              // Request mic permission first, then enable
               const granted = await requestMicPermission();
               if (granted) {
                 setHeyCosmoEnabled(true);
@@ -1387,6 +1393,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           <MessageCircle size={20} />
           <span className="cosmo-label">Cosmo</span>
         </button>
+        */}
 
         <button
           className={`kiosk-control-btn keyboard-btn ${showKeyboardInput ? 'active' : ''}`}
@@ -1940,7 +1947,8 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       {showEmergency && <EmergencyInfo onClose={() => setShowEmergency(false)} />}
 
       {/* Voice Input Button */}
-      {voiceSupported && (
+      {/* Voice input disabled - speech recognition not working on Pi/Chromium */}
+      {false && voiceSupported && (
         <div className="kiosk-voice-container">
           {/* Voice Result Feedback */}
           {voiceResult && (
@@ -2044,26 +2052,39 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
               </button>
             </div>
             <div className="wifi-modal-content">
-              <div className="wifi-qr-container">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`WIFI:T:WPA;S:${wifiCredentials.ssid};P:${wifiCredentials.password};;`)}`}
-                  alt="WiFi QR Code"
-                  className="wifi-qr-code"
-                />
-              </div>
-              <div className="wifi-details">
-                <div className="wifi-detail">
-                  <span className="wifi-label">Network:</span>
-                  <span className="wifi-value">{wifiCredentials.ssid}</span>
+              {wifiCredentials.ssid === 'Not Configured' ? (
+                <div className="wifi-not-configured">
+                  <p>WiFi credentials not configured.</p>
+                  <p className="wifi-hint">Add WIFI_SSID and WIFI_PASSWORD to your .env file.</p>
                 </div>
-                {wifiCredentials.password && (
-                  <div className="wifi-detail">
-                    <span className="wifi-label">Password:</span>
-                    <span className="wifi-value">{wifiCredentials.password}</span>
+              ) : wifiCredentials.ssid === 'Error loading WiFi' ? (
+                <div className="wifi-not-configured">
+                  <p>Failed to load WiFi credentials.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="wifi-qr-container">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`WIFI:T:WPA;S:${wifiCredentials.ssid};P:${wifiCredentials.password};;`)}`}
+                      alt="WiFi QR Code"
+                      className="wifi-qr-code"
+                    />
                   </div>
-                )}
-              </div>
-              <p className="wifi-hint">Scan QR code with your phone's camera</p>
+                  <div className="wifi-details">
+                    <div className="wifi-detail">
+                      <span className="wifi-label">Network:</span>
+                      <span className="wifi-value">{wifiCredentials.ssid}</span>
+                    </div>
+                    {wifiCredentials.password && (
+                      <div className="wifi-detail">
+                        <span className="wifi-label">Password:</span>
+                        <span className="wifi-value">{wifiCredentials.password}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="wifi-hint">Scan QR code with your phone's camera</p>
+                </>
+              )}
             </div>
           </div>
         </div>
