@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { X, Camera, Loader2 } from 'lucide-react';
+import { X, Camera } from 'lucide-react';
 import './BarcodeScanner.css';
 
 interface BarcodeScannerProps {

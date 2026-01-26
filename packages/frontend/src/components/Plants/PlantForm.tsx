@@ -112,13 +112,13 @@ export function PlantForm({ plant, onClose, onSaved }: PlantFormProps) {
     try {
       const data = {
         name: name.trim(),
-        species: species.trim() || null,
-        location: location.trim() || null,
+        species: species.trim() || undefined,
+        location: location.trim() || undefined,
         watering_frequency_days: parseInt(wateringFrequency) || 7,
-        last_watered: lastWatered || null,
-        sunlight_needs: sunlightNeeds || null,
-        notes: notes.trim() || null,
-        care_instructions: careInstructions.trim() || null,
+        last_watered: lastWatered || undefined,
+        sunlight_needs: sunlightNeeds || undefined,
+        notes: notes.trim() || undefined,
+        care_instructions: careInstructions.trim() || undefined,
       };
 
       if (plant) {

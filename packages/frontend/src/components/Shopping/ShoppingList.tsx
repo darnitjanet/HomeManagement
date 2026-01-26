@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, X, ExternalLink, ChevronRight, Check, ScanBarcode, Package, Undo2 } from 'lucide-react';
+import { X, ExternalLink, ChevronRight, Check, ScanBarcode, Package } from 'lucide-react';
 import { shoppingApi, pantryApi } from '../../services/api';
 import './ShoppingList.css';
 
@@ -167,25 +167,6 @@ export function ShoppingList() {
       loadData();
     } catch (err) {
       console.error('Failed to update quantity:', err);
-    }
-  };
-
-  const handleAddFavorite = async () => {
-    if (!newItemName.trim() || adding) return;
-    try {
-      setAdding(true);
-      await shoppingApi.addFavorite(activeTab, {
-        name: newItemName.trim(),
-        // AI will auto-categorize on backend
-        defaultQuantity: newItemQuantity,
-      });
-      setNewItemName('');
-      setNewItemQuantity(1);
-      loadData();
-    } catch (err) {
-      console.error('Failed to add favorite:', err);
-    } finally {
-      setAdding(false);
     }
   };
 

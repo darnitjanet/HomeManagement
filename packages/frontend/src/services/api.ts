@@ -698,6 +698,7 @@ export const booksApi = {
     publisher?: string;
     publishYear?: string;
     pages?: number;
+    genre?: string;
     subject?: string;
     description?: string;
     coverUrl?: string;

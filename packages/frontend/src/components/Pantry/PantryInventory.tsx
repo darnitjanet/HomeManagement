@@ -71,7 +71,7 @@ export function PantryInventory() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info'; action?: () => void; actionLabel?: string } | null>(null);
 
   // Undo state for deleted items
-  const [deletedItem, setDeletedItem] = useState<PantryItem | null>(null);
+  const [_deletedItem, setDeletedItem] = useState<PantryItem | null>(null);
   const [undoTimeout, setUndoTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

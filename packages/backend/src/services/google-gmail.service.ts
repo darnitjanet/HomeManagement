@@ -104,8 +104,8 @@ export class GoogleGmailService {
     // Only look in Updates category (where shipping notifications go)
     queryParts.push('category:updates');
 
-    // Require emails from specific trusted senders
-    queryParts.push('from:(amazon.com OR walmart.com OR target.com OR usps.com OR ups.com OR fedex.com)');
+    // Require emails from specific trusted senders (retailers and carriers)
+    queryParts.push('from:(amazon.com OR walmart.com OR target.com OR ebay.com OR bestbuy.com OR homedepot.com OR lowes.com OR costco.com OR etsy.com OR aliexpress.com OR newegg.com OR chewy.com OR express-scripts.com OR cvs.com OR walgreens.com OR usps.com OR ups.com OR fedex.com OR dhl.com OR ontrac.com)');
 
     // Subject keywords for shipping notifications
     queryParts.push('subject:(shipped OR "has shipped" OR "out for delivery" OR "on its way" OR "your package")');

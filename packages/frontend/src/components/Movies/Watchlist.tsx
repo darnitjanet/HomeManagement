@@ -39,7 +39,7 @@ export function Watchlist({ onBack }: WatchlistProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMarkWatchedModal, setShowMarkWatchedModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<WatchlistItem | null>(null);
-  const [editingItem, setEditingItem] = useState<WatchlistItem | null>(null);
+  const [_editingItem, _setEditingItem] = useState<WatchlistItem | null>(null);
 
   // Add modal state
   const [searchQuery, setSearchQuery] = useState('');

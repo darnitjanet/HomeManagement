@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Plus, X, Check, Phone, Mail, MapPin, User, FileText, Heart, Shield, Home, AlertTriangle } from 'lucide-react';
+import { Trash2, Edit2, Plus, X, Check, Phone, Mail, MapPin, User, FileText, Heart, Shield, Home } from 'lucide-react';
 import { emergencyApi } from '../../services/api';
 import './EmergencyManagement.css';
 

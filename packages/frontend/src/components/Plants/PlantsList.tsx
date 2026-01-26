@@ -3,7 +3,6 @@ import {
   Flower2,
   Droplets,
   Plus,
-  Sun,
   MapPin,
   Calendar,
   Clock,

@@ -105,9 +105,20 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
     }
   };
 
+  const handleOverlayClick = (e: React.MouseEvent | React.TouchEvent) => {
+    // Only close if clicking directly on the overlay, not on form elements
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="pantry-form-modal" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal-overlay"
+      onClick={handleOverlayClick}
+      onTouchEnd={handleOverlayClick}
+    >
+      <div className="pantry-form-modal" onClick={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{item ? 'Edit Item' : 'Add Pantry Item'}</h2>
           <button className="close-btn" onClick={onClose}>

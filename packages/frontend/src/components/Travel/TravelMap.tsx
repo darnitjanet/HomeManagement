@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Plus, List, Map as MapIcon, Search, X, Star, Calendar, Users, DollarSign, Briefcase, Package } from 'lucide-react';
+import { MapPin, Plus, List, Map as MapIcon, Search, Star, Calendar, Users, DollarSign, Briefcase, Package } from 'lucide-react';
 import { travelApi } from '../../services/api';
 import { PlaceForm } from './PlaceForm';
 import { PackingList } from './PackingList';
@@ -162,7 +162,7 @@ export function TravelMap() {
   const [editingPlace, setEditingPlace] = useState<TravelPlace | null>(null);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number; name?: string } | null>(null);
   const [viewMode, setViewMode] = useState<'map' | 'list' | 'trips'>('map');
-  const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
+  const [_selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
   const [packingTrip, setPackingTrip] = useState<Trip | null>(null);
 
   useEffect(() => {

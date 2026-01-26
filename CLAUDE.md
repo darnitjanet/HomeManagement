@@ -24,6 +24,85 @@ Monorepo with packages:
 - SQLite with Knex.js migrations
 - Database file: `packages/backend/database/home_management.db`
 
+## Recent Work: Kiosk Kids Rewards Display (COMPLETED)
+
+Added read-only kids rewards tracker display to kiosk dashboard.
+
+**Features:**
+- Shows each kid with avatar, name, and current sticker count
+- Displays progress bar toward next unclaimed reward
+- Shows reward name and progress (e.g., "Ice Cream (5/10)")
+- Gold star icons for stickers
+- Gift icon for reward goals
+- Non-interactive display only (no buttons)
+- Tasks list reduced from 5 to 3 items to make room
+
+**Files Modified:**
+- `packages/frontend/src/components/Kiosk/KioskDashboard.tsx` - Added Kid interface, kids state, loadKids function, kids section UI
+- `packages/frontend/src/components/Kiosk/KioskDashboard.css` - Added kids rewards styling
+
+---
+
+## Recent Work: Kiosk & Notification Fixes (COMPLETED)
+
+Various fixes for the Raspberry Pi kiosk deployment.
+
+**Fixes:**
+- **Duplicate notifications bug**: Fixed date comparison in notification.service.ts using `substring(0, 10)` instead of `split('T')[0]` since SQLite stores dates as `YYYY-MM-DD HH:MM:SS` without the T separator
+- **Notification bell centering**: Moved notification bell to center of header using absolute positioning
+- **Notification dropdown animation**: Fixed glitchy animation by including `translateX(-50%)` in keyframes
+- **Settings modal width**: Fixed skinny modal by adding min-width and margin
+- **Kiosk URL detection**: App now properly detects `/kiosk` URL path on load to enter kiosk mode
+- **Kiosk sleep mode**: Fixed sleep timer not activating by using ref for isSleeping state to prevent callback recreation loops
+- **Removed floating keyboard in kiosk**: VirtualKeyboard removed from KioskDashboard (kiosk has its own keyboard icon in controls)
+- **Motion detection timing**: Fixed video element not being available by rendering it during loading state
+
+**Files Modified:**
+- `packages/backend/src/services/notification.service.ts` - Date comparison fix
+- `packages/frontend/src/components/Navigation/Header.tsx` - 3-column layout with centered bell
+- `packages/frontend/src/components/Navigation/Header.css` - Absolute positioning for center
+- `packages/frontend/src/components/Notifications/NotificationBell.css` - Animation keyframes fix
+- `packages/frontend/src/components/Notifications/NotificationSettings.css` - Fixed skinny modal width
+- `packages/frontend/src/App.tsx` - URL-based kiosk detection
+- `packages/frontend/src/components/Kiosk/KioskDashboard.tsx` - Sleep timer ref fix, video element timing fix, removed VirtualKeyboard import and usage
+
+---
+
+## Raspberry Pi Kiosk Setup
+
+**Current Pi IP:** 192.168.68.58 (may change on network reconnect)
+
+**Startup Script:** `~/start-kiosk.sh`
+```bash
+#!/bin/bash
+sleep 10
+cd ~/HomeManagement/packages/backend
+NODE_ENV=production npx ts-node --transpile-only src/index.ts &
+sleep 15
+chromium --ozone-platform=wayland --start-fullscreen --noerrdialogs --disable-infobars --password-store=basic --enable-features=WebRTCPipeWireCapturer http://localhost:3000/kiosk
+```
+
+**Chromium Flags for Pi (Wayland/Trixie):**
+- `--ozone-platform=wayland` - Required for Wayland display
+- `--start-fullscreen` - Fullscreen mode
+- `--password-store=basic` - Prevents keyring password popup
+- `--noerrdialogs --disable-infobars` - Clean kiosk experience
+- `--enable-features=WebRTCPipeWireCapturer` - Enable PipeWire for camera on Wayland
+
+**Camera Permissions:** Camera permission for localhost:3000 is saved in Chromium preferences. If motion detection doesn't work, check that permission is granted in browser settings.
+
+**Motion Detection:** When enabled in Settings → Notifications, a green camera indicator shows on the kiosk. The kiosk will wake from sleep when motion is detected.
+
+**Database on Pi:** `~/HomeManagement/packages/backend/database/homemanagement.db` (note: no underscore)
+
+**Deploy Updates to Pi:**
+```bash
+ssh pi@192.168.68.58 "cd ~/HomeManagement && git pull && cd packages/frontend && npx vite build"
+# Then restart Chromium or refresh browser
+```
+
+---
+
 ## Recent Work: Smart Weather Alerts (COMPLETED)
 
 Added intelligent weather alerts to the kiosk dashboard.

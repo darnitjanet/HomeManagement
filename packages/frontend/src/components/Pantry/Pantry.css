@@ -614,6 +614,8 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1001; /* Above modal overlay */
 }
 
 .pantry-form-modal .modal-header {
@@ -672,6 +674,17 @@
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: inherit;
+}
+
+/* Touch-friendly select improvements */
+.pantry-form-modal select {
+  min-height: 48px;
+  padding: 0.75rem;
+  font-size: 16px; /* Prevents iOS zoom */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  background-color: white;
 }
 
 .pantry-form-modal input:focus,

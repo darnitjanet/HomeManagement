@@ -187,6 +187,22 @@ input, textarea, select {
   font-family: inherit;
 }
 
+/* Touch-friendly select elements */
+select {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  background-color: white;
+  /* Prevent iOS zoom on focus */
+  font-size: 16px;
+}
+
+/* Ensure select options are interactive on touch devices */
+select option {
+  padding: 12px;
+  min-height: 44px;
+}
+
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--slate-400);

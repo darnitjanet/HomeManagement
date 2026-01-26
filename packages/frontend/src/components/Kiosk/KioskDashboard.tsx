@@ -28,7 +28,6 @@ import {
   Camera,
   MessageCircle,
   Timer,
-  Plus,
   ScanBarcode,
   ShoppingCart,
   Wifi,
@@ -229,7 +228,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     isSpeaking,
     isSupported: ttsSupported,
     speak: speakRaw,
-    stop: stopSpeaking,
+    stop: _stopSpeaking,
   } = useSpeechSynthesis();
 
   // Wrapper to include volume in speak calls
@@ -1335,8 +1334,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
                 step="0.1"
                 value={ttsVolume}
                 onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
-                onMouseUp={() => notificationsApi.updatePreferences({ ttsVolume })}
-                onTouchEnd={() => notificationsApi.updatePreferences({ ttsVolume })}
                 className="volume-slider"
               />
               <span className="volume-value">{Math.round(ttsVolume * 100)}%</span>
