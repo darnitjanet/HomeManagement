@@ -342,6 +342,13 @@ export async function lookupBarcode(req: Request, res: Response) {
 function mapOpenFoodFactsCategory(tags: string[]): string | null {
   const tagString = tags.join(' ').toLowerCase();
 
+  // Check specific food types first before generic categories
+  if (tagString.includes('pasta') || tagString.includes('spaghetti') || tagString.includes('noodle') || tagString.includes('macaroni')) {
+    return 'Grains & Pasta';
+  }
+  if (tagString.includes('grain') || tagString.includes('rice') || tagString.includes('cereal') || tagString.includes('oat')) {
+    return 'Grains & Pasta';
+  }
   if (tagString.includes('dairy') || tagString.includes('milk') || tagString.includes('cheese') || tagString.includes('yogurt')) {
     return 'Dairy';
   }
@@ -360,9 +367,6 @@ function mapOpenFoodFactsCategory(tags: string[]): string | null {
   if (tagString.includes('frozen')) {
     return 'Frozen';
   }
-  if (tagString.includes('beverage') || tagString.includes('drink') || tagString.includes('juice') || tagString.includes('soda') || tagString.includes('water')) {
-    return 'Beverages';
-  }
   if (tagString.includes('snack') || tagString.includes('chip') || tagString.includes('cracker') || tagString.includes('cookie')) {
     return 'Snacks';
   }
@@ -372,11 +376,12 @@ function mapOpenFoodFactsCategory(tags: string[]): string | null {
   if (tagString.includes('spice') || tagString.includes('herb') || tagString.includes('seasoning')) {
     return 'Spices & Seasonings';
   }
-  if (tagString.includes('grain') || tagString.includes('rice') || tagString.includes('pasta') || tagString.includes('cereal')) {
-    return 'Grains & Pasta';
-  }
   if (tagString.includes('canned') || tagString.includes('preserved')) {
     return 'Canned Goods';
+  }
+  // Check beverages last since some products have misleading tags
+  if (tagString.includes('beverage') || tagString.includes('drink') || tagString.includes('juice') || tagString.includes('soda') || tagString.includes('water')) {
+    return 'Beverages';
   }
 
   return null;
