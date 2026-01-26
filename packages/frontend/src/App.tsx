@@ -138,7 +138,7 @@ function App() {
         {currentPage === 'packages' && <PackagesList />}
       </main>
       <ToastContainer />
-      {currentPage === 'kiosk' && <VirtualKeyboard />}
+      <VirtualKeyboard />
     </div>
   );
 }
