@@ -11,6 +11,14 @@
   overflow: hidden;
 }
 
+.recipe-form-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
