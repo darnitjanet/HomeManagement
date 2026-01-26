@@ -35,6 +35,7 @@ import {
   Star,
   Gift,
   RotateCcw,
+  Minimize2,
 } from 'lucide-react';
 import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
@@ -1325,6 +1326,18 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         <button className="kiosk-exit-btn" onClick={onExit}>
           <X size={20} />
           <span>Exit</span>
+        </button>
+
+        <button
+          className="kiosk-control-btn"
+          onClick={() => {
+            // Open a new window to escape kiosk mode
+            // This opens YouTube in a new window with normal browser chrome
+            window.open('https://www.youtube.com', '_blank', 'menubar=yes,toolbar=yes,location=yes,status=yes');
+          }}
+          title="Open browser window (YouTube)"
+        >
+          <Minimize2 size={20} />
         </button>
 
         <div className="volume-control-wrapper">
