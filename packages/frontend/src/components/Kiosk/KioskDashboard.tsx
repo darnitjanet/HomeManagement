@@ -1946,9 +1946,8 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
       {showEmergency && <EmergencyInfo onClose={() => setShowEmergency(false)} />}
 
-      {/* Voice Input Button */}
-      {/* Voice input disabled - speech recognition not working on Pi/Chromium */}
-      {false && voiceSupported && (
+      {/* Voice Input Button - uses backend Vosk STT */}
+      {voiceSupported && (
         <div className="kiosk-voice-container">
           {/* Voice Result Feedback */}
           {voiceResult && (

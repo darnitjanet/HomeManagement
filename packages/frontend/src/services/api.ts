@@ -1184,12 +1184,24 @@ export const watchlistApi = {
   deleteItem: (id: number) => api.delete(`/watchlist/${id}`),
 };
 
-// TTS API (backend text-to-speech using espeak-ng)
+// TTS API (backend text-to-speech using Piper/espeak-ng)
 export const ttsApi = {
   speak: (text: string, options?: { speed?: number; pitch?: number; volume?: number; voice?: string }) =>
     api.post('/tts/speak', { text, ...options }),
   stop: () => api.post('/tts/stop'),
   getStatus: () => api.get('/tts/status'),
+};
+
+// STT API (backend speech-to-text using Vosk)
+export const sttApi = {
+  transcribe: (audioBlob: Blob) => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    return api.post('/stt/transcribe', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getStatus: () => api.get('/stt/status'),
 };
 
 export default api;
