@@ -97,24 +97,55 @@
 
 /* Enable touch scrolling globally */
 html, body, #root {
-  touch-action: pan-x pan-y;
+  touch-action: manipulation;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Make ALL elements allow touch scrolling by default */
+* {
+  touch-action: auto;
 }
 
 /* Make all scrollable containers touch-friendly */
 *[style*="overflow"],
 *[class*="scroll"],
-*[class*="list"] {
+*[class*="list"],
+*[class*="page"],
+*[class*="modal"],
+*[class*="container"] {
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* Ensure overflow-y auto/scroll elements are touch scrollable */
 .overflow-y-auto,
 .overflow-y-scroll {
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
   overscroll-behavior: contain;
+}
+
+/* Specific page containers */
+.todo-list,
+.shopping-list,
+.pantry-page,
+.contacts-page,
+.calendar-view,
+.movies-page,
+.games-page,
+.chores-page,
+.books-page,
+.plants-page,
+.assets-page,
+.recipes-page,
+.travel-page,
+.packages-page,
+.seasonal-tasks,
+.emergency-page,
+.kids-page,
+.mood-page {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
 }
 
 body {
