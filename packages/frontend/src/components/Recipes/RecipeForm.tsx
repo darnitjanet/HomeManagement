@@ -124,7 +124,7 @@ interface RecipeFormProps {
   initialData?: Partial<Recipe>;
 }
 
-const CUISINES = ['American', 'Asian', 'Chinese', 'French', 'Indian', 'Italian', 'Korean', 'Mediterranean', 'Mexican', 'Other'];
+const CUISINES = ['American', 'Asian', 'Chinese', 'French', 'Indian', 'Italian', 'Korean', 'Mediterranean', 'Mexican', 'Thai', 'Other'];
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Appetizer'];
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const DIETARY_OPTIONS = ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Low-Carb'];
