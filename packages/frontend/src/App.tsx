@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { enableGlobalTouchScroll } from './hooks/useTouchScroll';
 import { CalendarView } from './components/Calendar/CalendarView';
 import { ContactsList } from './components/Contacts/ContactsList';
 import { MoviesList } from './components/Movies/MoviesList';
@@ -36,6 +37,12 @@ function App() {
 
   useEffect(() => {
     checkAuthStatus();
+  }, []);
+
+  // Enable touch scrolling for Chromium/Wayland on Pi
+  useEffect(() => {
+    const cleanup = enableGlobalTouchScroll();
+    return cleanup;
   }, []);
 
   const checkAuthStatus = async () => {
