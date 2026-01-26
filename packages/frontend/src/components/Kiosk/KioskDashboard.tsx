@@ -240,6 +240,10 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [motionDetectionEnabled, setMotionDetectionEnabled] = useState(false);
   const resetSleepTimerRef = useRef<(() => void) | null>(null);
 
+  // Keyboard input state for kiosk
+  const [showKeyboardInput, setShowKeyboardInput] = useState(false);
+  const keyboardInputRef = useRef<HTMLInputElement | null>(null);
+
   // Hey Cosmo voice assistant state - starts disabled, user must click to enable (provides user gesture for mic)
   const [heyCosmoEnabled, setHeyCosmoEnabled] = useState(false);
   const [cosmoResponse, setCosmoResponse] = useState<string | null>(null);
@@ -1356,47 +1360,69 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         )}
 
-        {cosmoSupported && (
-          <button
-            className={`kiosk-control-btn cosmo-toggle ${heyCosmoEnabled ? 'active' : ''}`}
-            onClick={async () => {
-              if (!heyCosmoEnabled) {
-                // Request mic permission first, then enable
-                const granted = await requestMicPermission();
-                if (granted) {
-                  setHeyCosmoEnabled(true);
-                }
+        <button
+          className={`kiosk-control-btn cosmo-toggle ${heyCosmoEnabled ? 'active' : ''} ${!cosmoSupported ? 'unsupported' : ''}`}
+          onClick={async () => {
+            if (!cosmoSupported) {
+              // Show error message
+              setCosmoResponse('Speech recognition not supported in this browser');
+              setTimeout(() => setCosmoResponse(null), 3000);
+              return;
+            }
+            if (!heyCosmoEnabled) {
+              // Request mic permission first, then enable
+              const granted = await requestMicPermission();
+              if (granted) {
+                setHeyCosmoEnabled(true);
               } else {
-                setHeyCosmoEnabled(false);
+                setCosmoResponse('Microphone permission denied');
+                setTimeout(() => setCosmoResponse(null), 3000);
               }
-            }}
-            title={heyCosmoEnabled ? 'Disable Hey Cosmo' : 'Enable Hey Cosmo'}
-          >
-            <MessageCircle size={20} />
-            <span className="cosmo-label">Cosmo</span>
-          </button>
-        )}
+            } else {
+              setHeyCosmoEnabled(false);
+            }
+          }}
+          title={!cosmoSupported ? 'Speech not supported' : heyCosmoEnabled ? 'Disable Hey Cosmo' : 'Enable Hey Cosmo'}
+        >
+          <MessageCircle size={20} />
+          <span className="cosmo-label">Cosmo</span>
+        </button>
 
         <button
-          className="kiosk-control-btn keyboard-btn"
+          className={`kiosk-control-btn keyboard-btn ${showKeyboardInput ? 'active' : ''}`}
           onClick={() => {
-            // Create and focus a temporary input to trigger the virtual keyboard
-            const tempInput = document.createElement('input');
-            tempInput.type = 'text';
-            tempInput.style.position = 'fixed';
-            tempInput.style.bottom = '100px';
-            tempInput.style.left = '50%';
-            tempInput.style.transform = 'translateX(-50%)';
-            tempInput.style.fontSize = '18px';
-            tempInput.style.padding = '12px';
-            tempInput.style.zIndex = '9998';
-            tempInput.style.border = '2px solid #5b768a';
-            tempInput.style.borderRadius = '8px';
-            tempInput.placeholder = 'Type here...';
-            document.body.appendChild(tempInput);
-            tempInput.focus();
+            if (showKeyboardInput) {
+              // Hide the keyboard input
+              if (keyboardInputRef.current) {
+                keyboardInputRef.current.blur();
+                keyboardInputRef.current.remove();
+                keyboardInputRef.current = null;
+              }
+              setShowKeyboardInput(false);
+            } else {
+              // Create and focus a temporary input to trigger the virtual keyboard
+              const tempInput = document.createElement('input');
+              tempInput.type = 'text';
+              tempInput.style.position = 'fixed';
+              tempInput.style.bottom = '100px';
+              tempInput.style.left = '50%';
+              tempInput.style.transform = 'translateX(-50%)';
+              tempInput.style.fontSize = '18px';
+              tempInput.style.padding = '12px';
+              tempInput.style.width = '80%';
+              tempInput.style.maxWidth = '400px';
+              tempInput.style.zIndex = '9998';
+              tempInput.style.border = '2px solid #5b768a';
+              tempInput.style.borderRadius = '8px';
+              tempInput.style.backgroundColor = '#eed6aa';
+              tempInput.placeholder = 'Type here... (tap keyboard button to close)';
+              document.body.appendChild(tempInput);
+              tempInput.focus();
+              keyboardInputRef.current = tempInput;
+              setShowKeyboardInput(true);
+            }
           }}
-          title="Show Keyboard"
+          title={showKeyboardInput ? 'Hide Keyboard' : 'Show Keyboard'}
         >
           ⌨
         </button>
@@ -1511,7 +1537,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       )}
 
       {/* Hey Cosmo Assistant Indicator */}
-      {heyCosmoEnabled && cosmoSupported && (
+      {(heyCosmoEnabled && cosmoSupported) && (
         <div className={`cosmo-assistant ${cosmoAwake ? 'awake' : ''} ${cosmoListening ? 'listening' : ''}`}>
           <div className="cosmo-indicator">
             <MessageCircle size={24} />
@@ -1525,6 +1551,12 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           {cosmoResponse && (
             <div className="cosmo-response">{cosmoResponse}</div>
           )}
+        </div>
+      )}
+      {/* Cosmo error/response messages when not enabled */}
+      {cosmoResponse && !heyCosmoEnabled && (
+        <div className="cosmo-assistant error">
+          <div className="cosmo-response">{cosmoResponse}</div>
         </div>
       )}
 

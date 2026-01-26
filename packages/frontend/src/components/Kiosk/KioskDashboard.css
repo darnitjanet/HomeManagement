@@ -1206,6 +1206,26 @@
   color: #c4b5fd;
 }
 
+.kiosk-control-btn.cosmo-toggle.unsupported {
+  opacity: 0.7;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.kiosk-control-btn.keyboard-btn.active {
+  background: rgba(91, 118, 138, 0.4);
+  border-color: rgba(91, 118, 138, 0.6);
+}
+
+.cosmo-assistant.error {
+  top: 80px;
+}
+
+.cosmo-assistant.error .cosmo-response {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
 .cosmo-assistant {
   position: fixed;
   top: 24px;
