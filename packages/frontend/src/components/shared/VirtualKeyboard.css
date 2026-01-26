@@ -51,7 +51,7 @@
 
 .keyboard-close-btn {
   position: absolute;
-  top: 4px;
+  top: -36px;
   right: 8px;
   width: 32px;
   height: 32px;
@@ -65,6 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .keyboard-close-btn:hover {

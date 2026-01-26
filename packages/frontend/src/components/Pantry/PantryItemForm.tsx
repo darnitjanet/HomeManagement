@@ -124,9 +124,8 @@ export function PantryItemForm({ item, constants, onClose, onSave }: PantryItemF
     <div
       className="modal-overlay"
       onClick={handleOverlayClick}
-      onTouchEnd={handleOverlayClick}
     >
-      <div className="pantry-form-modal" onClick={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
+      <div className="pantry-form-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{item ? 'Edit Item' : 'Add Pantry Item'}</h2>
           <button className="close-btn" onClick={onClose}>

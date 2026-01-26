@@ -606,7 +606,6 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
-  touch-action: none; /* Prevent touch on overlay itself */
 }
 
 .pantry-form-modal {
