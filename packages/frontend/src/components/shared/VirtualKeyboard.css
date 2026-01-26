@@ -44,8 +44,9 @@
 
 .virtual-keyboard-wrapper {
   position: relative;
-  max-width: 100%;
-  padding: 8px;
+  max-width: 600px; /* Limit keyboard width */
+  margin: 0 auto;
+  padding: 4px 8px;
 }
 
 .keyboard-close-btn {
@@ -71,22 +72,29 @@
 }
 
 .keyboard-container {
-  padding-top: 8px;
+  padding-top: 4px;
 }
 
-/* Override simple-keyboard styles */
+/* Override simple-keyboard styles - compact keyboard */
 .simple-keyboard {
   background: transparent !important;
   padding: 0 !important;
 }
 
+.simple-keyboard .hg-row {
+  margin-bottom: 4px !important;
+}
+
 .simple-keyboard .hg-button {
-  height: 50px !important;
-  font-size: 18px !important;
+  height: 38px !important;
+  min-width: 28px !important;
+  font-size: 14px !important;
   background: white !important;
   border: 1px solid #ccc !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+  margin: 1px !important;
+  padding: 0 6px !important;
 }
 
 .simple-keyboard .hg-button:active,
@@ -95,7 +103,8 @@
 }
 
 .simple-keyboard .hg-button-space {
-  min-width: 300px !important;
+  min-width: 150px !important;
+  max-width: 200px !important;
 }
 
 .simple-keyboard .hg-button-bksp,
@@ -103,6 +112,7 @@
 .simple-keyboard .hg-button-shift {
   background: #5b768a !important;
   color: white !important;
+  min-width: 50px !important;
 }
 
 .simple-keyboard .hg-button-bksp:active,
@@ -111,10 +121,10 @@
   background: #4a6579 !important;
 }
 
-/* For touch devices - larger hit targets */
+/* Touch devices - slightly larger but still compact */
 @media (pointer: coarse) {
   .simple-keyboard .hg-button {
-    height: 55px !important;
-    font-size: 20px !important;
+    height: 42px !important;
+    font-size: 15px !important;
   }
 }

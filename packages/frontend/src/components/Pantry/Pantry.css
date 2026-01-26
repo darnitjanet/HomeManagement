@@ -606,6 +606,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  touch-action: none; /* Prevent touch on overlay itself */
 }
 
 .pantry-form-modal {
@@ -614,7 +615,10 @@
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow-y: scroll; /* Use scroll for better touch support */
+  -webkit-overflow-scrolling: touch; /* Momentum scrolling on touch */
+  touch-action: pan-y; /* Allow vertical touch scrolling */
+  overscroll-behavior: contain;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   position: relative;
   z-index: 1001; /* Above modal overlay */
