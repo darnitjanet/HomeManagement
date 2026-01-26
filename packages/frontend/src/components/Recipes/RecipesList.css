@@ -11,6 +11,8 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  touch-action: none;
+  overflow: hidden;
 }
 
 .recipes-page {

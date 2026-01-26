@@ -27,5 +27,9 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/multer": "^2.0.0",
+    "multer": "^2.0.2"
   }
 }
