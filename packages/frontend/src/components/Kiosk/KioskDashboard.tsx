@@ -47,6 +47,37 @@ import { generateWakeAnnouncement } from '../../utils/announcementGenerator';
 import { EmergencyInfo } from '../Emergency/EmergencyInfo';
 import './KioskDashboard.css';
 
+// Play alarm sound using Web Audio API
+const playAlarmSound = () => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+  const playBeep = (startTime: number, frequency: number, duration: number) => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+
+    gainNode.gain.setValueAtTime(0.5, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
+  };
+
+  const now = audioContext.currentTime;
+  // Play a series of beeps: 3 sets of 3 beeps
+  for (let set = 0; set < 3; set++) {
+    for (let beep = 0; beep < 3; beep++) {
+      const time = now + (set * 1.2) + (beep * 0.2);
+      playBeep(time, 880, 0.15); // A5 note
+    }
+  }
+};
+
 interface KioskDashboardProps {
   onExit: () => void;
 }
@@ -291,12 +322,16 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         const finished = updated.filter(t => t.remainingSeconds <= 0);
         const remaining = updated.filter(t => t.remainingSeconds > 0);
 
-        // Announce finished timers
-        finished.forEach(timer => {
-          if (ttsEnabled && ttsSupported) {
-            speak(`Your ${timer.label} timer is done!`);
-          }
-        });
+        // Announce finished timers with alarm sound
+        if (finished.length > 0) {
+          playAlarmSound();
+          finished.forEach(timer => {
+            if (ttsEnabled && ttsSupported) {
+              // Delay TTS slightly so alarm plays first
+              setTimeout(() => speak(`Your ${timer.label} timer is done!`), 500);
+            }
+          });
+        }
 
         return remaining;
       });
