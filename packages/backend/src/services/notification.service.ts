@@ -560,14 +560,13 @@ export class NotificationService {
     let count = 0;
 
     for (const contact of upcomingBirthdays) {
-      // Check if we already have a notification for this contact today
+      // Check if we already have an undismissed notification for this contact's birthday
       const existing = await this.notificationRepo.findByEntity('contact', contact.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today && n.type === 'birthday_reminder'
+      const hasUndismissedNotification = existing.some(
+        (n) => n.type === 'birthday_reminder' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasUndismissedNotification) {
         await this.createBirthdayNotification({
           id: contact.id,
           name: contact.displayName,
