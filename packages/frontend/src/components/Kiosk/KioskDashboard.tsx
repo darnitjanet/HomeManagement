@@ -768,14 +768,13 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     setTimeout(() => speakRef.current(announcement), 500);
   }, []);
 
-  // Initial load announcement - runs ONCE when loading completes
+  // Track when initial load completes (but don't announce - only announce on wake from sleep)
   useEffect(() => {
     if (!loading && !initialLoadCompleteRef.current) {
       initialLoadCompleteRef.current = true;
-      console.log('[TTS] Initial load complete, announcing...');
-      makeWakeAnnouncement();
+      console.log('[TTS] Initial load complete');
     }
-  }, [loading, makeWakeAnnouncement]);
+  }, [loading]);
 
   // Track sleep start time
   useEffect(() => {
