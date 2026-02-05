@@ -706,6 +706,8 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const ttsSupportedRef = useRef(ttsSupported);
   const initialLoadCompleteRef = useRef(false); // Track if initial load is done
   const hasAnnouncedThisSessionRef = useRef(false); // Prevent HMR duplicates
+  const lastAnnouncementTimeRef = useRef<number>(0); // Track last announcement for cooldown
+  const ANNOUNCEMENT_COOLDOWN = 60 * 60 * 1000; // 1 hour between announcements
 
   // Keep refs updated (no effect triggers, just updates refs)
   useEffect(() => {
@@ -728,7 +730,16 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       console.log('[TTS] Skipping announcement (already announced this session)');
       return;
     }
+
+    // Check cooldown - only announce once per hour
+    const timeSinceLastAnnouncement = Date.now() - lastAnnouncementTimeRef.current;
+    if (timeSinceLastAnnouncement < ANNOUNCEMENT_COOLDOWN) {
+      console.log(`[TTS] Skipping announcement (cooldown: ${Math.round((ANNOUNCEMENT_COOLDOWN - timeSinceLastAnnouncement) / 60000)} min remaining)`);
+      return;
+    }
+
     hasAnnouncedThisSessionRef.current = true;
+    lastAnnouncementTimeRef.current = Date.now();
 
     const currentWeather = weatherRef.current;
     const alerts: { message: string; icon: string; type: 'info' | 'warning' | 'danger' }[] = [];
