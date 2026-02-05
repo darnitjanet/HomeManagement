@@ -194,7 +194,9 @@ export class ContactRepository {
       .whereNotNull('birthday')
       .where('birthday', '!=', '');
 
+    // Normalize today to midnight for date-only comparison
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const upcoming: (Contact & { daysUntil: number })[] = [];
 
     for (const contact of contacts) {
@@ -205,15 +207,17 @@ export class ContactRepository {
 
       const thisYear = today.getFullYear();
 
-      // Create date for this year's birthday
+      // Create date for this year's birthday (at midnight)
       let birthdayDate = new Date(thisYear, month - 1, day);
+      birthdayDate.setHours(0, 0, 0, 0);
 
       // If birthday already passed this year, check next year
       if (birthdayDate < today) {
         birthdayDate = new Date(thisYear + 1, month - 1, day);
+        birthdayDate.setHours(0, 0, 0, 0);
       }
 
-      const daysUntil = Math.ceil((birthdayDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntil = Math.round((birthdayDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
       if (daysUntil >= 0 && daysUntil <= daysAhead) {
         const mappedContact = this.mapFromDb(contact);
