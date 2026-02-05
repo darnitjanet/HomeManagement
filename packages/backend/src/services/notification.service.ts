@@ -560,20 +560,43 @@ export class NotificationService {
     let count = 0;
 
     for (const contact of upcomingBirthdays) {
-      // Check if we already have an undismissed notification for this contact's birthday
       const existing = await this.notificationRepo.findByEntity('contact', contact.id);
-      const hasUndismissedNotification = existing.some(
+      const undismissedBirthdayNotifications = existing.filter(
         (n) => n.type === 'birthday_reminder' && !n.isDismissed
       );
 
-      if (!hasUndismissedNotification) {
-        await this.createBirthdayNotification({
-          id: contact.id,
-          name: contact.displayName,
-          birthday: contact.birthday || '',
-          daysUntil: contact.daysUntil,
-        });
-        count++;
+      // On the actual birthday, dismiss old "upcoming" notifications and create fresh one
+      if (contact.daysUntil === 0) {
+        // Check if we already have a "today" notification
+        const hasTodayNotification = undismissedBirthdayNotifications.some(
+          (n) => n.title === 'Birthday Today!'
+        );
+
+        if (!hasTodayNotification) {
+          // Dismiss old "upcoming" notifications
+          for (const oldNotification of undismissedBirthdayNotifications) {
+            await this.notificationRepo.dismiss(oldNotification.id);
+          }
+
+          await this.createBirthdayNotification({
+            id: contact.id,
+            name: contact.displayName,
+            birthday: contact.birthday || '',
+            daysUntil: contact.daysUntil,
+          });
+          count++;
+        }
+      } else {
+        // For upcoming birthdays, only create if no undismissed notification exists
+        if (undismissedBirthdayNotifications.length === 0) {
+          await this.createBirthdayNotification({
+            id: contact.id,
+            name: contact.displayName,
+            birthday: contact.birthday || '',
+            daysUntil: contact.daysUntil,
+          });
+          count++;
+        }
       }
     }
 
