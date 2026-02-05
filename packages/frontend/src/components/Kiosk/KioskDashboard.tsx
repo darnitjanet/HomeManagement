@@ -48,33 +48,42 @@ import { EmergencyInfo } from '../Emergency/EmergencyInfo';
 import './KioskDashboard.css';
 
 // Play alarm sound using Web Audio API
-const playAlarmSound = () => {
-  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+const playAlarmSound = async () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-  const playBeep = (startTime: number, frequency: number, duration: number) => {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.5, startTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration);
-  };
-
-  const now = audioContext.currentTime;
-  // Play a series of beeps: 3 sets of 3 beeps
-  for (let set = 0; set < 3; set++) {
-    for (let beep = 0; beep < 3; beep++) {
-      const time = now + (set * 1.2) + (beep * 0.2);
-      playBeep(time, 880, 0.15); // A5 note
+    // Resume context if suspended (browser autoplay policy)
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
     }
+
+    const playBeep = (startTime: number, frequency: number, duration: number) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'square'; // Louder, more alarm-like
+
+      gainNode.gain.setValueAtTime(1.0, startTime); // Full volume
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+
+    const now = audioContext.currentTime;
+    // Play a loud, attention-getting alarm: 4 sets of 3 beeps
+    for (let set = 0; set < 4; set++) {
+      for (let beep = 0; beep < 3; beep++) {
+        const time = now + (set * 1.0) + (beep * 0.15);
+        playBeep(time, 1000, 0.12); // Higher pitch, more urgent
+      }
+    }
+  } catch (err) {
+    console.error('Failed to play alarm sound:', err);
   }
 };
 
