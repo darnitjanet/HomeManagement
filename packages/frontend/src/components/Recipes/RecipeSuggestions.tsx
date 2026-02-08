@@ -140,12 +140,20 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
     setSuggestions([]);
 
     try {
+      console.log('[RecipeSuggestions] Requesting from ingredients:', validIngredients);
       const response = await recipesApi.suggestFromIngredients(validIngredients);
+      console.log('[RecipeSuggestions] Response:', response.data);
       if (response.data.success) {
         setSuggestions(response.data.data);
+        if (response.data.data.length === 0) {
+          setError('No recipes found for these ingredients. Try adding more.');
+        }
+      } else {
+        setError(response.data.error || 'Failed to get suggestions');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to get suggestions');
+      console.error('[RecipeSuggestions] Error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to get suggestions');
     } finally {
       setLoading(false);
     }
@@ -164,12 +172,20 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
       if (prefDietary) preferences.dietary = prefDietary;
       if (prefMaxTime) preferences.maxTimeMinutes = prefMaxTime;
 
+      console.log('[RecipeSuggestions] Requesting by preference:', preferences);
       const response = await recipesApi.suggestByPreference(preferences);
+      console.log('[RecipeSuggestions] Response:', response.data);
       if (response.data.success) {
         setSuggestions(response.data.data);
+        if (response.data.data.length === 0) {
+          setError('No recipes found. Try different preferences.');
+        }
+      } else {
+        setError(response.data.error || 'Failed to get suggestions');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to get suggestions');
+      console.error('[RecipeSuggestions] Error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to get suggestions');
     } finally {
       setLoading(false);
     }
