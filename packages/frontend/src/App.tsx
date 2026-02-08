@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { enableGlobalTouchScroll } from './hooks/useTouchScroll';
 import { CalendarView } from './components/Calendar/CalendarView';
 import { ContactsList } from './components/Contacts/ContactsList';
@@ -44,6 +44,52 @@ function App() {
     const cleanup = enableGlobalTouchScroll();
     return cleanup;
   }, []);
+
+  // Auto-switch to kiosk mode after 5 minutes of inactivity
+  const KIOSK_INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetInactivityTimer = useCallback(() => {
+    // Don't set timer if already in kiosk mode
+    if (currentPage === 'kiosk') return;
+
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    inactivityTimerRef.current = setTimeout(() => {
+      setCurrentPage('kiosk');
+      // Update URL to reflect kiosk mode
+      window.history.pushState({}, '', '/kiosk');
+    }, KIOSK_INACTIVITY_TIMEOUT);
+  }, [currentPage]);
+
+  useEffect(() => {
+    // Only run inactivity timer when not in kiosk mode
+    if (currentPage === 'kiosk') {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+      return;
+    }
+
+    const events = ['mousedown', 'mousemove', 'touchstart', 'touchmove', 'keydown', 'scroll'];
+
+    events.forEach((event) => {
+      window.addEventListener(event, resetInactivityTimer);
+    });
+
+    // Start the timer
+    resetInactivityTimer();
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, resetInactivityTimer);
+      });
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+    };
+  }, [currentPage, resetInactivityTimer]);
 
   const checkAuthStatus = async () => {
     try {
