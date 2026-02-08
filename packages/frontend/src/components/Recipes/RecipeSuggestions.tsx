@@ -446,8 +446,11 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
               <div style={{ background: '#ffe', padding: '10px', marginBottom: '10px', fontSize: '12px', whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'auto' }}>
                 DEBUG: {JSON.stringify(suggestions[0], null, 2)}
               </div>
-              <div className="suggestions-list">
-                {suggestions.map((suggestion, index) => (
+              <div className="suggestions-list" style={{ background: 'lightgreen', padding: '20px' }}>
+                <div style={{ background: 'yellow', padding: '10px', marginBottom: '10px' }}>TEST: If you see this, the list container is visible</div>
+                {suggestions.map((suggestion, index) => {
+                  console.log('Rendering suggestion:', index, suggestion.name);
+                  return (
                   <div key={index} className="suggestion-card" style={{ border: '2px solid red' }}>
                     <div className="suggestion-info">
                       <h4 style={{ color: 'blue' }}>{suggestion.name || 'Unnamed Recipe'}</h4>
@@ -478,7 +481,8 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
                       )}
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
