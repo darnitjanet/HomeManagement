@@ -442,24 +442,50 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
 
           {suggestions.length > 0 && (
             <div className="suggestions-results">
-              <h3>Recipe Ideas ({suggestions.length} found)</h3>
-              <ul style={{ listStyle: 'decimal', paddingLeft: '20px' }}>
+              <h3>Recipe Ideas</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {suggestions.map((s, i) => (
-                  <li key={i} style={{ marginBottom: '15px', padding: '10px', background: '#f0f0f0', borderRadius: '8px' }}>
-                    <strong>{s.name}</strong>
-                    <br />
-                    <span style={{ fontSize: '14px', color: '#666' }}>{s.description}</span>
-                    <br />
+                  <div key={i} style={{
+                    padding: '16px',
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '12px'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '16px', marginBottom: '4px', color: '#1f2937' }}>{s.name}</div>
+                      <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>{s.description}</div>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {s.cuisine && <span style={{ fontSize: '12px', padding: '2px 8px', background: '#e5e7eb', borderRadius: '4px' }}>{s.cuisine}</span>}
+                        {s.estimatedTime && <span style={{ fontSize: '12px', padding: '2px 8px', background: '#e5e7eb', borderRadius: '4px' }}>{s.estimatedTime}</span>}
+                      </div>
+                    </div>
                     <button
-                      style={{ marginTop: '8px', padding: '8px 16px', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                      style={{
+                        padding: '8px 12px',
+                        background: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        whiteSpace: 'nowrap'
+                      }}
                       onClick={() => handleGenerateRecipe(s)}
                       disabled={generating}
                     >
-                      {generating ? 'Generating...' : 'Create Full Recipe'}
+                      <ChefHat size={14} /> {generating ? 'Generating...' : 'Create Recipe'}
                     </button>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
