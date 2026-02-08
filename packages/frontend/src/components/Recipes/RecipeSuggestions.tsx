@@ -443,50 +443,23 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
           {suggestions.length > 0 && (
             <div className="suggestions-results">
               <h3>Recipe Ideas ({suggestions.length} found)</h3>
-              <div style={{ background: 'lime', padding: '15px', marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>
-                TEST BEFORE DEBUG - Can you see this green box?
-              </div>
-              <div style={{ background: '#ffe', padding: '10px', marginBottom: '10px', fontSize: '10px', whiteSpace: 'pre-wrap', maxHeight: '80px', overflow: 'auto' }}>
-                DEBUG: {JSON.stringify(suggestions[0], null, 2)}
-              </div>
-              <div className="suggestions-list" style={{ background: 'cyan', padding: '20px', minHeight: '100px' }}>
-                <div style={{ background: 'orange', padding: '15px', marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>TEST INSIDE LIST - Can you see this orange box?</div>
-                {suggestions.map((suggestion, index) => {
-                  console.log('Rendering suggestion:', index, suggestion.name);
-                  return (
-                  <div key={index} className="suggestion-card" style={{ border: '2px solid red' }}>
-                    <div className="suggestion-info">
-                      <h4 style={{ color: 'blue' }}>{suggestion.name || 'Unnamed Recipe'}</h4>
-                      <p>{suggestion.description || 'No description'}</p>
-                      <div className="suggestion-meta">
-                        {suggestion.estimatedTime && (
-                          <span className="meta-tag">{suggestion.estimatedTime}</span>
-                        )}
-                        {suggestion.difficulty && (
-                          <span className="meta-tag">{suggestion.difficulty}</span>
-                        )}
-                        {suggestion.cuisine && (
-                          <span className="meta-tag">{suggestion.cuisine}</span>
-                        )}
-                      </div>
-                    </div>
+              <ul style={{ listStyle: 'decimal', paddingLeft: '20px' }}>
+                {suggestions.map((s, i) => (
+                  <li key={i} style={{ marginBottom: '15px', padding: '10px', background: '#f0f0f0', borderRadius: '8px' }}>
+                    <strong>{s.name}</strong>
+                    <br />
+                    <span style={{ fontSize: '14px', color: '#666' }}>{s.description}</span>
+                    <br />
                     <button
-                      className="generate-btn"
-                      onClick={() => handleGenerateRecipe(suggestion)}
+                      style={{ marginTop: '8px', padding: '8px 16px', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                      onClick={() => handleGenerateRecipe(s)}
                       disabled={generating}
                     >
-                      {generating ? (
-                        <Loader2 size={16} className="spinner" />
-                      ) : (
-                        <>
-                          <ChefHat size={16} /> Create Recipe
-                        </>
-                      )}
+                      {generating ? 'Generating...' : 'Create Full Recipe'}
                     </button>
-                  </div>
-                  );
-                })}
-              </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
