@@ -443,11 +443,14 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
           {suggestions.length > 0 && (
             <div className="suggestions-results">
               <h3>Recipe Ideas ({suggestions.length} found)</h3>
-              <div style={{ background: '#ffe', padding: '10px', marginBottom: '10px', fontSize: '12px', whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'auto' }}>
+              <div style={{ background: 'lime', padding: '15px', marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+                TEST BEFORE DEBUG - Can you see this green box?
+              </div>
+              <div style={{ background: '#ffe', padding: '10px', marginBottom: '10px', fontSize: '10px', whiteSpace: 'pre-wrap', maxHeight: '80px', overflow: 'auto' }}>
                 DEBUG: {JSON.stringify(suggestions[0], null, 2)}
               </div>
-              <div className="suggestions-list" style={{ background: 'lightgreen', padding: '20px' }}>
-                <div style={{ background: 'yellow', padding: '10px', marginBottom: '10px' }}>TEST: If you see this, the list container is visible</div>
+              <div className="suggestions-list" style={{ background: 'cyan', padding: '20px', minHeight: '100px' }}>
+                <div style={{ background: 'orange', padding: '15px', marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>TEST INSIDE LIST - Can you see this orange box?</div>
                 {suggestions.map((suggestion, index) => {
                   console.log('Rendering suggestion:', index, suggestion.name);
                   return (
