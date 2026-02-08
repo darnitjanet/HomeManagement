@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Clock, Users, Heart, ShoppingCart, Sparkles, Link, CalendarDays } from 'lucide-react';
-import { recipesApi } from '../../services/api';
+import { Trash2, Clock, Users, Heart, ShoppingCart, Sparkles, Link, CalendarDays, X, Check, Package } from 'lucide-react';
+import { recipesApi, pantryApi } from '../../services/api';
 import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
 import { RecipeSuggestions } from './RecipeSuggestions';
 import { RecipeImport } from './RecipeImport';
 import { MealPlanner } from './MealPlanner';
+import { MicButton } from '../common/MicButton';
 import './RecipesList.css';
 
 interface RecipeIngredient {
@@ -62,6 +63,13 @@ export function RecipesList() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showMealPlanner, setShowMealPlanner] = useState(false);
+
+  // Shopping list ingredient selection
+  const [showIngredientSelect, setShowIngredientSelect] = useState(false);
+  const [ingredientSelectRecipe, setIngredientSelectRecipe] = useState<Recipe | null>(null);
+  const [selectedIngredients, setSelectedIngredients] = useState<Set<number>>(new Set());
+  const [pantryItems, setPantryItems] = useState<string[]>([]);
+  const [addingToShopping, setAddingToShopping] = useState(false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -172,15 +180,76 @@ export function RecipesList() {
     }
   };
 
-  const handleAddToShopping = async (id: number) => {
+  const handleAddToShopping = async (recipeId: number) => {
+    // Find the recipe
+    const recipe = recipes.find(r => r.id === recipeId) || selectedRecipe;
+    if (!recipe || !recipe.ingredients || recipe.ingredients.length === 0) {
+      alert('No ingredients to add');
+      return;
+    }
+
+    // Fetch pantry items to compare
     try {
-      const response = await recipesApi.addToShopping(id);
+      const pantryRes = await pantryApi.getIngredients();
+      if (pantryRes.data.success) {
+        setPantryItems(pantryRes.data.data.map((p: string) => p.toLowerCase()));
+      }
+    } catch (err) {
+      console.error('Failed to fetch pantry items:', err);
+      setPantryItems([]);
+    }
+
+    // Pre-select ingredients NOT in pantry
+    const notInPantry = new Set<number>();
+    recipe.ingredients.forEach(ing => {
+      const ingName = ing.name.toLowerCase();
+      const inPantry = pantryItems.some(p =>
+        p.includes(ingName) || ingName.includes(p)
+      );
+      if (!inPantry) {
+        notInPantry.add(ing.id);
+      }
+    });
+
+    setSelectedIngredients(notInPantry);
+    setIngredientSelectRecipe(recipe);
+    setShowIngredientSelect(true);
+  };
+
+  const handleConfirmAddToShopping = async () => {
+    if (!ingredientSelectRecipe || selectedIngredients.size === 0) return;
+
+    setAddingToShopping(true);
+    try {
+      const response = await recipesApi.addToShopping(ingredientSelectRecipe.id, {
+        ingredientIds: Array.from(selectedIngredients)
+      });
       if (response.data.success) {
         alert(`Added ${response.data.data.addedItems.length} items to shopping list!`);
+        setShowIngredientSelect(false);
+        setIngredientSelectRecipe(null);
       }
     } catch (error) {
       console.error('Add to shopping failed:', error);
+      alert('Failed to add items to shopping list');
+    } finally {
+      setAddingToShopping(false);
     }
+  };
+
+  const toggleIngredient = (id: number) => {
+    const newSet = new Set(selectedIngredients);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIngredients(newSet);
+  };
+
+  const isInPantry = (ingredientName: string): boolean => {
+    const ingName = ingredientName.toLowerCase();
+    return pantryItems.some(p => p.includes(ingName) || ingName.includes(p));
   };
 
   const formatTime = (prepMinutes?: number, cookMinutes?: number): string => {
@@ -235,13 +304,16 @@ export function RecipesList() {
       </div>
 
       <div className="recipes-filters">
-        <input
-          type="text"
-          placeholder="Search recipes..."
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="search-input"
-        />
+        <div className="input-with-mic">
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="search-input"
+          />
+          <MicButton onResult={(text) => handleSearch(text)} />
+        </div>
 
         <select value={selectedCuisine} onChange={(e) => setSelectedCuisine(e.target.value)}>
           <option value="">All Cuisines</option>
@@ -423,6 +495,124 @@ export function RecipesList() {
 
       {showMealPlanner && (
         <MealPlanner onClose={() => setShowMealPlanner(false)} />
+      )}
+
+      {/* Ingredient Selection Modal */}
+      {showIngredientSelect && ingredientSelectRecipe && (
+        <div className="modal-overlay" onClick={() => setShowIngredientSelect(false)}>
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '12px',
+              width: '90%',
+              maxWidth: '500px',
+              maxHeight: '80vh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShoppingCart size={20} /> Add to Shopping List
+              </h2>
+              <button onClick={() => setShowIngredientSelect(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                <X size={24} color="#6b7280" />
+              </button>
+            </div>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
+                Select ingredients to add for <strong>{ingredientSelectRecipe.name}</strong>
+              </p>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 20px' }}>
+              {ingredientSelectRecipe.ingredients?.map((ing) => {
+                const inPantry = isInPantry(ing.name);
+                const isSelected = selectedIngredients.has(ing.id);
+                return (
+                  <div
+                    key={ing.id}
+                    onClick={() => toggleIngredient(ing.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '12px',
+                      marginBottom: '8px',
+                      background: isSelected ? '#ecfdf5' : inPantry ? '#f3f4f6' : '#fff',
+                      border: `1px solid ${isSelected ? '#10b981' : '#e5e7eb'}`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '4px',
+                        border: `2px solid ${isSelected ? '#10b981' : '#d1d5db'}`,
+                        background: isSelected ? '#10b981' : 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: '12px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isSelected && <Check size={14} color="white" />}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 500, color: inPantry ? '#9ca3af' : '#1f2937' }}>
+                        {ing.quantity && `${ing.quantity} `}
+                        {ing.unit && `${ing.unit} `}
+                        {ing.name}
+                        {ing.preparation && <span style={{ color: '#9ca3af' }}> ({ing.preparation})</span>}
+                      </div>
+                    </div>
+                    {inPantry && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#059669', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
+                        <Package size={12} /> In Pantry
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '12px', padding: '16px 20px', borderTop: '1px solid #e5e7eb', background: '#f9fafb' }}>
+              <button
+                onClick={() => setShowIngredientSelect(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAddToShopping}
+                disabled={selectedIngredients.size === 0 || addingToShopping}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: selectedIngredients.size === 0 ? '#9ca3af' : '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: selectedIngredients.size === 0 ? 'not-allowed' : 'pointer',
+                  fontWeight: 500,
+                }}
+              >
+                {addingToShopping ? 'Adding...' : `Add ${selectedIngredients.size} Items`}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
