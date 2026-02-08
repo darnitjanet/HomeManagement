@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, AlertTriangle, ChefHat, Package, Barcode, Undo2, ShoppingCart } from 'lucide-react';
+import { Plus, Search, AlertTriangle, ChefHat, Package, Barcode, Undo2, ShoppingCart, X, Loader2, Sparkles } from 'lucide-react';
 import { pantryApi, recipesApi, shoppingApi } from '../../services/api';
 import { PantryItemForm } from './PantryItemForm';
 import { QuickScanModal } from './QuickScanModal';
+import { MicButton } from '../common/MicButton';
 import './Pantry.css';
 
 interface PantryItem {
@@ -66,6 +67,9 @@ export function PantryInventory() {
   const [showQuickScan, setShowQuickScan] = useState(false);
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
   const [suggestingRecipes, setSuggestingRecipes] = useState(false);
+  const [showRecipeSuggestions, setShowRecipeSuggestions] = useState(false);
+  const [recipeSuggestions, setRecipeSuggestions] = useState<any[]>([]);
+  const [generatingRecipe, setGeneratingRecipe] = useState(false);
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info'; action?: () => void; actionLabel?: string } | null>(null);
@@ -235,12 +239,16 @@ export function PantryInventory() {
 
   const handleSuggestRecipes = async () => {
     setSuggestingRecipes(true);
+    setRecipeSuggestions([]);
     try {
       const ingredientsRes = await pantryApi.getIngredients();
       if (ingredientsRes.data.success && ingredientsRes.data.data.length > 0) {
         const res = await recipesApi.suggestFromIngredients(ingredientsRes.data.data);
-        if (res.data.success) {
-          alert(`Recipe suggestions based on your pantry:\n\n${res.data.data.map((r: any) => `- ${r.name}: ${r.description}`).join('\n')}`);
+        if (res.data.success && res.data.data.length > 0) {
+          setRecipeSuggestions(res.data.data);
+          setShowRecipeSuggestions(true);
+        } else {
+          alert('No recipe suggestions found for your pantry items.');
         }
       } else {
         alert('Add some items to your pantry first!');
@@ -250,6 +258,41 @@ export function PantryInventory() {
       alert('Failed to get recipe suggestions. Make sure AI is enabled.');
     } finally {
       setSuggestingRecipes(false);
+    }
+  };
+
+  const handleGenerateRecipe = async (suggestion: any) => {
+    setGeneratingRecipe(true);
+    try {
+      const res = await recipesApi.generateFromSuggestion({
+        name: suggestion.name,
+        description: suggestion.description,
+        cuisine: suggestion.cuisine,
+      });
+      if (res.data.success) {
+        // Create the recipe
+        const recipe = res.data.data;
+        const createRes = await recipesApi.createRecipe({
+          name: recipe.name,
+          instructions: recipe.instructions,
+          prepTimeMinutes: recipe.prepTimeMinutes,
+          cookTimeMinutes: recipe.cookTimeMinutes,
+          servings: recipe.servings,
+          cuisine: recipe.cuisine,
+          mealType: recipe.mealType,
+          difficulty: recipe.difficulty,
+          ingredients: recipe.ingredients,
+        });
+        if (createRes.data.success) {
+          setShowRecipeSuggestions(false);
+          showToast(`Recipe "${recipe.name}" created!`, 'success');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to generate recipe:', err);
+      alert('Failed to generate recipe.');
+    } finally {
+      setGeneratingRecipe(false);
     }
   };
 
@@ -338,6 +381,7 @@ export function PantryInventory() {
               &times;
             </button>
           )}
+          <MicButton onResult={(text) => { setSearchQuery(text); }} />
         </div>
         <select
           value={filterCategory}
@@ -455,6 +499,88 @@ export function PantryInventory() {
           onClose={() => setShowQuickScan(false)}
           onComplete={loadData}
         />
+      )}
+
+      {/* Recipe suggestions modal */}
+      {showRecipeSuggestions && (
+        <div className="modal-overlay" onClick={() => setShowRecipeSuggestions(false)}>
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '12px',
+              width: '90%',
+              maxWidth: '600px',
+              maxHeight: '90vh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} style={{ color: '#8b5cf6' }} /> What Can I Make?
+              </h2>
+              <button onClick={() => setShowRecipeSuggestions(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                <X size={24} color="#6b7280" />
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+              <p style={{ color: '#6b7280', fontSize: '14px', marginTop: 0 }}>
+                Based on your pantry items, here are some recipes you can make:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {recipeSuggestions.map((s, i) => (
+                  <div key={i} style={{
+                    padding: '16px',
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '12px'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '16px', marginBottom: '4px', color: '#1f2937' }}>{s.name}</div>
+                      <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>{s.description}</div>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {s.cuisine && <span style={{ fontSize: '12px', padding: '2px 8px', background: '#e5e7eb', borderRadius: '4px' }}>{s.cuisine}</span>}
+                        {s.estimatedTime && <span style={{ fontSize: '12px', padding: '2px 8px', background: '#e5e7eb', borderRadius: '4px' }}>{s.estimatedTime}</span>}
+                      </div>
+                      {s.matchedIngredients && s.matchedIngredients.length > 0 && (
+                        <div style={{ marginTop: '8px', fontSize: '12px', color: '#059669' }}>
+                          ✓ Uses: {s.matchedIngredients.slice(0, 3).join(', ')}{s.matchedIngredients.length > 3 ? '...' : ''}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      style={{
+                        padding: '8px 12px',
+                        background: generatingRecipe ? '#9ca3af' : '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: generatingRecipe ? 'not-allowed' : 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onClick={() => handleGenerateRecipe(s)}
+                      disabled={generatingRecipe}
+                    >
+                      {generatingRecipe ? <Loader2 size={14} className="spinner" /> : <ChefHat size={14} />}
+                      {generatingRecipe ? 'Creating...' : 'Create Recipe'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast notification */}
