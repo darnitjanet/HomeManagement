@@ -443,11 +443,14 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
           {suggestions.length > 0 && (
             <div className="suggestions-results">
               <h3>Recipe Ideas ({suggestions.length} found)</h3>
+              <div style={{ background: '#ffe', padding: '10px', marginBottom: '10px', fontSize: '12px', whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'auto' }}>
+                DEBUG: {JSON.stringify(suggestions[0], null, 2)}
+              </div>
               <div className="suggestions-list">
                 {suggestions.map((suggestion, index) => (
-                  <div key={index} className="suggestion-card">
+                  <div key={index} className="suggestion-card" style={{ border: '2px solid red' }}>
                     <div className="suggestion-info">
-                      <h4>{suggestion.name || 'Unnamed Recipe'}</h4>
+                      <h4 style={{ color: 'blue' }}>{suggestion.name || 'Unnamed Recipe'}</h4>
                       <p>{suggestion.description || 'No description'}</p>
                       <div className="suggestion-meta">
                         {suggestion.estimatedTime && (
