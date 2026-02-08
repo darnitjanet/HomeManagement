@@ -442,16 +442,16 @@ export function RecipeSuggestions({ onClose, onRecipeCreated }: RecipeSuggestion
 
           {suggestions.length > 0 && (
             <div className="suggestions-results">
-              <h3>Recipe Ideas</h3>
+              <h3>Recipe Ideas ({suggestions.length} found)</h3>
               <div className="suggestions-list">
                 {suggestions.map((suggestion, index) => (
                   <div key={index} className="suggestion-card">
                     <div className="suggestion-info">
-                      <h4>{suggestion.name}</h4>
-                      <p>{suggestion.description}</p>
+                      <h4>{suggestion.name || 'Unnamed Recipe'}</h4>
+                      <p>{suggestion.description || 'No description'}</p>
                       <div className="suggestion-meta">
                         {suggestion.estimatedTime && (
-                          <span className="meta-tag">{suggestion.estimatedTime} min</span>
+                          <span className="meta-tag">{suggestion.estimatedTime}</span>
                         )}
                         {suggestion.difficulty && (
                           <span className="meta-tag">{suggestion.difficulty}</span>
