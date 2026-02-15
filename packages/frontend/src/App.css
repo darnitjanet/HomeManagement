@@ -184,7 +184,7 @@
 
 /* Print styles - only show content, hide header and navigation */
 @media print {
-  /* Hide header, navigation, and keyboard */
+  /* Hide header, navigation, keyboard, and toasts */
   header,
   .header,
   .app-header,
@@ -194,29 +194,44 @@
   .sidebar,
   .bottom-nav,
   .keyboard-toggle-btn,
-  .virtual-keyboard-overlay {
+  .virtual-keyboard-overlay,
+  .keyboard-close-btn,
+  .simple-keyboard,
+  .toast-container {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Reset app layout for print */
+  /* Reset app layout for print - allow full content to flow */
   .app {
     display: block !important;
     height: auto !important;
     min-height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
     background: white !important;
   }
 
   .app-main {
+    display: block !important;
     overflow: visible !important;
     height: auto !important;
+    max-height: none !important;
     flex: none !important;
   }
 
   /* Reset page for clean print */
   body, html, #root {
     height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
     background: white !important;
+  }
+
+  /* Ensure all content containers can expand */
+  * {
+    max-height: none !important;
   }
 }
