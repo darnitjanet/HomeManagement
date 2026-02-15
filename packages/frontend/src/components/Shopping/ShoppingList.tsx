@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ExternalLink, ChevronRight, Check, ScanBarcode, Package } from 'lucide-react';
+import { X, ExternalLink, ChevronRight, Check, ScanBarcode, Package, Heart, ShoppingCart, Printer, Trash2, CheckCheck } from 'lucide-react';
 import { shoppingApi, pantryApi } from '../../services/api';
+import { MicButton } from '../common/MicButton';
 import './ShoppingList.css';
 
 type ListType = 'grocery' | 'other';
@@ -69,6 +70,9 @@ export function ShoppingList() {
   const [scanResult, setScanResult] = useState<string>('');
   const scanInputRef = useRef<HTMLInputElement>(null);
 
+  // Checked items state
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+
   // Pantry prompt state
   const [pantryPromptItem, setPantryPromptItem] = useState<ShoppingItem | null>(null);
 
@@ -76,6 +80,7 @@ export function ShoppingList() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
 
   useEffect(() => {
+    setCheckedItems(new Set());
     loadData();
   }, [activeTab]);
 
@@ -116,21 +121,28 @@ export function ShoppingList() {
     }
   };
 
-  const handleCheckItem = async (id: number) => {
-    const item = items.find(i => i.id === id);
-    if (!item) return;
-
-    // For grocery items, show pantry prompt
-    if (activeTab === 'grocery') {
-      setPantryPromptItem(item);
-    } else {
-      // For other items, just remove
-      try {
-        await shoppingApi.removeItem(activeTab, id);
-        loadData();
-      } catch (err) {
-        console.error('Failed to remove item:', err);
+  const handleCheckItem = (id: number) => {
+    setCheckedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
+      return next;
+    });
+  };
+
+  const handleRemoveChecked = async () => {
+    if (checkedItems.size === 0) return;
+    try {
+      await Promise.all(
+        Array.from(checkedItems).map(id => shoppingApi.removeItem(activeTab, id))
+      );
+      setCheckedItems(new Set());
+      loadData();
+    } catch (err) {
+      console.error('Failed to remove checked items:', err);
     }
   };
 
@@ -359,7 +371,7 @@ export function ShoppingList() {
           className={`action-btn ${showFavorites ? 'active' : ''}`}
           onClick={() => setShowFavorites(!showFavorites)}
         >
-          ♥ Favorites
+          <Heart size={18} /> Favorites
         </button>
         <button className="action-btn scan" onClick={openScanModal}>
           <ScanBarcode size={18} />
@@ -368,19 +380,24 @@ export function ShoppingList() {
         {items.length > 0 && (
           <>
             <button className="action-btn dillons" onClick={() => openStoreShopping('dillons')}>
-              🛒 Dillons
+              <ShoppingCart size={18} /> Dillons
             </button>
             <button className="action-btn walmart" onClick={() => openStoreShopping('walmart')}>
-              🛒 Walmart
+              <ShoppingCart size={18} /> Walmart
             </button>
           </>
         )}
+        {checkedItems.size > 0 && (
+          <button className="action-btn remove-checked" onClick={handleRemoveChecked}>
+            <CheckCheck size={18} /> Remove Checked ({checkedItems.size})
+          </button>
+        )}
         <button className="action-btn" onClick={handlePrint}>
-          🖨 Print
+          <Printer size={18} /> Print
         </button>
         {items.length > 0 && (
           <button className="action-btn danger" onClick={handleClearList}>
-            🗑 Clear
+            <Trash2 size={18} /> Clear
           </button>
         )}
       </div>
@@ -427,6 +444,10 @@ export function ShoppingList() {
           className="item-input"
           disabled={adding}
         />
+        <MicButton
+          onResult={(text) => setNewItemName(text)}
+          disabled={adding}
+        />
         <button type="submit" className="add-btn primary" disabled={adding}>
           {adding ? '✨ Adding...' : '+ Add'}
         </button>
@@ -451,9 +472,9 @@ export function ShoppingList() {
                 <h3 className="category-header">{category}</h3>
                 <ul className="items-list">
                   {groupedItems[category].map((item) => (
-                    <li key={item.id} className="shopping-item">
+                    <li key={item.id} className={`shopping-item ${checkedItems.has(item.id) ? 'checked' : ''}`}>
                       <button
-                        className="check-btn no-print"
+                        className={`check-btn no-print ${checkedItems.has(item.id) ? 'checked' : ''}`}
                         onClick={() => handleCheckItem(item.id)}
                         title="Check off item"
                       >
@@ -504,9 +525,9 @@ export function ShoppingList() {
           // Simple list for "other"
           <ul className="items-list">
             {items.map((item) => (
-              <li key={item.id} className="shopping-item">
+              <li key={item.id} className={`shopping-item ${checkedItems.has(item.id) ? 'checked' : ''}`}>
                 <button
-                  className="check-btn no-print"
+                  className={`check-btn no-print ${checkedItems.has(item.id) ? 'checked' : ''}`}
                   onClick={() => handleCheckItem(item.id)}
                   title="Check off item"
                 >

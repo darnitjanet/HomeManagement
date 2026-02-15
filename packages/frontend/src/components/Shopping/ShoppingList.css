@@ -376,6 +376,33 @@
   color: white;
 }
 
+.check-btn.checked {
+  background: var(--orange-500);
+  color: white;
+}
+
+/* Checked item styling */
+.shopping-item.checked .item-name {
+  text-decoration: line-through;
+  color: var(--slate-400);
+}
+
+.shopping-item.checked .item-category-tag {
+  opacity: 0.5;
+}
+
+/* Remove checked button */
+.action-btn.remove-checked {
+  background: var(--orange-500);
+  color: white;
+  border-color: var(--orange-500);
+}
+
+.action-btn.remove-checked:hover {
+  background: #c45e2c;
+  border-color: #c45e2c;
+}
+
 .print-checkbox {
   display: none;
 }
