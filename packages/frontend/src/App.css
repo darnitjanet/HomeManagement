@@ -181,3 +181,42 @@
     padding: 32px 24px;
   }
 }
+
+/* Print styles - only show content, hide header and navigation */
+@media print {
+  /* Hide header, navigation, and keyboard */
+  header,
+  .header,
+  .app-header,
+  nav,
+  .nav,
+  .navigation,
+  .sidebar,
+  .bottom-nav,
+  .keyboard-toggle-btn,
+  .virtual-keyboard-overlay {
+    display: none !important;
+  }
+
+  /* Reset app layout for print */
+  .app {
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .app-main {
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+  }
+
+  /* Reset page for clean print */
+  body, html, #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+}

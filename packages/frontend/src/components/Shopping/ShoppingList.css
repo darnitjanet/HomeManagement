@@ -519,6 +519,8 @@
   .shopping-page {
     padding: 0;
     max-width: 100%;
+    overflow: visible !important;
+    height: auto !important;
   }
 
   .shopping-banner {
@@ -536,6 +538,12 @@
   .shopping-list {
     box-shadow: none;
     padding: 0;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .category-group {
+    page-break-inside: avoid;
   }
 
   .category-header {
@@ -545,6 +553,10 @@
 
   .shopping-item {
     page-break-inside: avoid;
+  }
+
+  .item-category-tag {
+    display: none;
   }
 
   .print-checkbox {
