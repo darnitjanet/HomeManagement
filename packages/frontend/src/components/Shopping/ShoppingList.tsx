@@ -133,16 +133,17 @@ export function ShoppingList() {
     });
   };
 
-  const handleRemoveChecked = async () => {
-    if (checkedItems.size === 0) return;
+  const handleRemoveUnchecked = async () => {
+    const uncheckedItems = items.filter(item => !checkedItems.has(item.id));
+    if (uncheckedItems.length === 0) return;
     try {
       await Promise.all(
-        Array.from(checkedItems).map(id => shoppingApi.removeItem(activeTab, id))
+        uncheckedItems.map(item => shoppingApi.removeItem(activeTab, item.id))
       );
       setCheckedItems(new Set());
       loadData();
     } catch (err) {
-      console.error('Failed to remove checked items:', err);
+      console.error('Failed to remove unchecked items:', err);
     }
   };
 
@@ -387,9 +388,9 @@ export function ShoppingList() {
             </button>
           </>
         )}
-        {checkedItems.size > 0 && (
-          <button className="action-btn remove-checked" onClick={handleRemoveChecked}>
-            <CheckCheck size={18} /> Remove Checked ({checkedItems.size})
+        {items.length > 0 && (
+          <button className="action-btn remove-checked" onClick={handleRemoveUnchecked}>
+            <CheckCheck size={18} /> Remove Unchecked ({items.length - checkedItems.size})
           </button>
         )}
         <button className="action-btn" onClick={handlePrint}>
