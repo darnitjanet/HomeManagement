@@ -62,6 +62,7 @@ export function ShoppingList() {
   const [showStoreModal, setShowStoreModal] = useState(false);
   const [storeItemIndex, setStoreItemIndex] = useState(0);
   const [activeStore, setActiveStore] = useState<'walmart' | 'dillons'>('walmart');
+  const storeWindowRef = useRef<Window | null>(null);
 
   // Barcode scanner state
   const [showScanModal, setShowScanModal] = useState(false);
@@ -244,10 +245,27 @@ export function ShoppingList() {
       walmart: `https://www.walmart.com/search?q=${encodeURIComponent(itemName)}`,
       dillons: `https://www.dillons.com/search?query=${encodeURIComponent(itemName)}&searchType=default_search`,
     };
-    window.open(searchUrls[activeStore], '_blank');
+    // Open in a named popup window so we can close it to return to the app
+    const popup = window.open(
+      searchUrls[activeStore],
+      'storeSearch',
+      'menubar=yes,toolbar=yes,location=yes,status=yes'
+    );
+    if (popup) {
+      storeWindowRef.current = popup;
+    }
+  };
+
+  const closeStoreWindow = () => {
+    if (storeWindowRef.current && !storeWindowRef.current.closed) {
+      storeWindowRef.current.close();
+      storeWindowRef.current = null;
+    }
+    window.focus();
   };
 
   const nextStoreItem = () => {
+    closeStoreWindow();
     if (storeItemIndex < items.length - 1) {
       setStoreItemIndex(storeItemIndex + 1);
     } else {
@@ -256,6 +274,7 @@ export function ShoppingList() {
   };
 
   const closeStoreModal = () => {
+    closeStoreWindow();
     setShowStoreModal(false);
     setStoreItemIndex(0);
   };
@@ -667,6 +686,13 @@ export function ShoppingList() {
               >
                 <ExternalLink size={20} />
                 Search on {storeInfo[activeStore].name}
+              </button>
+
+              <button
+                className="store-back-btn"
+                onClick={closeStoreWindow}
+              >
+                Back to App
               </button>
 
               <button

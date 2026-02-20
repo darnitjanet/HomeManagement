@@ -748,6 +748,25 @@
   background: #004f9a;
 }
 
+.store-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px;
+  background: #5b768a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.store-back-btn:hover {
+  background: #4a6275;
+}
+
 .store-next-btn {
   display: flex;
   align-items: center;
