@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Clock, Users, Heart, ShoppingCart, Sparkles, Link, CalendarDays, X, Check, Package } from 'lucide-react';
 import { recipesApi, pantryApi } from '../../services/api';
+import { decimalToFraction } from '../../utils/fractions';
 import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
 import { RecipeSuggestions } from './RecipeSuggestions';
@@ -564,7 +565,7 @@ export function RecipesList() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 500, color: inPantry ? '#9ca3af' : '#1f2937' }}>
-                        {ing.quantity && `${ing.quantity} `}
+                        {ing.quantity && `${decimalToFraction(ing.quantity)} `}
                         {ing.unit && `${ing.unit} `}
                         {ing.name}
                         {ing.preparation && <span style={{ color: '#9ca3af' }}> ({ing.preparation})</span>}

@@ -1,4 +1,5 @@
 import { Clock, Users, Edit, Trash2, ShoppingCart, ExternalLink, X } from 'lucide-react';
+import { decimalToFraction } from '../../utils/fractions';
 import './RecipeDetail.css';
 
 interface RecipeIngredient {
@@ -61,7 +62,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onAddToShopping, onDelet
   const formatIngredient = (ing: RecipeIngredient): string => {
     let str = '';
     if (ing.quantity) {
-      str += ing.quantity;
+      str += decimalToFraction(ing.quantity);
       if (ing.unit) str += ` ${ing.unit}`;
       str += ' ';
     }
