@@ -13,6 +13,7 @@ const VALID_CATEGORIES: GroceryCategory[] = [
   'Snacks',
   'Household',
   'Personal Care',
+  'Health & Pharmacy',
   'Other',
 ];
 
@@ -45,7 +46,7 @@ export async function categorizeGroceryItem(itemName: string): Promise<GroceryCa
       messages: [
         {
           role: 'user',
-          content: `Categorize this grocery item into exactly one of these categories: Produce, Dairy, Meat & Seafood, Bakery, Frozen, Pantry, Beverages, Snacks, Household, Personal Care, Other.
+          content: `Categorize this grocery item into exactly one of these categories: Produce, Dairy, Meat & Seafood, Bakery, Frozen, Pantry, Beverages, Snacks, Household, Personal Care, Health & Pharmacy, Other.
 
 Item: "${itemName}"
 
@@ -437,19 +438,76 @@ function extractSchemaRecipe(html: string): ImportedRecipe | null {
           const ingredients: ImportedRecipe['ingredients'] = [];
           const recipeIngredients = item.recipeIngredient || [];
 
+          const KNOWN_UNITS = [
+            'cup', 'cups', 'tablespoon', 'tablespoons', 'tbsp', 'teaspoon', 'teaspoons', 'tsp',
+            'ounce', 'ounces', 'oz', 'pound', 'pounds', 'lb', 'lbs',
+            'gram', 'grams', 'g', 'kilogram', 'kilograms', 'kg',
+            'milliliter', 'milliliters', 'ml', 'liter', 'liters', 'l',
+            'pinch', 'dash', 'handful', 'bunch',
+            'piece', 'pieces', 'slice', 'slices', 'clove', 'cloves',
+            'can', 'cans', 'package', 'packages', 'pkg', 'bag', 'bags',
+            'quart', 'quarts', 'qt', 'pint', 'pints', 'pt', 'gallon', 'gallons', 'gal',
+            'stick', 'sticks', 'head', 'heads', 'sprig', 'sprigs',
+            'stalk', 'stalks', 'ear', 'ears', 'leaf', 'leaves',
+            'small', 'medium', 'large',
+          ];
+
+          const parseFraction = (str: string): number | undefined => {
+            const trimmed = str.trim();
+            // Mixed number: "2 1/2"
+            const mixedMatch = trimmed.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+            if (mixedMatch) {
+              return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2]) / parseInt(mixedMatch[3]);
+            }
+            // Simple fraction: "1/2"
+            const fracMatch = trimmed.match(/^(\d+)\/(\d+)$/);
+            if (fracMatch) {
+              return parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
+            }
+            // Range: "5-6" -> use the first number
+            const rangeMatch = trimmed.match(/^(\d+)\s*-\s*\d+$/);
+            if (rangeMatch) {
+              return parseInt(rangeMatch[1]);
+            }
+            // Decimal or whole number
+            const num = parseFloat(trimmed);
+            return isNaN(num) ? undefined : num;
+          };
+
           for (const ing of recipeIngredients) {
             if (typeof ing === 'string') {
-              // Try to parse "2 cups flour" format
-              const match = ing.match(/^([\d./\s]+)?\s*(\w+)?\s+(.+)$/);
+              const trimmed = ing.trim();
+              // Match quantity at the start: fractions, mixed numbers, ranges, or plain numbers
+              // Examples: "2", "1/2", "2 1/2", "5-6", "14"
+              const match = trimmed.match(/^((?:\d+\s+)?\d+\/\d+|\d+\s*-\s*\d+|\d+\.?\d*)\s*(.*)/);
               if (match) {
-                const qty = match[1] ? parseFloat(match[1].replace(/\s/g, '')) : undefined;
-                ingredients.push({
-                  name: match[3] || ing,
-                  quantity: isNaN(qty as number) ? undefined : qty,
-                  unit: match[2] || undefined,
-                });
+                const qty = parseFraction(match[1]);
+                const rest = match[2].trim();
+                // Check if first word is a known unit
+                const firstWord = rest.split(/\s+/)[0]?.toLowerCase();
+                const isUnit = KNOWN_UNITS.includes(firstWord);
+                if (isUnit) {
+                  const name = rest.substring(firstWord.length).trim().replace(/^,?\s*/, '');
+                  // Check for preparation in parentheses or after comma
+                  const prepMatch = name.match(/^(.+?)\s*[,(]\s*(.+?)\s*\)?$/);
+                  ingredients.push({
+                    name: prepMatch ? prepMatch[1].trim() : name,
+                    quantity: qty,
+                    unit: firstWord,
+                    preparation: prepMatch ? prepMatch[2].trim() : undefined,
+                  });
+                } else {
+                  // No unit, rest is the name (e.g., "3 eggs")
+                  const prepMatch = rest.match(/^(.+?)\s*[,(]\s*(.+?)\s*\)?$/);
+                  ingredients.push({
+                    name: prepMatch ? prepMatch[1].trim() : rest,
+                    quantity: qty,
+                    preparation: prepMatch ? prepMatch[2].trim() : undefined,
+                  });
+                }
               } else {
-                ingredients.push({ name: ing });
+                // No quantity found, store as name (e.g., "salt to taste")
+                ingredients.push({ name: trimmed });
               }
             }
           }

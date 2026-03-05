@@ -375,6 +375,7 @@ export type GroceryCategory =
   | 'Snacks'
   | 'Household'
   | 'Personal Care'
+  | 'Health & Pharmacy'
   | 'Other';
 
 export interface ShoppingItem {

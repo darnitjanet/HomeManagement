@@ -47,6 +47,8 @@ export async function lookupBarcode(barcode: string): Promise<ProductInfo> {
         category = 'Household';
       } else if (categories.includes('personal') || categories.includes('hygiene') || categories.includes('beauty')) {
         category = 'Personal Care';
+      } else if (categories.includes('pharma') || categories.includes('medicine') || categories.includes('health') || categories.includes('supplement') || categories.includes('vitamin')) {
+        category = 'Health & Pharmacy';
       } else {
         category = 'Pantry'; // Default for food items
       }

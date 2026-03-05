@@ -16,6 +16,7 @@ type GroceryCategory =
   | 'Snacks'
   | 'Household'
   | 'Personal Care'
+  | 'Health & Pharmacy'
   | 'Other';
 
 interface ShoppingItem {
@@ -47,6 +48,7 @@ const GROCERY_CATEGORIES: GroceryCategory[] = [
   'Snacks',
   'Household',
   'Personal Care',
+  'Health & Pharmacy',
   'Other',
 ];
 
