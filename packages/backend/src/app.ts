@@ -68,10 +68,11 @@ export function createApp(): Express {
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Extend session on every request so it never expires while in use
     cookie: {
       secure: false, // Running on http://localhost on Pi kiosk, no HTTPS
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
       sameSite: 'lax',
     },
   }));
