@@ -69,10 +69,10 @@ export function createApp(): Express {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Running on http://localhost on Pi kiosk, no HTTPS
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'lax', // Required for cross-port cookie handling in development
+      sameSite: 'lax',
     },
   }));
 
