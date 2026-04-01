@@ -1140,7 +1140,8 @@ export const ttsApi = {
 export const sttApi = {
   transcribe: (audioBlob: Blob) => {
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.wav');
+    const ext = audioBlob.type.includes('webm') ? 'webm' : 'wav';
+    formData.append('audio', audioBlob, `recording.${ext}`);
     return api.post('/stt/transcribe', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

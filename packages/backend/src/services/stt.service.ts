@@ -22,10 +22,25 @@ class STTService {
   }
 
   /**
+   * Convert audio file to WAV format using ffmpeg (for non-WAV inputs like webm)
+   */
+  private async convertToWav(inputPath: string): Promise<string> {
+    const wavPath = inputPath.replace(/\.[^.]+$/, '') + '_converted.wav';
+    await execAsync(
+      `ffmpeg -y -i "${inputPath}" -ar 16000 -ac 1 -f wav "${wavPath}"`,
+      { timeout: 15000 }
+    );
+    return wavPath;
+  }
+
+  /**
    * Transcribe audio file to text using Vosk
-   * @param audioPath Path to WAV audio file
+   * @param audioPath Path to audio file (WAV or webm - webm is auto-converted)
    */
   async transcribe(audioPath: string): Promise<STTResult> {
+    let wavPath = audioPath;
+    let needsCleanup = false;
+
     try {
       console.log('[STT] Transcribing:', audioPath);
 
@@ -34,9 +49,16 @@ class STTService {
         return { success: false, error: 'STT script not found' };
       }
 
+      // If not a WAV file, convert using ffmpeg
+      if (!audioPath.endsWith('.wav')) {
+        console.log('[STT] Converting non-WAV audio to WAV...');
+        wavPath = await this.convertToWav(audioPath);
+        needsCleanup = true;
+      }
+
       // Run the Python script
       const { stdout, stderr } = await execAsync(
-        `${this.pythonPath} "${this.scriptPath}" "${audioPath}"`,
+        `${this.pythonPath} "${this.scriptPath}" "${wavPath}"`,
         { timeout: 30000 }
       );
 
@@ -52,6 +74,11 @@ class STTService {
     } catch (error: any) {
       console.error('[STT] Error:', error.message);
       return { success: false, error: error.message };
+    } finally {
+      // Clean up converted file
+      if (needsCleanup && fs.existsSync(wavPath)) {
+        fs.unlink(wavPath, () => {});
+      }
     }
   }
 
