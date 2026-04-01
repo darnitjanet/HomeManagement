@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import * as todoRepository from '../repositories/todo.repository';
+import { NotificationRepository } from '../repositories/notification.repository';
 import {
   breakdownTask,
   generateNudge,
@@ -148,6 +149,15 @@ router.put('/:id/complete', async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Todo not found' });
     }
 
+    // Dismiss any active notifications for this task
+    const notificationRepo = new NotificationRepository();
+    const notifications = await notificationRepo.findByEntity('todo', id);
+    for (const n of notifications) {
+      if (!n.isDismissed) {
+        await notificationRepo.dismiss(n.id);
+      }
+    }
+
     res.json({ success: true, data: todo });
   } catch (error) {
     console.error('Error completing todo:', error);
@@ -199,6 +209,15 @@ router.put('/:id/snooze', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    // Dismiss any active notifications for this task before deleting
+    const notificationRepo2 = new NotificationRepository();
+    const taskNotifications = await notificationRepo2.findByEntity('todo', id);
+    for (const n of taskNotifications) {
+      if (!n.isDismissed) {
+        await notificationRepo2.dismiss(n.id);
+      }
+    }
+
     const deleted = await todoRepository.deleteTodo(id);
 
     if (!deleted) {
