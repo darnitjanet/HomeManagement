@@ -1,4 +1,4 @@
-import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale, Leaf } from 'lucide-react';
+import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Package, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale, Leaf, RefreshCw } from 'lucide-react';
 import { WeatherWidget } from '../Weather/WeatherWidget';
 import './HomePage.css';
 
@@ -40,6 +40,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <button className="kiosk-mode-btn" onClick={() => onNavigate('kiosk')}>
           <Monitor size={18} />
           <span>Kiosk Mode</span>
+        </button>
+        <button className="kiosk-mode-btn" onClick={() => window.location.reload()}>
+          <RefreshCw size={18} />
+          <span>Refresh</span>
         </button>
       </div>
 
