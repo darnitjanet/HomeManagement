@@ -12,7 +12,7 @@
   padding: 20px;
 }
 
-.omdb-modal {
+.modal-content.omdb-modal {
   background: white;
   border-radius: 16px;
   max-width: 900px;

@@ -42,7 +42,14 @@ export function createApp(): Express {
   const app = express();
 
   // Security middleware
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'img-src': ["'self'", 'https://image.tmdb.org'],
+      },
+    },
+  }));
 
   // CORS configuration
   app.use(cors({
