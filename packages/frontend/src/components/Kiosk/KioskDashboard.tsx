@@ -24,7 +24,6 @@ import {
   Volume2,
   VolumeX,
   Camera,
-  MessageCircle,
   Timer,
   ScanBarcode,
   ShoppingCart,
@@ -35,10 +34,9 @@ import {
   RotateCcw,
   Minimize2,
 } from 'lucide-react';
-import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
+import { weatherApi, todosApi, calendarApi, syncApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { useMotionDetection } from '../../hooks/useMotionDetection';
-import { useVoiceAssistant, type VoiceCommand } from '../../hooks/useVoiceAssistant';
 import { useBarcodeDetector } from '../../hooks/useBarcodeDetector';
 import { generateWakeAnnouncement } from '../../utils/announcementGenerator';
 import { EmergencyInfo } from '../Emergency/EmergencyInfo';
@@ -279,10 +277,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [showKeyboardInput, setShowKeyboardInput] = useState(false);
   const keyboardInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Hey Cosmo voice assistant state - starts disabled, user must click to enable (provides user gesture for mic)
-  const [heyCosmoEnabled, setHeyCosmoEnabled] = useState(false);
-  const [cosmoResponse, setCosmoResponse] = useState<string | null>(null);
-  const cosmoResponseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
   // Timer functions
@@ -333,127 +327,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     return () => clearInterval(interval);
   }, [timers.length, ttsEnabled, ttsSupported, speak]);
 
-  // Handle voice assistant commands
-  const handleVoiceCommand = useCallback(async (command: VoiceCommand) => {
-    try {
-      switch (command.action) {
-        case 'add_shopping_item':
-          await shoppingApi.addItem('grocery', {
-            name: command.data.item,
-            quantity: 1,
-          });
-          break;
-        case 'add_task':
-          await todosApi.createTodo({
-            title: command.data.title,
-            priority: 'medium',
-          });
-          loadTodos();
-          break;
-        case 'add_chore':
-          // Chores require more setup, so use smart input
-          await smartInputApi.process(`add chore ${command.data.name}`);
-          break;
-        case 'set_timer':
-          const seconds = parseInt(command.data.seconds);
-          const label = command.data.display || `${seconds} second`;
-          startTimer(seconds, label);
-          break;
-        case 'cancel_timer':
-          setTimers([]);
-          break;
-        case 'lights_on':
-        case 'lights_off':
-          // Control Govee lights
-          try {
-            const devices = await smartHomeApi.getGoveeDevices();
-            if (devices.data.success && devices.data.data.length > 0) {
-              const room = command.data.room?.toLowerCase();
-              // Find matching devices by name (or control all if room is 'all')
-              const targetDevices = room === 'all'
-                ? devices.data.data
-                : devices.data.data.filter((d: any) =>
-                    d.deviceName.toLowerCase().includes(room)
-                  );
-
-              for (const device of targetDevices) {
-                await smartHomeApi.controlGovee(device.device, {
-                  model: device.model,
-                  action: command.action === 'lights_on' ? 'turn_on' : 'turn_off',
-                });
-              }
-            }
-          } catch (error) {
-            console.error('Failed to control lights:', error);
-          }
-          break;
-        case 'set_temperature':
-          // Control Ecobee thermostat
-          try {
-            const thermostats = await smartHomeApi.getEcobeeThermostats();
-            if (thermostats.data.success && thermostats.data.data.length > 0) {
-              const temp = parseInt(command.data.temperature);
-              // Set temperature on first thermostat
-              await smartHomeApi.controlEcobee(thermostats.data.data[0].id, {
-                action: 'set_temperature',
-                value: temp,
-                holdType: 'nextTransition',
-              });
-            }
-          } catch (error) {
-            console.error('Failed to set temperature:', error);
-          }
-          break;
-        case 'unknown':
-          // Try smart input as fallback, but skip timer-related commands
-          // (prevents creating tasks when timer parsing fails)
-          if (!command.rawText.toLowerCase().includes('timer')) {
-            await smartInputApi.process(command.rawText);
-          }
-          break;
-      }
-    } catch (error) {
-      console.error('Voice command failed:', error);
-    }
-  }, [startTimer]);
-
-  // Handle voice assistant response (TTS feedback)
-  const handleCosmoResponse = useCallback((text: string) => {
-    setCosmoResponse(text);
-    // Clear any existing timeout
-    if (cosmoResponseTimeoutRef.current) {
-      clearTimeout(cosmoResponseTimeoutRef.current);
-    }
-    // Clear response after 4 seconds
-    cosmoResponseTimeoutRef.current = setTimeout(() => {
-      setCosmoResponse(null);
-    }, 4000);
-    // Speak the response
-    if (ttsEnabled && ttsSupported) {
-      speak(text);
-    }
-  }, [ttsEnabled, ttsSupported, speak]);
-
-  // Hey Cosmo voice assistant
-  const {
-    isSupported: cosmoSupported,
-    isListening: cosmoListening,
-    isAwake: cosmoAwake,
-    transcript: cosmoTranscript,
-    requestMicPermission,
-    restart: restartCosmo,
-  } = useVoiceAssistant({
-    enabled: heyCosmoEnabled,
-    wakeWord: 'hey cosmo',
-    onWakeWordDetected: () => {
-      // Reset sleep timer when user says hey cosmo
-      if (resetSleepTimerRef.current) {
-        resetSleepTimerRef.current();
-      }
-    },
-    onCommand: handleVoiceCommand,
-    onResponse: handleCosmoResponse,
-  });
 
   // Motion detection hook - uses ref to access resetSleepTimer
   const {
@@ -599,22 +472,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     }
   }, [showBarcodeModal]);
 
-  // Debug Cosmo state
-  useEffect(() => {
-    console.log('[Kiosk] Cosmo state - supported:', cosmoSupported, 'enabled:', heyCosmoEnabled, 'listening:', cosmoListening, 'awake:', cosmoAwake);
-  }, [cosmoSupported, heyCosmoEnabled, cosmoListening, cosmoAwake]);
-
-  // Restart Cosmo after TTS finishes speaking (TTS can interfere with mic)
-  const wasSpeakingRef = useRef(false);
-  useEffect(() => {
-    if (wasSpeakingRef.current && !isSpeaking && heyCosmoEnabled) {
-      // TTS just finished, restart Cosmo recognition after a brief delay
-      setTimeout(() => {
-        restartCosmo();
-      }, 500);
-    }
-    wasSpeakingRef.current = isSpeaking;
-  }, [isSpeaking, heyCosmoEnabled, restartCosmo]);
 
   // Update time every second
   useEffect(() => {
@@ -1347,33 +1204,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         )}
 
-        {/* Hey Cosmo disabled - speech recognition not working on Pi/Chromium
-        <button
-          className={`kiosk-control-btn cosmo-toggle ${heyCosmoEnabled ? 'active' : ''} ${!cosmoSupported ? 'unsupported' : ''}`}
-          onClick={async () => {
-            if (!cosmoSupported) {
-              setCosmoResponse('Speech recognition not supported in this browser');
-              setTimeout(() => setCosmoResponse(null), 3000);
-              return;
-            }
-            if (!heyCosmoEnabled) {
-              const granted = await requestMicPermission();
-              if (granted) {
-                setHeyCosmoEnabled(true);
-              } else {
-                setCosmoResponse('Microphone permission denied');
-                setTimeout(() => setCosmoResponse(null), 3000);
-              }
-            } else {
-              setHeyCosmoEnabled(false);
-            }
-          }}
-          title={!cosmoSupported ? 'Speech not supported' : heyCosmoEnabled ? 'Disable Hey Cosmo' : 'Enable Hey Cosmo'}
-        >
-          <MessageCircle size={20} />
-          <span className="cosmo-label">Cosmo</span>
-        </button>
-        */}
 
         <button
           className={`kiosk-control-btn keyboard-btn ${showKeyboardInput ? 'active' : ''}`}
@@ -1523,29 +1353,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         </div>
       )}
 
-      {/* Hey Cosmo Assistant Indicator */}
-      {(heyCosmoEnabled && cosmoSupported) && (
-        <div className={`cosmo-assistant ${cosmoAwake ? 'awake' : ''} ${cosmoListening ? 'listening' : ''}`}>
-          <div className="cosmo-indicator">
-            <MessageCircle size={24} />
-            <span className="cosmo-status">
-              {cosmoAwake ? 'Listening...' : cosmoListening ? 'Say "Hey Cosmo"' : 'Voice Assistant'}
-            </span>
-          </div>
-          {cosmoTranscript && (
-            <div className="cosmo-transcript">{cosmoTranscript}</div>
-          )}
-          {cosmoResponse && (
-            <div className="cosmo-response">{cosmoResponse}</div>
-          )}
-        </div>
-      )}
-      {/* Cosmo error/response messages when not enabled */}
-      {cosmoResponse && !heyCosmoEnabled && (
-        <div className="cosmo-assistant error">
-          <div className="cosmo-response">{cosmoResponse}</div>
-        </div>
-      )}
 
       {/* Active Timers */}
       {timers.length > 0 && (
