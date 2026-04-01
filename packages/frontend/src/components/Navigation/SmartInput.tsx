@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff } from 'lucide-react';
 import { smartInputApi } from '../../services/api';
 import { useCalendarStore } from '../../stores/useCalendarStore';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import './SmartInput.css';
 
 interface ActionResult {
@@ -33,17 +31,6 @@ export function SmartInput() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Speech recognition
-  const {
-    isListening,
-    transcript,
-    interimTranscript,
-    isSupported: voiceSupported,
-    error: voiceError,
-    startListening,
-    stopListening,
-  } = useSpeechRecognition();
-
   // Close results dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -63,29 +50,6 @@ export function SmartInput() {
     }
   }, [showResults, results]);
 
-  // Update input when speech transcript changes
-  useEffect(() => {
-    if (transcript) {
-      setInput(transcript);
-    }
-  }, [transcript]);
-
-  // Show voice errors
-  useEffect(() => {
-    if (voiceError) {
-      setErrorMessage(voiceError);
-      setShowResults(true);
-    }
-  }, [voiceError]);
-
-  const handleMicClick = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || processing) return;
@@ -99,7 +63,6 @@ export function SmartInput() {
       const data = response.data.data as SmartInputResponse;
 
       if (data.message && data.results.length === 0) {
-        // AI couldn't understand the input
         setErrorMessage(data.message);
         setResults([]);
       } else {
@@ -107,7 +70,6 @@ export function SmartInput() {
       }
       setShowResults(true);
 
-      // Clear input on any success
       if (data.results.some((r: ActionResult) => r.success)) {
         setInput('');
       }
@@ -141,23 +103,12 @@ export function SmartInput() {
         <input
           ref={inputRef}
           type="text"
-          className={`smart-input-field ${isListening ? 'listening' : ''}`}
-          placeholder={isListening ? 'Listening...' : 'Add milk to shopping, schedule dentist Tuesday...'}
-          value={isListening && interimTranscript ? interimTranscript : input}
+          className="smart-input-field"
+          placeholder="Add milk to shopping, schedule dentist Tuesday..."
+          value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={processing || isListening}
+          disabled={processing}
         />
-        {voiceSupported && (
-          <button
-            type="button"
-            className={`smart-input-mic ${isListening ? 'listening' : ''}`}
-            onClick={handleMicClick}
-            disabled={processing}
-            title={isListening ? 'Stop listening' : 'Start voice input'}
-          >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
-        )}
         <button
           type="submit"
           className="smart-input-submit"

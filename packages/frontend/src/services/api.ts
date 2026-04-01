@@ -1136,17 +1136,4 @@ export const ttsApi = {
   getStatus: () => api.get('/tts/status'),
 };
 
-// STT API (backend speech-to-text using Vosk)
-export const sttApi = {
-  transcribe: (audioBlob: Blob) => {
-    const formData = new FormData();
-    const ext = audioBlob.type.includes('webm') ? 'webm' : 'wav';
-    formData.append('audio', audioBlob, `recording.${ext}`);
-    return api.post('/stt/transcribe', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  getStatus: () => api.get('/stt/status'),
-};
-
 export default api;

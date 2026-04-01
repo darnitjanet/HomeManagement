@@ -16,8 +16,6 @@ import {
   Bell,
   ListTodo,
   CalendarDays,
-  Mic,
-  MicOff,
   Check,
   AlertCircle,
   AlertTriangle,
@@ -38,7 +36,6 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { weatherApi, todosApi, calendarApi, syncApi, smartInputApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { useMotionDetection } from '../../hooks/useMotionDetection';
 import { useVoiceAssistant, type VoiceCommand } from '../../hooks/useVoiceAssistant';
@@ -209,9 +206,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
   const [kids, setKids] = useState<Kid[]>([]);
 
-  // Voice input state
-  const [voiceResult, setVoiceResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [voiceProcessing, setVoiceProcessing] = useState(false);
 
   // Emergency info modal
   const [showEmergency, setShowEmergency] = useState(false);
@@ -290,16 +284,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [cosmoResponse, setCosmoResponse] = useState<string | null>(null);
   const cosmoResponseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const {
-    isListening,
-    transcript,
-    interimTranscript,
-    isSupported: voiceSupported,
-    error: voiceError,
-    startListening,
-    stopListening,
-    resetTranscript,
-  } = useSpeechRecognition();
 
   // Timer functions
   const startTimer = useCallback((seconds: number, label: string) => {
@@ -841,77 +825,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
     }
   }, [aiEnabled, todos.length]);
 
-  // Handle voice transcript completion
-  useEffect(() => {
-    if (transcript && !isListening) {
-      handleVoiceSubmit(transcript);
-    }
-  }, [transcript, isListening]);
-
-  // Handle voice errors
-  useEffect(() => {
-    if (voiceError) {
-      setVoiceResult({ success: false, message: voiceError });
-      setTimeout(() => setVoiceResult(null), 5000);
-    }
-  }, [voiceError]);
-
-  // Auto-hide voice result
-  useEffect(() => {
-    if (voiceResult) {
-      const timer = setTimeout(() => setVoiceResult(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [voiceResult]);
-
-  const handleVoiceSubmit = async (text: string) => {
-    if (!text.trim() || voiceProcessing) return;
-
-    setVoiceProcessing(true);
-    setVoiceResult(null);
-
-    try {
-      const response = await smartInputApi.process(text.trim());
-      const data = response.data.data;
-
-      if (data.results && data.results.length > 0) {
-        const successCount = data.results.filter((r: any) => r.success).length;
-        const messages = data.results.map((r: any) => r.message).join('; ');
-        setVoiceResult({
-          success: successCount > 0,
-          message: messages || 'Processed successfully',
-        });
-        // Reload todos if any were added
-        if (data.results.some((r: any) => r.action?.type === 'todo' && r.success)) {
-          loadTodos();
-        }
-        // Reload events if calendar items were added
-        if (data.results.some((r: any) => r.action?.type === 'calendar' && r.success)) {
-          loadEvents();
-        }
-      } else if (data.message) {
-        setVoiceResult({ success: false, message: data.message });
-      }
-    } catch (error: any) {
-      console.error('Voice input error:', error);
-      setVoiceResult({
-        success: false,
-        message: error.response?.data?.message || 'Failed to process voice input',
-      });
-    } finally {
-      setVoiceProcessing(false);
-      resetTranscript();
-    }
-  };
-
-  const handleMicClick = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      setVoiceResult(null);
-      startListening();
-    }
-  };
 
   const checkAIStatus = async () => {
     try {
@@ -2012,45 +1925,6 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
       {showEmergency && <EmergencyInfo onClose={() => setShowEmergency(false)} />}
 
-      {/* Voice Input Button - uses backend Vosk STT */}
-      {voiceSupported && (
-        <div className="kiosk-voice-container">
-          {/* Voice Result Feedback */}
-          {voiceResult && (
-            <div className={`kiosk-voice-result ${voiceResult.success ? 'success' : 'error'}`}>
-              {voiceResult.success ? <Check size={20} /> : <AlertCircle size={20} />}
-              <span>{voiceResult.message}</span>
-            </div>
-          )}
-
-          {/* Interim Transcript Display */}
-          {isListening && interimTranscript && (
-            <div className="kiosk-voice-transcript">
-              <span>{interimTranscript}</span>
-            </div>
-          )}
-
-          {/* Voice Button */}
-          <button
-            className={`kiosk-voice-btn ${isListening ? 'listening' : ''} ${voiceProcessing ? 'processing' : ''}`}
-            onClick={handleMicClick}
-            disabled={voiceProcessing}
-            title={isListening ? 'Stop listening' : 'Voice input'}
-          >
-            {voiceProcessing ? (
-              <div className="kiosk-voice-spinner" />
-            ) : isListening ? (
-              <MicOff size={32} />
-            ) : (
-              <Mic size={32} />
-            )}
-          </button>
-
-          {isListening && (
-            <div className="kiosk-voice-label">Listening...</div>
-          )}
-        </div>
-      )}
 
       {/* Timer Modal */}
       {showTimerModal && (
