@@ -275,14 +275,13 @@ export class NotificationService {
         continue;
       }
 
-      // Check if we already have a notification for this task today
+      // Check if we already have an undismissed notification for this task
       const existing = await this.notificationRepo.findByEntity('todo', task.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today
+      const hasActiveNotification = existing.some(
+        (n) => n.type === 'task_due' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasActiveNotification) {
         await this.createTaskDueNotification({
           id: task.id,
           title: task.title,
@@ -310,14 +309,13 @@ export class NotificationService {
     let count = 0;
 
     for (const chore of chores) {
-      // Check if we already have a notification for this chore instance today
+      // Check if we already have an undismissed notification for this chore
       const existing = await this.notificationRepo.findByEntity('chore', chore.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today
+      const hasActiveNotification = existing.some(
+        (n) => n.type === 'chore_due' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasActiveNotification) {
         await this.createChoreDueNotification({
           id: chore.id,
           name: chore.choreDefinition?.name || 'Chore',
@@ -383,14 +381,13 @@ export class NotificationService {
     for (const asset of expiringAssets) {
       if (!asset.warrantyExpirationDate) continue;
 
-      // Check if we already have a notification for this asset today
+      // Check if we already have an undismissed notification for this asset
       const existing = await this.notificationRepo.findByEntity('asset', asset.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today && n.type === 'warranty_expiring'
+      const hasActiveNotification = existing.some(
+        (n) => n.type === 'warranty_expiring' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasActiveNotification) {
         // Calculate days until expiration
         const expirationDate = new Date(asset.warrantyExpirationDate);
         const now = new Date();
@@ -551,14 +548,13 @@ export class NotificationService {
     let count = 0;
 
     for (const task of upcomingTasks) {
-      // Check if we already have a notification for this task today
+      // Check if we already have an undismissed notification for this task
       const existing = await this.notificationRepo.findByEntity('seasonal_task', task.id);
-      const today = new Date().toISOString().split('T')[0];
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today && n.type === 'seasonal_task'
+      const hasActiveNotification = existing.some(
+        (n) => n.type === 'seasonal_task' && !n.isDismissed
       );
 
-      if (!hasRecentNotification) {
+      if (!hasActiveNotification) {
         await this.createSeasonalTaskNotification({
           id: task.id,
           title: task.title,
