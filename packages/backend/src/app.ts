@@ -47,7 +47,7 @@ export function createApp(): Express {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'img-src': ["'self'", 'https://image.tmdb.org', 'data:'],
-        'upgrade-insecure-requests': [],
+        'upgrade-insecure-requests': null,
       },
     },
   }));
