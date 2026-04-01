@@ -43,13 +43,7 @@ export function createApp(): Express {
 
   // Security middleware
   app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'img-src': ["'self'", 'https://image.tmdb.org', 'data:'],
-        'upgrade-insecure-requests': null,
-      },
-    },
+    contentSecurityPolicy: false,
   }));
 
   // CORS configuration
