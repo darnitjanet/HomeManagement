@@ -11,7 +11,6 @@ export type NotificationType =
   | 'warranty_expiring'
   | 'plant_watering'
   | 'birthday_reminder'
-  | 'package_delivery'
   | 'seasonal_task'
   | 'appointment_reminder'
   | 'general_alert';

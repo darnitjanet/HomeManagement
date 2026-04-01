@@ -28,8 +28,6 @@ import plantsRoutes from './routes/plants.routes';
 import mealPlanRoutes from './routes/meal-plan.routes';
 import emergencyRoutes from './routes/emergency.routes';
 import seasonalTaskRoutes from './routes/seasonal-task.routes';
-import packagesRoutes from './routes/packages.routes';
-import gmailRoutes from './routes/gmail.routes';
 import smartHomeRoutes from './routes/smart-home.routes';
 import watchlistRoutes from './routes/watchlist.routes';
 import ttsRoutes from './routes/tts.routes';
@@ -104,8 +102,6 @@ export function createApp(): Express {
   app.use('/api/meal-plans', mealPlanRoutes);
   app.use('/api/emergency', emergencyRoutes);
   app.use('/api/seasonal-tasks', seasonalTaskRoutes);
-  app.use('/api/packages', packagesRoutes);
-  app.use('/api/gmail', gmailRoutes);
   app.use('/api/smart-home', smartHomeRoutes);
   app.use('/api/watchlist', watchlistRoutes);
   app.use('/api/tts', ttsRoutes);

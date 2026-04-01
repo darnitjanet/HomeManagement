@@ -1067,62 +1067,6 @@ export const seasonalTasksApi = {
   markCompleted: (id: number) => api.post(`/seasonal-tasks/${id}/complete`),
 };
 
-// Gmail API (for package tracking email sync)
-export const gmailApi = {
-  getShippingEmails: (days?: number) =>
-    api.get('/gmail/shipping', { params: days ? { days } : {} }),
-  importEmail: (emailId: string) =>
-    api.post('/gmail/import', { emailId }),
-  syncFromEmail: (days?: number) =>
-    api.post('/gmail/sync', {}, { params: days ? { days } : {} }),
-};
-
-// Packages API
-export const packagesApi = {
-  getAll: (includeArchived?: boolean) =>
-    api.get('/packages', { params: { archived: includeArchived } }),
-  getActive: () => api.get('/packages/active'),
-  getArchived: () => api.get('/packages/archived'),
-  getArrivingSoon: (days?: number) =>
-    api.get('/packages/arriving-soon', { params: { days } }),
-  getStats: () => api.get('/packages/stats'),
-  getCarriers: () => api.get('/packages/carriers'),
-  getStatuses: () => api.get('/packages/statuses'),
-  getById: (id: number) => api.get(`/packages/${id}`),
-  create: (data: {
-    name: string;
-    tracking_number?: string;
-    carrier?: string;
-    status?: string;
-    order_date?: string;
-    expected_delivery?: string;
-    order_number?: string;
-    vendor?: string;
-    cost?: number;
-    notes?: string;
-    notify_on_delivery?: boolean;
-  }) => api.post('/packages', data),
-  update: (id: number, data: {
-    name?: string;
-    tracking_number?: string;
-    carrier?: string;
-    status?: string;
-    order_date?: string;
-    expected_delivery?: string;
-    actual_delivery?: string;
-    order_number?: string;
-    vendor?: string;
-    cost?: number;
-    notes?: string;
-    notify_on_delivery?: boolean;
-    is_archived?: boolean;
-  }) => api.put(`/packages/${id}`, data),
-  updateStatus: (id: number, status: string) =>
-    api.put(`/packages/${id}/status`, { status }),
-  archive: (id: number) => api.post(`/packages/${id}/archive`),
-  delete: (id: number) => api.delete(`/packages/${id}`),
-};
-
 // Smart Home API
 export const smartHomeApi = {
   // Overall status

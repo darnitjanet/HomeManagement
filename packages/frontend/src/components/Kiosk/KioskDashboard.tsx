@@ -1977,11 +1977,10 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
                 {notifications.slice(0, 4).map((notification) => (
                   <div key={notification.id} className={`notification-item-kiosk priority-${notification.priority}`}>
                     <div className="notification-icon-kiosk">
-                      {notification.type === 'package_delivery' && <Package size={18} />}
                       {notification.type === 'task_due' && <ListTodo size={18} />}
                       {notification.type === 'calendar_reminder' && <CalendarDays size={18} />}
                       {notification.type === 'birthday_reminder' && <Cake size={18} />}
-                      {!['package_delivery', 'task_due', 'calendar_reminder', 'birthday_reminder'].includes(notification.type) && <Bell size={18} />}
+                      {!['task_due', 'calendar_reminder', 'birthday_reminder'].includes(notification.type) && <Bell size={18} />}
                     </div>
                     <div className="notification-content-kiosk">
                       <div className="notification-title-kiosk">{notification.title}</div>

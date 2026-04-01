@@ -663,7 +663,6 @@ export type NotificationType =
   | 'warranty_expiring'
   | 'plant_watering'
   | 'birthday_reminder'
-  | 'package_delivery'
   | 'seasonal_task'
   | 'appointment_reminder'
   | 'general_alert';
@@ -712,7 +711,6 @@ export interface NotificationPreferences {
   warrantyExpiringAlerts: boolean;
   plantWateringAlerts: boolean;
   birthdayReminders: boolean;
-  packageDeliveryAlerts: boolean;
   ttsEnabled: boolean;
   ttsVolume: number;
   motionDetectionEnabled: boolean;
@@ -737,7 +735,6 @@ export interface UpdatePreferencesInput {
   warrantyExpiringAlerts?: boolean;
   plantWateringAlerts?: boolean;
   birthdayReminders?: boolean;
-  packageDeliveryAlerts?: boolean;
   ttsEnabled?: boolean;
   ttsVolume?: number;
   motionDetectionEnabled?: boolean;

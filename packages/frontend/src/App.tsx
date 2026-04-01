@@ -18,7 +18,6 @@ import { PlantsList } from './components/Plants/PlantsList';
 import { FamilyRulesPage } from './components/FamilyRules/FamilyRulesPage';
 import { EmergencyManagement } from './components/Emergency/EmergencyManagement';
 import { SeasonalTasks } from './components/SeasonalTasks/SeasonalTasks';
-import { PackagesList } from './components/Packages/PackagesList';
 import { HomePage } from './components/HomePage/HomePage';
 import { Header } from './components/Navigation/Header';
 import { KioskDashboard } from './components/Kiosk/KioskDashboard';
@@ -181,7 +180,6 @@ function App() {
         {currentPage === 'family-rules' && <FamilyRulesPage />}
         {currentPage === 'emergency' && <EmergencyManagement />}
         {currentPage === 'seasonal-tasks' && <SeasonalTasks />}
-        {currentPage === 'packages' && <PackagesList />}
       </main>
       <ToastContainer />
       <VirtualKeyboard />

@@ -205,8 +205,6 @@ export function generateBirthdayAnnouncement(birthdays: BirthdayContact[]): stri
 export function generateNotificationAnnouncement(notification: KioskNotification): string {
   // Handle different notification types
   switch (notification.type) {
-    case 'package_delivery':
-      return `Package alert: ${notification.message}`;
     case 'task_due':
       return `Task reminder: ${notification.title}`;
     case 'calendar_reminder':

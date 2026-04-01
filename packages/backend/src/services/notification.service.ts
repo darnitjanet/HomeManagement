@@ -5,7 +5,6 @@ import { CalendarRepository } from '../repositories/calendar.repository';
 import { AssetRepository } from '../repositories/asset.repository';
 import * as plantRepo from '../repositories/plant.repository';
 import * as todoRepo from '../repositories/todo.repository';
-import * as packageRepo from '../repositories/package.repository';
 import { ContactRepository } from '../repositories/contact.repository';
 import { seasonalTaskRepository } from '../repositories/seasonal-task.repository';
 import {
@@ -253,52 +252,6 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Create a package delivery notification
-   */
-  async createPackageDeliveryNotification(pkg: {
-    id: number;
-    name: string;
-    vendor: string | null;
-    expectedDelivery: string | null;
-    isToday: boolean;
-    isOverdue: boolean;
-  }): Promise<Notification> {
-    const vendorStr = pkg.vendor ? ` from ${pkg.vendor}` : '';
-    let message: string;
-    let title: string;
-    let priority: 'urgent' | 'high' | 'normal' | 'low' = 'normal';
-
-    if (pkg.isOverdue) {
-      title = 'Package May Be Delayed';
-      const dateStr = pkg.expectedDelivery
-        ? new Date(pkg.expectedDelivery).toLocaleDateString()
-        : '';
-      message = `"${pkg.name}"${vendorStr} was expected ${dateStr} but hasn't arrived`;
-      priority = 'high';
-    } else if (pkg.isToday) {
-      title = 'Package Arriving Today!';
-      message = `"${pkg.name}"${vendorStr} is expected to arrive today`;
-      priority = 'high';
-    } else {
-      title = 'Package Arriving Soon';
-      const dateStr = pkg.expectedDelivery
-        ? new Date(pkg.expectedDelivery).toLocaleDateString()
-        : 'soon';
-      message = `"${pkg.name}"${vendorStr} is expected ${dateStr}`;
-    }
-
-    return this.create({
-      type: 'package_delivery',
-      title,
-      message,
-      icon: 'package',
-      priority,
-      entityType: 'package',
-      entityId: pkg.id,
-    });
-  }
-
   // =====================
   // BATCH NOTIFICATION GENERATION
   // =====================
@@ -493,51 +446,6 @@ export class NotificationService {
           location: plant.location,
           daysOverdue: Math.max(0, daysOverdue),
         });
-        count++;
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * Generate notifications for packages arriving soon
-   * Called by the scheduler
-   */
-  async generatePackageDeliveryNotifications(): Promise<number> {
-    const prefs = await this.notificationRepo.getPreferences();
-    // Only skip if explicitly set to false
-    if (prefs && prefs.packageDeliveryAlerts === false) {
-      return 0;
-    }
-
-    // Get packages arriving today or tomorrow
-    const packagesForNotification = await packageRepo.getPackagesForNotification();
-    let count = 0;
-    const today = new Date().toISOString().split('T')[0];
-
-    for (const pkg of packagesForNotification) {
-      // Check if we already have a notification for this package today
-      const existing = await this.notificationRepo.findByEntity('package', pkg.id);
-      const hasRecentNotification = existing.some(
-        (n) => n.createdAt.substring(0, 10) === today && n.type === 'package_delivery'
-      );
-
-      if (!hasRecentNotification) {
-        const isToday = pkg.expected_delivery === today;
-        const isOverdue = pkg.expected_delivery ? pkg.expected_delivery < today : false;
-
-        await this.createPackageDeliveryNotification({
-          id: pkg.id,
-          name: pkg.name,
-          vendor: pkg.vendor,
-          expectedDelivery: pkg.expected_delivery,
-          isToday,
-          isOverdue,
-        });
-
-        // Mark as notified
-        await packageRepo.markNotified(pkg.id);
         count++;
       }
     }

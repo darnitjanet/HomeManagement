@@ -1,10 +1,6 @@
 import cron from 'node-cron';
 import { NotificationService } from '../services/notification.service';
 import { EmailService } from '../services/email.service';
-import { GoogleGmailService } from '../services/google-gmail.service';
-import { parseMultipleEmails } from '../services/shipping-email-parser';
-import { parseMultipleAppointmentEmails, ParsedAppointment } from '../services/appointment-email-parser';
-import * as packageRepo from '../repositories/package.repository';
 import { NotificationRepository } from '../repositories/notification.repository';
 import { getOAuth2Client } from '../config/google';
 import { db } from '../config/database';
@@ -13,8 +9,6 @@ import { db } from '../config/database';
 let notificationCheckTask: cron.ScheduledTask | null = null;
 let digestTask: cron.ScheduledTask | null = null;
 let cleanupTask: cron.ScheduledTask | null = null;
-let packageEmailSyncTask: cron.ScheduledTask | null = null;
-
 const notificationService = new NotificationService();
 const emailService = new EmailService();
 
@@ -42,10 +36,9 @@ export function initializeNotificationScheduler() {
     await runCleanup();
   });
 
-  // Sync shipping and appointment emails every hour
-  packageEmailSyncTask = cron.schedule('0 * * * *', async () => {
-    console.log('📦 Running email sync (packages & appointments)...');
-    await runPackageEmailSync();
+  // Sync appointment emails every hour
+  cron.schedule('0 * * * *', async () => {
+    console.log('📅 Running appointment email sync...');
     await runAppointmentEmailSync();
   });
 
@@ -53,7 +46,7 @@ export function initializeNotificationScheduler() {
   console.log('   - Notification check: Every 15 minutes (*/15 * * * *)');
   console.log('   - Daily digest: 7:00 AM (0 7 * * *)');
   console.log('   - Cleanup: 3:00 AM daily (0 3 * * *)');
-  console.log('   - Package email sync: Every hour (0 * * * *)');
+  console.log('   - Appointment email sync: Every hour (0 * * * *)');
 }
 
 /**
@@ -68,9 +61,6 @@ export function stopNotificationScheduler() {
   }
   if (cleanupTask) {
     cleanupTask.stop();
-  }
-  if (packageEmailSyncTask) {
-    packageEmailSyncTask.stop();
   }
   console.log('🛑 Stopped notification scheduler');
 }
@@ -128,19 +118,17 @@ async function runNotificationCheck() {
       return;
     }
 
-    const taskCount = await notificationService.generateTaskDueNotifications();
+    // Tasks are managed in their own UI, no notifications needed
     const choreCount = await notificationService.generateChoreDueNotifications();
     const calendarCount = await notificationService.generateCalendarReminders();
     const warrantyCount = await notificationService.generateWarrantyExpiringNotifications();
     const plantCount = await notificationService.generatePlantWateringNotifications();
     const birthdayCount = await notificationService.generateBirthdayNotifications();
-    const seasonalCount = await notificationService.generateSeasonalTaskNotifications();
-    const packageCount = await notificationService.generatePackageDeliveryNotifications();
     // Game overdue check runs less frequently (handled separately)
 
-    const total = taskCount + choreCount + calendarCount + warrantyCount + plantCount + birthdayCount + seasonalCount + packageCount;
+    const total = choreCount + calendarCount + warrantyCount + plantCount + birthdayCount;
     if (total > 0) {
-      console.log(`✅ Created ${total} notifications (tasks: ${taskCount}, chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount}, plants: ${plantCount}, birthdays: ${birthdayCount}, seasonal: ${seasonalCount}, packages: ${packageCount})`);
+      console.log(`✅ Created ${total} notifications (chores: ${choreCount}, calendar: ${calendarCount}, warranties: ${warrantyCount}, plants: ${plantCount}, birthdays: ${birthdayCount})`);
     }
   } catch (error: any) {
     console.error('❌ Notification check error:', error.message);
@@ -180,10 +168,9 @@ async function sendDailyDigest() {
     // Get digest data
     const digestData = await notificationService.getDigestData();
 
-    // Check if there's anything to send
+    // Check if there's anything to send (tasks excluded - managed in their own UI)
     const hasContent =
       digestData.calendarEvents.length > 0 ||
-      digestData.tasksDueToday.length > 0 ||
       digestData.choresDueToday.length > 0 ||
       digestData.overdueGameLoans.length > 0;
 
@@ -307,79 +294,6 @@ async function getActiveUserSession(): Promise<any> {
     console.error('Error getting active session:', error.message);
     return null;
   }
-}
-
-/**
- * Run package email sync - fetch shipping emails and import new packages
- */
-async function runPackageEmailSync() {
-  try {
-    // Get the active session with OAuth tokens
-    const session = await getActiveUserSession();
-
-    if (!session || !session.googleTokens) {
-      console.log('⏭️  No active user session, skipping package email sync');
-      return;
-    }
-
-    // Set up OAuth client with stored tokens
-    const oauth2Client = getOAuth2Client();
-    oauth2Client.setCredentials(session.googleTokens);
-
-    // Fetch shipping emails from the last 30 days
-    const daysBack = 30;
-    const afterDate = new Date();
-    afterDate.setDate(afterDate.getDate() - daysBack);
-
-    const gmailService = new GoogleGmailService(oauth2Client);
-    const emails = await gmailService.getShippingEmails(afterDate);
-    const parsed = parseMultipleEmails(emails);
-
-    let imported = 0;
-    let skipped = 0;
-
-    for (const info of parsed) {
-      try {
-        // Check if already imported
-        const existing = await packageRepo.findByEmailId(info.emailId);
-        if (existing) {
-          skipped++;
-          continue;
-        }
-
-        // Create the package
-        await packageRepo.createPackage({
-          name: info.itemDescription || 'Package from ' + (info.vendor || 'Unknown'),
-          tracking_number: info.trackingNumber || undefined,
-          carrier: info.carrier || undefined,
-          status: info.status,
-          expected_delivery: info.expectedDelivery || undefined,
-          order_number: info.orderNumber || undefined,
-          vendor: info.vendor || undefined,
-          email_id: info.emailId,
-        });
-
-        imported++;
-      } catch (err: any) {
-        console.error('Error importing email:', info.emailId, err.message);
-      }
-    }
-
-    if (imported > 0) {
-      console.log(`📦 Package email sync: imported ${imported} new packages (${skipped} already existed)`);
-    } else if (parsed.length > 0) {
-      console.log(`📦 Package email sync: no new packages (${skipped} already imported)`);
-    }
-  } catch (error: any) {
-    console.error('❌ Package email sync error:', error.message);
-  }
-}
-
-/**
- * Manually trigger package email sync (for testing)
- */
-export async function triggerPackageEmailSync() {
-  await runPackageEmailSync();
 }
 
 /**
