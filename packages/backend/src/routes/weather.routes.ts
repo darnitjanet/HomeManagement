@@ -35,19 +35,47 @@ router.get('/', async (req: Request, res: Response) => {
 
     const location = (req.query.location as string) || getDefaultLocation();
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=imperial`;
+    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=imperial`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${apiKey}&units=imperial`;
 
-    const response = await fetch(url);
+    const [currentResponse, forecastResponse] = await Promise.all([
+      fetch(currentUrl),
+      fetch(forecastUrl),
+    ]);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json({
+    if (!currentResponse.ok) {
+      const errorData = await currentResponse.json();
+      return res.status(currentResponse.status).json({
         success: false,
         error: errorData.message || 'Failed to fetch weather data',
       });
     }
 
-    const data = await response.json();
+    const data = await currentResponse.json();
+
+    // Get today's actual high/low from forecast data
+    let high = data.main.temp;
+    let low = data.main.temp;
+
+    if (forecastResponse.ok) {
+      const forecastData = await forecastResponse.json();
+      const today = new Date().toDateString();
+
+      // Include current temp in high/low calculation
+      let todayHigh = data.main.temp;
+      let todayLow = data.main.temp;
+
+      forecastData.list.forEach((item: any) => {
+        const itemDate = new Date(item.dt * 1000).toDateString();
+        if (itemDate === today) {
+          todayHigh = Math.max(todayHigh, item.main.temp_max);
+          todayLow = Math.min(todayLow, item.main.temp_min);
+        }
+      });
+
+      high = todayHigh;
+      low = todayLow;
+    }
 
     const weather: WeatherData = {
       location: data.name,
@@ -60,8 +88,8 @@ router.get('/', async (req: Request, res: Response) => {
       windSpeed: Math.round(data.wind.speed),
       sunrise: data.sys.sunrise,
       sunset: data.sys.sunset,
-      high: Math.round(data.main.temp_max),
-      low: Math.round(data.main.temp_min),
+      high: Math.round(high),
+      low: Math.round(low),
     };
 
     res.json({
