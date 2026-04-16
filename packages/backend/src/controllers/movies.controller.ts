@@ -76,7 +76,6 @@ export async function getOMDbDetails(req: Request, res: Response) {
     }
 
     const mediaType = req.query.type as string || 'movie';
-    console.log('[TMDB Details] id:', id, 'mediaType:', mediaType, 'query:', JSON.stringify(req.query));
     let transformedDetails: any;
 
     if (mediaType === 'tv') {
