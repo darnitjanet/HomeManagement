@@ -21,13 +21,13 @@ export async function searchOMDb(req: Request, res: Response) {
 
     // Transform TMDB results to match expected format
     const transformedResults = {
-      Search: results.results.map(movie => ({
-        Title: movie.title,
-        Year: movie.release_date ? movie.release_date.substring(0, 4) : 'N/A',
-        imdbID: String(movie.id), // Use TMDB ID temporarily
-        tmdbID: movie.id,
-        Type: 'movie',
-        Poster: tmdbService.getImageUrl(movie.poster_path, 'w342') || 'N/A',
+      Search: results.results.map(item => ({
+        Title: item.title || item.name || 'Unknown',
+        Year: (item.release_date || item.first_air_date || '').substring(0, 4) || 'N/A',
+        imdbID: String(item.id), // Use TMDB ID temporarily
+        tmdbID: item.id,
+        Type: item.media_type || 'movie',
+        Poster: tmdbService.getImageUrl(item.poster_path, 'w342') || 'N/A',
       })),
       totalResults: String(results.total_results),
       Response: 'True',
@@ -75,29 +75,64 @@ export async function getOMDbDetails(req: Request, res: Response) {
       });
     }
 
-    const details = await tmdbService.getMovieDetails(id);
+    const mediaType = req.query.type as string || 'movie';
+    let transformedDetails: any;
 
-    // Transform to match expected format for frontend
-    const transformedDetails = {
-      Title: details.title,
-      Year: details.release_date ? details.release_date.substring(0, 4) : 'N/A',
-      Rated: 'N/A', // Will be filled from release_dates
-      Released: details.release_date || 'N/A',
-      Runtime: details.runtime ? `${details.runtime} min` : 'N/A',
-      Genre: details.genres.map(g => g.name).join(', ') || 'N/A',
-      Director: details.credits.crew.filter(c => c.job === 'Director').map(c => c.name).join(', ') || 'N/A',
-      Writer: details.credits.crew.filter(c => c.department === 'Writing').map(c => c.name).slice(0, 3).join(', ') || 'N/A',
-      Actors: details.credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A',
-      Plot: details.overview || 'N/A',
-      Language: details.spoken_languages.map(l => l.english_name || l.name).join(', ') || 'N/A',
-      Country: details.production_countries.map(c => c.name).join(', ') || 'N/A',
-      Poster: tmdbService.getImageUrl(details.poster_path, 'w500') || 'N/A',
-      imdbRating: details.vote_average ? details.vote_average.toFixed(1) : 'N/A',
-      imdbID: details.imdb_id || 'N/A',
-      tmdbID: details.id,
-      Production: details.production_companies.map(pc => pc.name).join(', ') || 'N/A',
-      Response: 'True',
-    };
+    if (mediaType === 'tv') {
+      const details = await tmdbService.getTvDetails(id);
+      const usRating = details.content_ratings.results.find((r: any) => r.iso_3166_1 === 'US');
+      const runtime = details.episode_run_time && details.episode_run_time.length > 0
+        ? `${details.episode_run_time[0]} min/ep`
+        : 'N/A';
+
+      transformedDetails = {
+        Title: details.name,
+        Year: details.first_air_date ? details.first_air_date.substring(0, 4) : 'N/A',
+        Rated: usRating?.rating || 'N/A',
+        Released: details.first_air_date || 'N/A',
+        Runtime: runtime,
+        Genre: details.genres.map(g => g.name).join(', ') || 'N/A',
+        Director: details.created_by.map(c => c.name).join(', ') || 'N/A',
+        Writer: details.credits.crew.filter(c => c.department === 'Writing').map(c => c.name).slice(0, 3).join(', ') || 'N/A',
+        Actors: details.credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A',
+        Plot: details.overview || 'N/A',
+        Language: details.spoken_languages.map(l => l.english_name || l.name).join(', ') || 'N/A',
+        Country: details.production_countries.map(c => c.name).join(', ') || 'N/A',
+        Poster: tmdbService.getImageUrl(details.poster_path, 'w500') || 'N/A',
+        imdbRating: details.vote_average ? details.vote_average.toFixed(1) : 'N/A',
+        imdbID: 'N/A',
+        tmdbID: details.id,
+        Type: 'tv',
+        Production: details.production_companies.map(pc => pc.name).join(', ') || 'N/A',
+        Seasons: details.number_of_seasons,
+        Episodes: details.number_of_episodes,
+        Response: 'True',
+      };
+    } else {
+      const details = await tmdbService.getMovieDetails(id);
+
+      transformedDetails = {
+        Title: details.title,
+        Year: details.release_date ? details.release_date.substring(0, 4) : 'N/A',
+        Rated: 'N/A',
+        Released: details.release_date || 'N/A',
+        Runtime: details.runtime ? `${details.runtime} min` : 'N/A',
+        Genre: details.genres.map(g => g.name).join(', ') || 'N/A',
+        Director: details.credits.crew.filter(c => c.job === 'Director').map(c => c.name).join(', ') || 'N/A',
+        Writer: details.credits.crew.filter(c => c.department === 'Writing').map(c => c.name).slice(0, 3).join(', ') || 'N/A',
+        Actors: details.credits.cast.slice(0, 5).map(c => c.name).join(', ') || 'N/A',
+        Plot: details.overview || 'N/A',
+        Language: details.spoken_languages.map(l => l.english_name || l.name).join(', ') || 'N/A',
+        Country: details.production_countries.map(c => c.name).join(', ') || 'N/A',
+        Poster: tmdbService.getImageUrl(details.poster_path, 'w500') || 'N/A',
+        imdbRating: details.vote_average ? details.vote_average.toFixed(1) : 'N/A',
+        imdbID: details.imdb_id || 'N/A',
+        tmdbID: details.id,
+        Type: 'movie',
+        Production: details.production_companies.map(pc => pc.name).join(', ') || 'N/A',
+        Response: 'True',
+      };
+    }
 
     res.json({
       success: true,
@@ -297,7 +332,7 @@ export async function createMovie(req: Request, res: Response) {
  */
 export async function createMovieFromOMDb(req: Request, res: Response) {
   try {
-    const { imdbId, tmdbId, myRating, watchedStatus, format, personalNotes, tags } = req.body;
+    const { imdbId, tmdbId, myRating, watchedStatus, format, personalNotes, tags, mediaType } = req.body;
 
     // Accept either tmdbId or imdbId (which now contains TMDB ID from search)
     const movieId = tmdbId || imdbId;
@@ -309,24 +344,45 @@ export async function createMovieFromOMDb(req: Request, res: Response) {
       });
     }
 
-    // Fetch movie details from TMDB
-    const tmdbData = await tmdbService.getMovieDetails(parseInt(movieId));
+    let movieData: any;
 
-    if (!tmdbData) {
-      return res.status(404).json({
-        success: false,
-        error: 'Movie not found in TMDB',
-      });
+    if (mediaType === 'tv') {
+      // Fetch TV show details from TMDB
+      const tmdbData = await tmdbService.getTvDetails(parseInt(movieId));
+
+      if (!tmdbData) {
+        return res.status(404).json({
+          success: false,
+          error: 'TV show not found in TMDB',
+        });
+      }
+
+      movieData = {
+        ...tmdbService.mapTMDbTvToMovie(tmdbData),
+        myRating,
+        watchedStatus: watchedStatus || 'Not Watched',
+        format,
+        personalNotes,
+      };
+    } else {
+      // Fetch movie details from TMDB
+      const tmdbData = await tmdbService.getMovieDetails(parseInt(movieId));
+
+      if (!tmdbData) {
+        return res.status(404).json({
+          success: false,
+          error: 'Movie not found in TMDB',
+        });
+      }
+
+      movieData = {
+        ...tmdbService.mapTMDbToMovie(tmdbData),
+        myRating,
+        watchedStatus: watchedStatus || 'Not Watched',
+        format,
+        personalNotes,
+      };
     }
-
-    // Map TMDB data to our schema and merge with user data
-    const movieData = {
-      ...tmdbService.mapTMDbToMovie(tmdbData),
-      myRating,
-      watchedStatus: watchedStatus || 'Not Watched',
-      format,
-      personalNotes,
-    };
 
     const movieRepo = new MovieRepository();
     const id = await movieRepo.upsertMovie(movieData);

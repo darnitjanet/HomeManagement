@@ -267,7 +267,7 @@ export function MoviesList() {
           value={selectedMpaaRating}
           onChange={(e) => setSelectedMpaaRating(e.target.value)}
         >
-          <option value="">All Ratings</option>
+          <option value="">MPAA Rating</option>
           {uniqueMpaaRatings.map(rating => (
             <option key={rating} value={rating}>{rating}</option>
           ))}

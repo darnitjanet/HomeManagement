@@ -9,10 +9,14 @@ function getApiKey(): string | undefined {
 
 export interface TMDbSearchResult {
   id: number;
-  title: string;
-  original_title: string;
+  media_type?: string;
+  title?: string;
+  name?: string;
+  original_title?: string;
+  original_name?: string;
   overview: string;
-  release_date: string;
+  release_date?: string;
+  first_air_date?: string;
   poster_path: string | null;
   backdrop_path: string | null;
   genre_ids: number[];
@@ -88,6 +92,39 @@ export interface TMDbReleaseDates {
   }>;
 }
 
+export interface TMDbContentRatings {
+  results: Array<{
+    iso_3166_1: string;
+    rating: string;
+  }>;
+}
+
+export interface TMDbTvDetails {
+  id: number;
+  name: string;
+  original_name: string;
+  tagline: string;
+  overview: string;
+  first_air_date: string;
+  last_air_date: string;
+  number_of_seasons: number;
+  number_of_episodes: number;
+  episode_run_time: number[];
+  status: string;
+  adult: boolean;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  genres: Array<{ id: number; name: string }>;
+  production_companies: TMDbProductionCompany[];
+  production_countries: Array<{ iso_3166_1: string; name: string }>;
+  spoken_languages: Array<{ iso_639_1: string; name: string; english_name: string }>;
+  vote_average: number;
+  vote_count: number;
+  popularity: number;
+  networks: Array<{ id: number; name: string }>;
+  created_by: Array<{ id: number; name: string }>;
+}
+
 export class TMDbService {
   private readonly imageBaseUrl = 'https://image.tmdb.org/t/p/';
 
@@ -100,7 +137,7 @@ export class TMDbService {
   }
 
   /**
-   * Search for movies by title
+   * Search for movies and TV shows by title
    */
   async searchMovies(query: string): Promise<TMDbSearchResponse> {
     const apiKey = getApiKey();
@@ -113,7 +150,7 @@ export class TMDbService {
     }
 
     try {
-      const response = await axios.get(`${TMDB_API_URL}/search/movie`, {
+      const response = await axios.get(`${TMDB_API_URL}/search/multi`, {
         params: {
           api_key: apiKey,
           query: query.trim(),
@@ -122,7 +159,11 @@ export class TMDbService {
         timeout: 10000,
       });
 
-      return response.data;
+      // Filter to only movie and tv results (exclude person results)
+      const data = response.data;
+      data.results = data.results.filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv');
+
+      return data;
     } catch (error: any) {
       if (error.code === 'ECONNABORTED') {
         throw new Error('TMDB API request timed out');
@@ -171,6 +212,127 @@ export class TMDbService {
       }
       throw new Error(`TMDB API error: ${error.message}`);
     }
+  }
+
+  /**
+   * Get full TV show details by TMDB ID
+   */
+  async getTvDetails(tmdbId: number): Promise<TMDbTvDetails & { credits: TMDbCredits; content_ratings: TMDbContentRatings }> {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error('TMDB API key not configured. Please set TMDB_API_KEY in your .env file.');
+    }
+
+    try {
+      const response = await axios.get(`${TMDB_API_URL}/tv/${tmdbId}`, {
+        params: {
+          api_key: apiKey,
+          append_to_response: 'credits,content_ratings',
+        },
+        timeout: 10000,
+      });
+
+      return response.data;
+    } catch (error: any) {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('TMDB API request timed out');
+      }
+      if (error.response?.status === 401) {
+        throw new Error('Invalid TMDB API key');
+      }
+      if (error.response?.status === 404) {
+        throw new Error('TV show not found in TMDB');
+      }
+      if (error.response?.status === 429) {
+        throw new Error('TMDB API rate limit exceeded. Please try again later.');
+      }
+      throw new Error(`TMDB API error: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get US content rating for TV shows
+   */
+  private getTvContentRating(contentRatings: TMDbContentRatings): string | null {
+    const usRating = contentRatings.results.find(r => r.iso_3166_1 === 'US');
+    return usRating?.rating || null;
+  }
+
+  /**
+   * Map TMDB TV show data to our Movie type
+   */
+  mapTMDbTvToMovie(tmdbData: TMDbTvDetails & { credits: TMDbCredits; content_ratings: TMDbContentRatings }): Partial<any> {
+    // Get creators
+    const director = tmdbData.created_by
+      .map(c => c.name)
+      .join(', ');
+
+    // Get top 5 actors
+    const actors = tmdbData.credits.cast
+      .slice(0, 5)
+      .map(c => c.name)
+      .join(', ');
+
+    // Get writers from crew
+    const writers = tmdbData.credits.crew
+      .filter(c => c.department === 'Writing')
+      .map(c => c.name)
+      .slice(0, 5)
+      .join(', ');
+
+    // Get production companies
+    const productionCompanies = tmdbData.production_companies
+      .map(pc => pc.name)
+      .join(', ');
+
+    // Get genres
+    const genres = tmdbData.genres.map(g => g.name).join(', ');
+
+    // Get languages
+    const languages = tmdbData.spoken_languages
+      .map(l => l.english_name || l.name)
+      .join(', ');
+
+    // Get countries
+    const countries = tmdbData.production_countries
+      .map(c => c.name)
+      .join(', ');
+
+    // Get content rating (TV-MA, TV-14, etc.)
+    const mpaaRating = this.getTvContentRating(tmdbData.content_ratings);
+
+    // Convert TMDB 0-10 rating to 0-5 stars
+    const starRating = tmdbData.vote_average ? tmdbData.vote_average / 2 : null;
+
+    // Runtime: use first episode_run_time if available
+    const runtime = tmdbData.episode_run_time && tmdbData.episode_run_time.length > 0
+      ? `${tmdbData.episode_run_time[0]} min/ep`
+      : null;
+
+    return {
+      title: tmdbData.name,
+      type: 'TV Show',
+      tmdbId: tmdbData.id,
+      imdbId: null,
+      starRating,
+      mpaaRating,
+      genre: genres || null,
+      plot: tmdbData.overview || null,
+      releaseYear: tmdbData.first_air_date ? tmdbData.first_air_date.substring(0, 4) : null,
+      runtime,
+      languages: languages || null,
+      country: countries || null,
+      director: director || null,
+      actors: actors || null,
+      writers: writers || null,
+      productionCompany: productionCompanies || null,
+      posterUrl: this.getImageUrl(tmdbData.poster_path, 'w500'),
+      backdropUrl: this.getImageUrl(tmdbData.backdrop_path, 'w780'),
+      tmdbScore: tmdbData.vote_average ? tmdbData.vote_average.toFixed(1) : null,
+      budget: null,
+      revenue: null,
+      rawTmdbData: JSON.stringify(tmdbData),
+    };
   }
 
   /**

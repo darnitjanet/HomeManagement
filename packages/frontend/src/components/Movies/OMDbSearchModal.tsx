@@ -14,6 +14,7 @@ interface SearchResult {
   imdbID: string;
   Type: string;
   Poster: string;
+  tmdbID?: number;
 }
 
 export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps) {
@@ -24,6 +25,7 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [addingMovie, setAddingMovie] = useState(false);
+  const [selectedMediaType, setSelectedMediaType] = useState<string>('movie');
 
   // Form state for adding movie
   const [format, setFormat] = useState('');
@@ -54,18 +56,19 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
     }
   };
 
-  const handleSelectMovie = async (imdbId: string) => {
+  const handleSelectMovie = async (imdbId: string, type: string) => {
     setLoading(true);
     setError('');
+    setSelectedMediaType(type);
 
     try {
-      const response = await moviesApi.getOMDbDetails(imdbId);
+      const response = await moviesApi.getOMDbDetails(imdbId, type);
       if (response.data.success) {
         setSelectedMovie(response.data.data);
         setShowDetails(true);
       }
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to get movie details');
+      setError(error.response?.data?.message || 'Failed to get details');
     } finally {
       setLoading(false);
     }
@@ -84,6 +87,7 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
         watchedStatus,
         myRating: myRating > 0 ? myRating : undefined,
         personalNotes: personalNotes || undefined,
+        mediaType: selectedMediaType,
       });
 
       onMovieAdded();
@@ -121,7 +125,7 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
               <form onSubmit={handleSearch} className="search-form">
                 <input
                   type="text"
-                  placeholder="Search for a movie..."
+                  placeholder="Search for a movie or TV show..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -138,9 +142,9 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
                 <div className="search-results">
                   {searchResults.map((result) => (
                     <div
-                      key={result.imdbID}
+                      key={`${result.Type}-${result.imdbID}`}
                       className="search-result-card"
-                      onClick={() => handleSelectMovie(result.imdbID)}
+                      onClick={() => handleSelectMovie(result.imdbID, result.Type)}
                     >
                       {result.Poster && result.Poster !== 'N/A' ? (
                         <img src={result.Poster} alt={result.Title} />
@@ -149,7 +153,7 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
                       )}
                       <div className="result-info">
                         <h3>{result.Title}</h3>
-                        <p>{result.Year} • {result.Type}</p>
+                        <p>{result.Year} • {result.Type === 'tv' ? 'TV Show' : 'Movie'}</p>
                       </div>
                     </div>
                   ))}
@@ -176,12 +180,15 @@ export function OMDbSearchModal({ onClose, onMovieAdded }: OMDbSearchModalProps)
                   <p className="plot">{selectedMovie.Plot}</p>
 
                   <div className="credits">
-                    <p><strong>Director:</strong> {selectedMovie.Director}</p>
+                    <p><strong>{selectedMediaType === 'tv' ? 'Created by' : 'Director'}:</strong> {selectedMovie.Director}</p>
                     <p><strong>Actors:</strong> {selectedMovie.Actors}</p>
                     {selectedMovie.Production && selectedMovie.Production !== 'N/A' && (
-                      <p><strong>Studio:</strong> {selectedMovie.Production}</p>
+                      <p><strong>{selectedMediaType === 'tv' ? 'Network' : 'Studio'}:</strong> {selectedMovie.Production}</p>
                     )}
-                    <p><strong>TMDB Rating:</strong> ⭐ {selectedMovie.imdbRating}/10</p>
+                    {selectedMovie.Seasons && (
+                      <p><strong>Seasons:</strong> {selectedMovie.Seasons} ({selectedMovie.Episodes} episodes)</p>
+                    )}
+                    <p><strong>TMDB Rating:</strong> {selectedMovie.imdbRating}/10</p>
                   </div>
 
                   <div className="add-form">

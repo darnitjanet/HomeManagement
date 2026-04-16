@@ -130,7 +130,7 @@ export const contactsApi = {
 export const moviesApi = {
   // OMDb search
   searchOMDb: (query: string) => api.get('/movies/omdb/search', { params: { q: query } }),
-  getOMDbDetails: (imdbId: string) => api.get('/movies/omdb/details', { params: { imdbId } }),
+  getOMDbDetails: (imdbId: string, type?: string) => api.get('/movies/omdb/details', { params: { imdbId, type } }),
 
   // Get movies
   getAllMovies: () => api.get('/movies'),
@@ -155,6 +155,7 @@ export const moviesApi = {
     format?: string;
     personalNotes?: string;
     tags?: number[];
+    mediaType?: string;
   }) => api.post('/movies/from-omdb', data),
 
   // Update movie
