@@ -311,7 +311,7 @@ export class TMDbService {
 
     return {
       title: tmdbData.name,
-      type: 'TV Show',
+      type: 'Series',
       tmdbId: tmdbData.id,
       imdbId: null,
       starRating,
