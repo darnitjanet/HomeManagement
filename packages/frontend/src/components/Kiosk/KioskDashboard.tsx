@@ -502,7 +502,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
   // Set up activity listeners for sleep mode
   useEffect(() => {
-    const events = ['mousedown', 'mousemove', 'touchstart', 'touchmove', 'keydown'];
+    const events = ['mousedown', 'touchstart', 'keydown'];
 
     events.forEach((event) => {
       window.addEventListener(event, resetSleepTimer);
