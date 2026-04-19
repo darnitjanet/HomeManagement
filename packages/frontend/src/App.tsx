@@ -90,8 +90,19 @@ function App() {
     };
   }, [currentPage, resetInactivityTimer]);
 
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const checkAuthStatus = async () => {
     try {
+      // Check for OAuth error in URL params
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('auth') === 'error') {
+        const reason = params.get('reason') || 'unknown';
+        setAuthError(`Google sign-in failed: ${reason}`);
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
       const response = await authApi.getStatus();
       setAuthenticated(response.data.authenticated);
     } catch (error) {
@@ -102,10 +113,52 @@ function App() {
     }
   };
 
-  const handleLogin = () => {
-    // Direct browser redirect to OAuth endpoint
-    window.location.href = '/api/auth/google';
+  const handleLogin = async () => {
+    setAuthError(null);
+    try {
+      // Fetch the OAuth URL from server, then navigate directly to Google
+      // This avoids server-side redirect which can get cached/mangled by Chromium kiosk
+      const response = await fetch('/api/auth/google/url');
+      const data = await response.json();
+      if (data.url) {
+        // Open Google OAuth in a popup so the kiosk page never navigates away from localhost.
+        // If the popup fails or Google shows an error, the main page is unaffected.
+        const popup = window.open(data.url, 'google-auth', 'width=500,height=600');
+        if (popup) {
+          // Poll until popup closes (user completed or cancelled auth)
+          const pollTimer = setInterval(async () => {
+            if (popup.closed) {
+              clearInterval(pollTimer);
+              // Check if auth succeeded
+              const statusRes = await authApi.getStatus();
+              if (statusRes.data.authenticated) {
+                setAuthenticated(true);
+              } else {
+                setAuthError('Sign-in was cancelled or failed. Please try again.');
+              }
+            }
+          }, 500);
+        } else {
+          // Popup blocked — fall back to direct navigation
+          window.location.href = data.url;
+        }
+      } else {
+        setAuthError('Failed to get login URL');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setAuthError('Failed to connect to server');
+    }
   };
+
+  // Kiosk mode bypasses auth — most kiosk data doesn't require Google login
+  if (currentPage === 'kiosk' && !checking) {
+    return (
+      <div className="app kiosk-mode">
+        <KioskDashboard onExit={() => setCurrentPage('home')} />
+      </div>
+    );
+  }
 
   if (checking) {
     return (
@@ -126,6 +179,11 @@ function App() {
           </div>
 
           <div className="login-body">
+            {authError && (
+              <div style={{ background: '#fde2e2', color: '#a00', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+                {authError}
+              </div>
+            )}
             <p>Sign in with your Google account to get started</p>
             <button className="primary login-button" onClick={handleLogin}>
               <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
