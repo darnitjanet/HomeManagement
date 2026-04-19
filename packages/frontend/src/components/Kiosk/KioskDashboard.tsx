@@ -40,6 +40,7 @@ import { useMotionDetection } from '../../hooks/useMotionDetection';
 import { useBarcodeDetector } from '../../hooks/useBarcodeDetector';
 import { generateWakeAnnouncement } from '../../utils/announcementGenerator';
 import { EmergencyInfo } from '../Emergency/EmergencyInfo';
+import { DailyQuote } from './DailyQuote';
 import './KioskDashboard.css';
 
 // Play alarm sound using Web Audio API
@@ -1720,6 +1721,8 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         </div>
       </div>
+
+      <DailyQuote />
 
       <div className="kiosk-footer">
         <button className="kiosk-emergency-btn" onClick={() => setShowEmergency(true)}>

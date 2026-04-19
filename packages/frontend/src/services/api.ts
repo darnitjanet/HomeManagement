@@ -1137,4 +1137,13 @@ export const ttsApi = {
   getStatus: () => api.get('/tts/status'),
 };
 
+// Messages API (Family Message Board)
+export const messagesApi = {
+  getAll: () => api.get('/messages'),
+  create: (data: { author: string; content: string; color?: string }) => api.post('/messages', data),
+  update: (id: number, data: { content?: string; color?: string }) => api.put(`/messages/${id}`, data),
+  delete: (id: number) => api.delete(`/messages/${id}`),
+  togglePin: (id: number) => api.put(`/messages/${id}/pin`),
+};
+
 export default api;

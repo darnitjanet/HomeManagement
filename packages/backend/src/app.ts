@@ -31,6 +31,7 @@ import seasonalTaskRoutes from './routes/seasonal-task.routes';
 import smartHomeRoutes from './routes/smart-home.routes';
 import watchlistRoutes from './routes/watchlist.routes';
 import ttsRoutes from './routes/tts.routes';
+import messageRoutes from './routes/message.routes';
 
 // Import session store (will be implemented)
 const SQLiteStore = require('connect-sqlite3')(session);
@@ -104,6 +105,7 @@ export function createApp(): Express {
   app.use('/api/smart-home', smartHomeRoutes);
   app.use('/api/watchlist', watchlistRoutes);
   app.use('/api/tts', ttsRoutes);
+  app.use('/api/messages', messageRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {

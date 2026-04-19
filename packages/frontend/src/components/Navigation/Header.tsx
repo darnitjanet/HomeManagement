@@ -116,6 +116,18 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
             Kids
           </button>
           <button
+            className={currentPage === 'meals' ? 'active' : ''}
+            onClick={() => onNavigate('meals')}
+          >
+            Meals
+          </button>
+          <button
+            className={currentPage === 'messages' ? 'active' : ''}
+            onClick={() => onNavigate('messages')}
+          >
+            Messages
+          </button>
+          <button
             className={currentPage === 'mood' ? 'active' : ''}
             onClick={() => onNavigate('mood')}
           >

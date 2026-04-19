@@ -1,0 +1,22 @@
+.daily-quote {
+  background: rgba(238, 214, 170, 0.08);
+  border-left: 3px solid #da6b34;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+
+.daily-quote-text {
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 6px;
+}
+
+.daily-quote-author {
+  text-align: right;
+  font-size: 12px;
+  color: #dc9e33;
+  font-weight: 500;
+}

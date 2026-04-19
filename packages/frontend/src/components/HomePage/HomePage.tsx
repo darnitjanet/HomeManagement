@@ -1,4 +1,4 @@
-import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale, Leaf, RefreshCw } from 'lucide-react';
+import { Calendar, Users, Film, Gamepad2, Star, ShoppingCart, ChefHat, Box, Monitor, ClipboardCheck, Heart, BookOpen, MapPin, UtensilsCrossed, Flower2, AlertTriangle, Scale, Leaf, RefreshCw, CookingPot, MessageSquare } from 'lucide-react';
 import { WeatherWidget } from '../Weather/WeatherWidget';
 import './HomePage.css';
 
@@ -18,6 +18,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
     { id: 'games', icon: Gamepad2, title: 'Games', color: '#5b768a' },
     { id: 'assets', icon: Box, title: 'Home Assets', color: '#5b768a' },
     { id: 'kids', icon: Star, title: 'Kids Rewards', color: '#dc9e33' },
+    { id: 'meals', icon: CookingPot, title: 'Meal Plan', color: '#da6b34' },
+    { id: 'messages', icon: MessageSquare, title: 'Messages', color: '#5b768a' },
     { id: 'mood', icon: Heart, title: 'Mood', color: '#da6b34' },
     { id: 'movies', icon: Film, title: 'Movies', color: '#dc9e33' },
     { id: 'pantry', icon: UtensilsCrossed, title: 'Pantry', color: '#dc9e33' },

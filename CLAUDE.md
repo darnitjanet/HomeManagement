@@ -24,6 +24,26 @@ Monorepo with packages:
 - SQLite with Knex.js migrations
 - Database file: `packages/backend/database/home_management.db`
 
+## Known Issues & Fixes
+
+### Google OAuth Login 400 Error (Fixed 2026-04-13)
+**Problem:** Chromium in `--kiosk` mode on the Pi mangles server-side 302 redirects to Google's OAuth URL, causing Google to show "400 malformed request" (missing `response_type`). The redirect URL is valid (confirmed via curl) — the issue is browser-specific.
+
+**Fix:** Changed login flow from server-side redirect to client-side navigation:
+- Added `GET /api/auth/google/url` endpoint that returns the OAuth URL as JSON
+- Frontend fetches URL via `fetch()`, then navigates with `window.location.href`
+- Also improved OAuth callback to capture Google's error parameter and show it on the login page
+
+**If login breaks again:**
+1. Check backend is running: `curl http://localhost:3000/api/health`
+2. Check OAuth URL endpoint: `curl http://localhost:3000/api/auth/google/url`
+3. If Chromium is stuck, kill and restart: `WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 chromium --ozone-platform=wayland --kiosk ...`
+4. If Google rejects the URL itself, check Google Cloud Console credentials
+
+### Session Cookie Secure Flag (Fixed 2026-03-09, commit 3e7db51)
+**Problem:** Session cookie had `secure: true` in production, but Pi runs on HTTP localhost.
+**Fix:** Set `secure: false` in session cookie config.
+
 ## Recent Work: Kiosk Kids Rewards Display (COMPLETED)
 
 Added read-only kids rewards tracker display to kiosk dashboard.
@@ -438,6 +458,51 @@ Warranty tracking integrated into Home Inventory (Assets):
 - `notification.scheduler.ts` - Cron-based scheduling
 - `notifications.controller.ts` - API endpoints
 - `notifications.routes.ts` - Route definitions
+
+## Recent Work: Kiosk Stability Fixes (COMPLETED)
+
+Multiple fixes to prevent kiosk from breaking on reboot or session expiry.
+
+**Fixes:**
+- **Kiosk bypasses auth**: Kiosk mode (`/kiosk` URL) no longer requires Google login. Most kiosk data (weather, todos, shopping, etc.) doesn't need auth. This prevents the kiosk from getting stuck on the login screen after session expiry.
+- **Sleep mode not triggering**: Removed `mousemove` and `touchmove` from activity listeners — phantom touch events on the touchscreen were continuously resetting the 2-minute sleep timer. Now only `mousedown`, `touchstart`, and `keydown` reset it.
+- **Fullscreen not working**: Added labwc window rule (`~/.config/labwc/rc.xml`) with `serverDecoration="no"` and `Fullscreen` action for Chromium. Also added `--start-fullscreen` to `start-kiosk.sh`.
+- **Shopping list print too large**: Reduced print font sizes (body 10px, title 14px, headers 12px), tightened spacing and checkbox size in `@media print` styles.
+- **Duplex printing**: Set CUPS default for Brother printer: `lpoptions -p Brother_HL_L3280CDW_series -o sides=two-sided-long-edge`
+- **Desktop shortcut**: Created `~/Desktop/HomeManagement.desktop` so the app can be manually launched in fullscreen kiosk mode if auto-start fails.
+
+**Files Modified:**
+- `packages/frontend/src/App.tsx` - Kiosk mode renders before auth check
+- `packages/frontend/src/components/Kiosk/KioskDashboard.tsx` - Removed mousemove/touchmove from sleep activity listeners
+- `packages/frontend/src/components/Shopping/ShoppingList.css` - Compact print styles
+
+**Pi Config Files Modified:**
+- `~/.config/labwc/rc.xml` - Fullscreen window rule for Chromium
+- `~/start-kiosk.sh` - Added `--start-fullscreen` flag
+- `~/Desktop/HomeManagement.desktop` - Desktop shortcut
+
+---
+
+## Recent Work: TMDB TV Show Search & MPAA Filter Fix (COMPLETED)
+
+Added TV show lookup support to movie catalog and fixed filter label.
+
+**Features:**
+- TMDB search now uses `/search/multi` endpoint to return both movies and TV shows
+- TV shows display seasons, episodes, content rating (TV-MA, TV-14, etc.)
+- TV show details show "Created by" instead of "Director", "Network" instead of "Studio"
+- Fixed duplicate "All Ratings" filter label — MPAA rating dropdown now says "MPAA Rating"
+
+**Important:** The `movies` table `type` column has a CHECK constraint: only `'Movie'`, `'Series'`, `'Episode'`, `'All'` are valid. TV shows from TMDB are saved as `'Series'`.
+
+**Files Modified:**
+- `packages/backend/src/services/tmdb.service.ts` - Changed search from `/search/movie` to `/search/multi`, added `getTvDetails()`, `getTvContentRating()`, and `mapTMDbTvToMovie()` methods, added TV-specific interfaces
+- `packages/backend/src/controllers/movies.controller.ts` - Search results include media type, `getOMDbDetails` handles TV via `type` query param, `createMovieFromOMDb` handles TV via `mediaType` body param
+- `packages/frontend/src/components/Movies/OMDbSearchModal.tsx` - Tracks `selectedMediaType`, passes type through search/details/add flow, shows TV-specific info in details view
+- `packages/frontend/src/components/Movies/MoviesList.tsx` - Changed MPAA filter label from "All Ratings" to "MPAA Rating"
+- `packages/frontend/src/services/api.ts` - `getOMDbDetails` accepts optional `type` param, `createMovieFromOMDb` accepts optional `mediaType`
+
+---
 
 ## Commands
 ```bash

@@ -1,0 +1,381 @@
+.message-board {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.message-board.loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 60px 20px;
+  font-size: 16px;
+}
+
+/* Header */
+.message-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.message-board-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #5b768a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-message-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #da6b34;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-message-btn:active {
+  background: #c55a28;
+}
+
+/* Message Form */
+.message-form {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border-left: 5px solid #eed6aa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.message-form input,
+.message-form textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 16px;
+  margin-bottom: 12px;
+  resize: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.message-form input:focus,
+.message-form textarea:focus {
+  outline: none;
+  border-color: #5b768a;
+  box-shadow: 0 0 0 3px rgba(91, 118, 138, 0.15);
+}
+
+.message-form .form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+}
+
+.color-swatch:active {
+  transform: scale(0.9);
+}
+
+.color-swatch.selected {
+  border-color: #5b768a;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #5b768a;
+}
+
+.color-swatch.small {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.submit-message-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 24px;
+  min-height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: #5b768a;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-message-btn:disabled {
+  background: #b0bec5;
+  cursor: not-allowed;
+}
+
+.submit-message-btn:not(:disabled):active {
+  background: #4a6275;
+}
+
+/* Messages Grid */
+.messages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Sticky Note Card */
+.sticky-note {
+  border-radius: 4px;
+  padding: 20px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow:
+    2px 3px 8px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
+  /* Slight rotation for sticky note feel */
+  transform: rotate(-0.5deg);
+}
+
+.sticky-note:nth-child(even) {
+  transform: rotate(0.5deg);
+}
+
+.sticky-note:nth-child(3n) {
+  transform: rotate(-1deg);
+}
+
+.sticky-note:nth-child(3n+1) {
+  transform: rotate(0.8deg);
+}
+
+.sticky-note.pinned {
+  border-top: 4px solid #dc9e33;
+}
+
+.sticky-note.pinned::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: #dc9e33;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Sticky Note Header */
+.sticky-note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sticky-author {
+  font-weight: 700;
+  font-size: 15px;
+  color: #374151;
+}
+
+.sticky-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Sticky Note Content */
+.sticky-content {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1f2937;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 12px;
+}
+
+/* Sticky Note Actions - always visible for touchscreen */
+.sticky-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 10px;
+}
+
+.action-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.action-btn:active {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.action-btn.pin-btn.active {
+  color: #dc9e33;
+  background: rgba(220, 158, 51, 0.15);
+}
+
+.action-btn.edit-btn:active {
+  color: #5b768a;
+  background: rgba(91, 118, 138, 0.15);
+}
+
+.action-btn.delete-btn:active {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Edit Mode */
+.sticky-note-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sticky-note-edit textarea {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  background: rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
+}
+
+.sticky-note-edit textarea:focus {
+  outline: none;
+  border-color: #5b768a;
+}
+
+.edit-color-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancel-edit-btn,
+.save-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancel-edit-btn {
+  background: rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+}
+
+.cancel-edit-btn:active {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.save-edit-btn {
+  background: #5b768a;
+  color: white;
+}
+
+.save-edit-btn:active {
+  background: #4a6275;
+}
+
+/* Empty State */
+.no-messages {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+}
+
+.no-messages svg {
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.no-messages p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .message-board {
+    padding: 12px;
+  }
+
+  .message-board-header h2 {
+    font-size: 20px;
+  }
+
+  .messages-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .sticky-note {
+    transform: none !important;
+  }
+}
