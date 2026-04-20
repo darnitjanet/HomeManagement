@@ -73,25 +73,25 @@
   background: #f0fdf4;
   border: 2px solid #bbf7d0;
   border-radius: 12px;
-  color: #15803d;
+  color: #166534;
 }
 
 .stat-card.urgent {
   background: #fef2f2;
   border-color: #fecaca;
-  color: #dc2626;
+  color: #991b1b;
 }
 
 .stat-card.warning {
   background: #fffbeb;
   border-color: #fde68a;
-  color: #d97706;
+  color: #92400e;
 }
 
 .stat-card.success {
   background: #f0fdf4;
   border-color: #bbf7d0;
-  color: #15803d;
+  color: #166534;
 }
 
 .stat-info {
@@ -102,11 +102,13 @@
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
+  color: inherit;
 }
 
 .stat-label {
   font-size: 0.8rem;
   opacity: 0.8;
+  color: inherit;
 }
 
 /* Filters */
@@ -291,22 +293,22 @@
 
 .water-status.overdue {
   background: #fee2e2;
-  color: #dc2626;
+  color: #991b1b;
 }
 
 .water-status.today {
   background: #ffedd5;
-  color: #ea580c;
+  color: #9a3412;
 }
 
 .water-status.soon {
   background: #fef9c3;
-  color: #ca8a04;
+  color: #854d0e;
 }
 
 .water-status.ok {
   background: #dcfce7;
-  color: #16a34a;
+  color: #166534;
 }
 
 .water-btn {
