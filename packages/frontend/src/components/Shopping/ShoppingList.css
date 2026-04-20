@@ -482,6 +482,26 @@
   transform: scale(1.2);
 }
 
+.delete-item-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--slate-400);
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.delete-item-btn:active {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
 .is-favorite {
   width: 28px;
   height: 28px;

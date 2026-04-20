@@ -136,6 +136,15 @@ export function ShoppingList() {
     });
   };
 
+  const handleDeleteItem = async (id: number) => {
+    try {
+      await shoppingApi.removeItem(activeTab, id);
+      loadData();
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+    }
+  };
+
   const handleRemoveUnchecked = async () => {
     const uncheckedItems = items.filter(item => !checkedItems.has(item.id));
     if (uncheckedItems.length === 0) return;
@@ -536,6 +545,13 @@ export function ShoppingList() {
                           ♥
                         </span>
                       )}
+                      <button
+                        className="delete-item-btn no-print"
+                        onClick={() => handleDeleteItem(item.id)}
+                        title="Delete item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                       <span className="print-quantity">x{item.quantity}</span>
                     </li>
                   ))}
@@ -588,6 +604,13 @@ export function ShoppingList() {
                     ♥
                   </span>
                 )}
+                <button
+                  className="delete-item-btn no-print"
+                  onClick={() => handleDeleteItem(item.id)}
+                  title="Delete item"
+                >
+                  <Trash2 size={16} />
+                </button>
                 <span className="print-quantity">x{item.quantity}</span>
               </li>
             ))}
