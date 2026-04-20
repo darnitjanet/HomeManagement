@@ -62,6 +62,7 @@ const CATEGORIES = [
 
 const LOCATIONS = [
   'Living Room',
+  'Family Room',
   'Kitchen',
   'Bedroom',
   'Bathroom',
