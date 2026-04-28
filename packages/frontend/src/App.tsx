@@ -119,31 +119,12 @@ function App() {
     setAuthError(null);
     try {
       // Fetch the OAuth URL from server, then navigate directly to Google
-      // This avoids server-side redirect which can get cached/mangled by Chromium kiosk
       const response = await fetch('/api/auth/google/url');
       const data = await response.json();
       if (data.url) {
-        // Open Google OAuth in a popup so the kiosk page never navigates away from localhost.
-        // If the popup fails or Google shows an error, the main page is unaffected.
-        const popup = window.open(data.url, 'google-auth', 'width=500,height=600');
-        if (popup) {
-          // Poll until popup closes (user completed or cancelled auth)
-          const pollTimer = setInterval(async () => {
-            if (popup.closed) {
-              clearInterval(pollTimer);
-              // Check if auth succeeded
-              const statusRes = await authApi.getStatus();
-              if (statusRes.data.authenticated) {
-                setAuthenticated(true);
-              } else {
-                setAuthError('Sign-in was cancelled or failed. Please try again.');
-              }
-            }
-          }, 500);
-        } else {
-          // Popup blocked — fall back to direct navigation
-          window.location.href = data.url;
-        }
+        // Navigate in the same window — the OAuth callback will redirect back.
+        // Avoids popup issues in kiosk/fullscreen mode.
+        window.location.href = data.url;
       } else {
         setAuthError('Failed to get login URL');
       }
