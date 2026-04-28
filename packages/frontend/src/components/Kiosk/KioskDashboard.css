@@ -736,6 +736,59 @@
   color: #c4b5fd;
 }
 
+/* Family Messages Strip */
+.kiosk-messages-strip {
+  padding: 8px 24px;
+}
+
+.messages-strip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.messages-strip-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.messages-strip-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.messages-strip-note {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.messages-strip-content {
+  display: block;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.messages-strip-author {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 /* Footer */
 .kiosk-footer {
   display: flex;

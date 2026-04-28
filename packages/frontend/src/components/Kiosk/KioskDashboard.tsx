@@ -34,7 +34,8 @@ import {
   RotateCcw,
   Minimize2,
 } from 'lucide-react';
-import { weatherApi, todosApi, calendarApi, syncApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi } from '../../services/api';
+import { weatherApi, todosApi, calendarApi, syncApi, contactsApi, notificationsApi, shoppingApi, pantryApi, smartHomeApi, settingsApi, mealPlanApi, kidsApi, messagesApi } from '../../services/api';
+import { MessageSquare } from 'lucide-react';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { useMotionDetection } from '../../hooks/useMotionDetection';
 import { useBarcodeDetector } from '../../hooks/useBarcodeDetector';
@@ -204,6 +205,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   const [notifications, setNotifications] = useState<KioskNotification[]>([]);
   const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
   const [kids, setKids] = useState<Kid[]>([]);
+  const [familyMessages, setFamilyMessages] = useState<any[]>([]);
 
 
   // Emergency info modal
@@ -696,7 +698,7 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
   };
 
   const loadData = async () => {
-    await Promise.all([loadTodos(), loadWeather(), loadEvents(), loadBirthdays(), loadNotifications(), loadKioskPreferences(), loadMealPlan(), loadKids()]);
+    await Promise.all([loadTodos(), loadWeather(), loadEvents(), loadBirthdays(), loadNotifications(), loadKioskPreferences(), loadMealPlan(), loadKids(), loadMessages()]);
     setLoading(false);
   };
 
@@ -753,6 +755,17 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
       }
     } catch (error) {
       console.error('Failed to load kids:', error);
+    }
+  };
+
+  const loadMessages = async () => {
+    try {
+      const response = await messagesApi.getAll();
+      if (response.data.success) {
+        setFamilyMessages(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error);
     }
   };
 
@@ -1721,6 +1734,23 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
           </div>
         </div>
       </div>
+
+      {familyMessages.length > 0 && (
+        <div className="kiosk-messages-strip">
+          <div className="messages-strip-header">
+            <MessageSquare size={20} />
+            <h3>Family Messages</h3>
+          </div>
+          <div className="messages-strip-list">
+            {familyMessages.slice(0, 3).map((msg) => (
+              <div key={msg.id} className="messages-strip-note" style={{ backgroundColor: msg.color || '#eed6aa' }}>
+                <span className="messages-strip-content">{msg.content}</span>
+                <span className="messages-strip-author">— {msg.author}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <DailyQuote />
 
