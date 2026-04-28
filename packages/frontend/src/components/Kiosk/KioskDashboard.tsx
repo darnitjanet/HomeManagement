@@ -1735,24 +1735,25 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
         </div>
       </div>
 
-      {familyMessages.length > 0 && (
-        <div className="kiosk-messages-strip">
-          <div className="messages-strip-header">
-            <MessageSquare size={20} />
-            <h3>Family Messages</h3>
+      <div className="kiosk-bottom-row">
+        <DailyQuote />
+        {familyMessages.length > 0 && (
+          <div className="kiosk-messages-compact">
+            <div className="messages-compact-header">
+              <MessageSquare size={16} />
+              <span>Messages</span>
+            </div>
+            <div className="messages-compact-list">
+              {familyMessages.slice(0, 3).map((msg) => (
+                <div key={msg.id} className="messages-compact-note" style={{ backgroundColor: msg.color || '#eed6aa' }}>
+                  <span className="messages-compact-content">{msg.content}</span>
+                  <span className="messages-compact-author">— {msg.author}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="messages-strip-list">
-            {familyMessages.slice(0, 3).map((msg) => (
-              <div key={msg.id} className="messages-strip-note" style={{ backgroundColor: msg.color || '#eed6aa' }}>
-                <span className="messages-strip-content">{msg.content}</span>
-                <span className="messages-strip-author">— {msg.author}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <DailyQuote />
+        )}
+      </div>
 
       <div className="kiosk-footer">
         <button className="kiosk-emergency-btn" onClick={() => setShowEmergency(true)}>

@@ -736,57 +736,63 @@
   color: #c4b5fd;
 }
 
-/* Family Messages Strip */
-.kiosk-messages-strip {
+/* Bottom Row - Quote + Messages side by side */
+.kiosk-bottom-row {
+  display: flex;
+  gap: 16px;
   padding: 8px 24px;
+  align-items: stretch;
 }
 
-.messages-strip-header {
+.kiosk-bottom-row .daily-quote {
+  flex: 1;
+  margin-top: 0;
+}
+
+/* Family Messages Compact */
+.kiosk-messages-compact {
+  flex: 1;
+}
+
+.messages-compact-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
   color: rgba(255, 255, 255, 0.7);
-}
-
-.messages-strip-header h3 {
-  margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
+  margin-bottom: 6px;
 }
 
-.messages-strip-list {
+.messages-compact-list {
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.messages-strip-note {
-  flex-shrink: 0;
-  padding: 10px 14px;
-  border-radius: 6px;
-  min-width: 180px;
-  max-width: 280px;
+.messages-compact-note {
+  padding: 8px 10px;
+  border-radius: 5px;
 }
 
-.messages-strip-content {
+.messages-compact-content {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   color: #333;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
-.messages-strip-author {
-  display: block;
-  font-size: 11px;
+.messages-compact-author {
+  display: inline;
+  font-size: 10px;
   color: #666;
-  margin-top: 4px;
   font-style: italic;
+  margin-left: 6px;
 }
 
 /* Footer */
