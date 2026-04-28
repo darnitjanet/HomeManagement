@@ -25,13 +25,37 @@ router.get('/google', (req: Request, res: Response) => {
   }
 });
 
+// GET /api/auth/google/url - Return OAuth URL as JSON (avoids redirect caching issues)
+router.get('/google/url', (req: Request, res: Response) => {
+  try {
+    const authUrl = getAuthUrl(false);
+    res.json({ url: authUrl });
+  } catch (error) {
+    console.error('Error generating auth URL:', error);
+    res.status(500).json({ error: 'Failed to generate authentication URL' });
+  }
+});
+
 // GET /api/auth/google/callback - Handle OAuth callback
 router.get('/google/callback', async (req: Request, res: Response) => {
   try {
-    const { code } = req.query;
+    const { code, error: googleError } = req.query;
+
+    // Google sends back an error parameter when OAuth is rejected
+    if (googleError) {
+      console.error('Google OAuth error:', googleError, '| Full query:', req.query);
+      const frontendUrl = process.env.NODE_ENV === 'production'
+        ? `/?auth=error&reason=${googleError}`
+        : `http://localhost:5173/?auth=error&reason=${googleError}`;
+      return res.redirect(frontendUrl);
+    }
 
     if (!code || typeof code !== 'string') {
-      return res.status(400).json({ error: 'Missing authorization code' });
+      console.error('Missing authorization code. Query params:', req.query);
+      const frontendUrl = process.env.NODE_ENV === 'production'
+        ? '/?auth=error&reason=missing_code'
+        : 'http://localhost:5173/?auth=error&reason=missing_code';
+      return res.redirect(frontendUrl);
     }
 
     // Exchange code for tokens
@@ -56,22 +80,26 @@ router.get('/google/callback', async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Failed to save session' });
       }
 
-      // Redirect to frontend
-      const frontendUrl = process.env.NODE_ENV === 'production'
-        ? '/'
-        : 'http://localhost:5173';
-
-      res.redirect(frontendUrl);
+      // If opened in a popup (from kiosk login), close the popup.
+      // The parent window polls for auth status and will detect success.
+      // If not in a popup (direct navigation), redirect to frontend.
+      res.send(`<html><body><script>
+        if (window.opener) { window.close(); }
+        else { window.location.href = ${process.env.NODE_ENV === 'production' ? "'/' " : "'http://localhost:5173'"}; }
+      </script></body></html>`);
     });
   } catch (error) {
     console.error('OAuth callback error:', error);
 
-    // Redirect to frontend with error parameter
+    // Close popup on error, or redirect if not in popup
     const frontendUrl = process.env.NODE_ENV === 'production'
       ? '/?auth=error'
       : 'http://localhost:5173/?auth=error';
 
-    res.redirect(frontendUrl);
+    res.send(`<html><body><script>
+      if (window.opener) { window.close(); }
+      else { window.location.href = '${frontendUrl}'; }
+    </script></body></html>`);
   }
 });
 
