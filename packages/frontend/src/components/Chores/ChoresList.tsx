@@ -176,19 +176,19 @@ export function ChoresList() {
             className={`toggle-btn ${viewMode === 'today' ? 'active' : ''}`}
             onClick={() => setViewMode('today')}
           >
-            Today
+            Routine - Today
           </button>
           <button
             className={`toggle-btn ${viewMode === 'upcoming' ? 'active' : ''}`}
             onClick={() => setViewMode('upcoming')}
           >
-            Upcoming
+            Routine - Upcoming
           </button>
           <button
             className={`toggle-btn ${viewMode === 'payback' ? 'active' : ''}`}
             onClick={() => setViewMode('payback')}
           >
-            Payback
+            Goal Chores
           </button>
         </div>
         {viewMode !== 'payback' && (

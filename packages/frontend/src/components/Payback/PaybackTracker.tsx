@@ -174,7 +174,7 @@ export function PaybackTracker() {
   return (
     <div className="payback-tracker">
       <div className="pb-header">
-        <h1>Payback Chores</h1>
+        <h1>Goal Chores</h1>
         <button className="pb-add-account-btn" onClick={() => setShowAccountModal(true)}>
           <Plus size={20} /> Add Kid
         </button>
