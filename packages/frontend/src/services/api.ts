@@ -1146,4 +1146,16 @@ export const messagesApi = {
   togglePin: (id: number) => api.put(`/messages/${id}/pin`),
 };
 
+// Payback Chores API
+export const paybackApi = {
+  getAllAccounts: () => api.get('/payback/accounts'),
+  getAccount: (id: number) => api.get(`/payback/accounts/${id}`),
+  createAccount: (data: { kid_name: string; total_owed?: number }) => api.post('/payback/accounts', data),
+  updateAccount: (id: number, data: { kid_name?: string; total_owed?: number }) => api.put(`/payback/accounts/${id}`, data),
+  addChore: (accountId: number, data: { description: string; amount?: number }) => api.post(`/payback/accounts/${accountId}/chores`, data),
+  getChores: (accountId: number) => api.get(`/payback/accounts/${accountId}/chores`),
+  deleteChore: (id: number) => api.delete(`/payback/chores/${id}`),
+  resetAccount: (id: number) => api.post(`/payback/accounts/${id}/reset`),
+};
+
 export default api;

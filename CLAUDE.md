@@ -459,6 +459,80 @@ Warranty tracking integrated into Home Inventory (Assets):
 - `notifications.controller.ts` - API endpoints
 - `notifications.routes.ts` - Route definitions
 
+## Recent Work: Misc Fixes & Pi Network Stability (COMPLETED)
+
+**Fixes:**
+- **Shopping list auto-categorization broken (Fixed 2026-04-23)**: Items were all going to "Other" because the AI model `claude-3-haiku-20240307` was deprecated. Updated to `claude-haiku-4-5-20251001`. Extracted model ID to a single `AI_MODEL` constant at top of `packages/backend/src/services/ai.service.ts` so future model updates are a one-line change.
+- **Plants page text color**: Changed stat card and water status text to darker shades for readability (CSS cascade was causing light text)
+- **Home Assets locations**: Expanded location dropdown from 12 to 24 options — added Entry Way, Family Room, Closet, Dining Room, Guest Room, Hallway, Laundry Room, Nursery, Pantry, Patio/Deck, Playroom, Shed, Utility Room. Sorted alphabetically.
+- **Shopping list delete button**: Added per-item trash icon button for quick deletion (hidden in print view)
+- **Auth routes not deployed**: The `/api/auth/google/url` endpoint had never been committed to git, causing "failed to connect to server" on login. Committed and deployed.
+- **OAuth login popup issue**: Popup-based login opened non-fullscreen windows in kiosk mode. Simplified to same-window navigation. Kiosk bypasses auth entirely so login is only needed from the main app.
+- **Family messages on kiosk**: Added compact messages display on kiosk dashboard, inline with daily quote (quote left, messages right in one row). Shows up to 3 recent/pinned messages.
+- **AI model constant**: All AI calls in `packages/backend/src/services/ai.service.ts` now use a single `AI_MODEL` constant at the top of the file for easy updates when models are deprecated.
+
+**Pi Network Stability (Fixed 2026-04-22):**
+- **Static IP**: Set 192.168.68.58 as permanent via NetworkManager (`nmcli connection modify` with `ipv4.method manual`)
+- **WiFi power saving disabled**: `wifi.powersave 2` prevents WiFi adapter from sleeping and dropping connection
+- **Note**: There are two "Deco" WiFi connections in NetworkManager. The active one is UUID `90b5aff8-ca23-4c2d-bba5-28eb82edba8a`. Always reference by UUID when modifying.
+
+**If Pi loses network again:**
+1. Unplug/replug to reboot
+2. Check `nmcli connection show --active` to verify Deco is connected
+3. If needed: `sudo nmcli connection up 90b5aff8-ca23-4c2d-bba5-28eb82edba8a`
+
+---
+
+## Recent Work: Meal Plan Page, Message Board, Daily Quote (COMPLETED)
+
+Added three new features: standalone Meal Plan page, Family Message Board, and Daily Quote on kiosk.
+
+### Meal Plan Page
+- Promoted meal planner from a modal inside Recipes to its own standalone page
+- Two views: **Calendar** (weekly grid) and **List** (day cards) with toggle
+- Week navigation (prev/next/today), copy last week, clear week
+- Add meals via custom text (just type "Tacos") or pick from saved recipes
+- Shopping list generation from recipe ingredients
+- Accessible from nav bar ("Meals") and home page card
+
+**Files Created:**
+- `packages/frontend/src/components/MealPlan/MealPlanPage.tsx`
+- `packages/frontend/src/components/MealPlan/MealPlanPage.css`
+
+**Note:** Backend already existed from prior work (meal_plans + meal_plan_entries tables, repository, controller, routes at `/api/meal-plans`). The existing modal in `packages/frontend/src/components/Recipes/MealPlanner.tsx` still works too.
+
+### Family Message Board
+- Sticky note board with colored notes (cream, pink, green, blue, yellow, purple)
+- Pin important messages to the top
+- Author name remembered via localStorage
+- Edit and delete messages
+
+**Files Created:**
+- `packages/backend/database/migrations/20260419000000_create_message_board.js` — `messages` table
+- `packages/backend/src/repositories/message.repository.ts`
+- `packages/backend/src/controllers/message.controller.ts`
+- `packages/backend/src/routes/message.routes.ts` — mounted at `/api/messages`
+- `packages/frontend/src/components/Messages/MessageBoard.tsx`
+- `packages/frontend/src/components/Messages/MessageBoard.css`
+
+### Daily Quote (Kiosk)
+- 100 inspirational quotes, rotates daily based on day of year
+- Displays at bottom of kiosk dashboard
+
+**Files Created:**
+- `packages/frontend/src/components/Kiosk/DailyQuote.tsx`
+- `packages/frontend/src/components/Kiosk/DailyQuote.css`
+
+**Files Modified:**
+- `packages/frontend/src/App.tsx` — Added MealPlanPage and MessageBoard routes
+- `packages/frontend/src/components/Navigation/Header.tsx` — Added Meals and Messages nav buttons
+- `packages/frontend/src/components/HomePage/HomePage.tsx` — Added Meal Plan and Messages cards
+- `packages/frontend/src/components/Kiosk/KioskDashboard.tsx` — Added DailyQuote component
+- `packages/frontend/src/services/api.ts` — Added messagesApi
+- `packages/backend/src/app.ts` — Mounted message routes
+
+---
+
 ## Recent Work: Kiosk Stability Fixes (COMPLETED)
 
 Multiple fixes to prevent kiosk from breaking on reboot or session expiry.

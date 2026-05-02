@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Settings, CheckCircle2, Clock, RotateCcw, Sparkles } from 'lucide-react';
 import { choresApi, kidsApi } from '../../services/api';
 import { ChoreDefinitionForm } from './ChoreDefinitionForm';
+import { PaybackTracker } from '../Payback/PaybackTracker';
 import './ChoresList.css';
 
 interface Kid {
@@ -44,13 +45,17 @@ export function ChoresList() {
   const [editMode, setEditMode] = useState(false);
   const [completing, setCompleting] = useState<number | null>(null);
   const [celebratingKid, setCelebratingKid] = useState<Kid | null>(null);
-  const [viewMode, setViewMode] = useState<'today' | 'upcoming'>('today');
+  const [viewMode, setViewMode] = useState<'today' | 'upcoming' | 'payback'>('today');
 
   useEffect(() => {
     loadData();
   }, [viewMode]);
 
   const loadData = async () => {
+    if (viewMode === 'payback') {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const [choresRes, kidsRes] = await Promise.all([
@@ -179,21 +184,33 @@ export function ChoresList() {
           >
             Upcoming
           </button>
-        </div>
-        <div className="header-actions">
           <button
-            className={`settings-btn ${editMode ? 'active' : ''}`}
-            onClick={() => setEditMode(!editMode)}
+            className={`toggle-btn ${viewMode === 'payback' ? 'active' : ''}`}
+            onClick={() => setViewMode('payback')}
           >
-            <Settings size={20} />
-          </button>
-          <button className="primary add-chore-btn" onClick={() => setShowAddChore(true)}>
-            <Plus size={20} />
-            Add Chore
+            Payback
           </button>
         </div>
+        {viewMode !== 'payback' && (
+          <div className="header-actions">
+            <button
+              className={`settings-btn ${editMode ? 'active' : ''}`}
+              onClick={() => setEditMode(!editMode)}
+            >
+              <Settings size={20} />
+            </button>
+            <button className="primary add-chore-btn" onClick={() => setShowAddChore(true)}>
+              <Plus size={20} />
+              Add Chore
+            </button>
+          </div>
+        )}
       </div>
 
+      {viewMode === 'payback' ? (
+        <PaybackTracker />
+      ) : (
+      <>
       {error && <div className="error-message">{error}</div>}
 
       {chores.length === 0 ? (
@@ -283,6 +300,8 @@ export function ChoresList() {
           onClose={() => setShowAddChore(false)}
           onSave={handleChoreCreated}
         />
+      )}
+      </>
       )}
     </div>
   );
