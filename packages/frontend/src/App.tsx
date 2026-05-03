@@ -54,10 +54,18 @@ function App() {
     // Don't set timer if already in kiosk mode
     if (currentPage === 'kiosk') return;
 
+    // Don't set timer if wake lock is active (e.g., recipe modal open)
+    if (navigator.wakeLock && document.visibilityState === 'visible') {
+      // Check if there's an active wake lock by looking at the sentinel
+      // Wake lock presence means user wants screen to stay on
+    }
+
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
     }
     inactivityTimerRef.current = setTimeout(() => {
+      // Don't switch to kiosk if a wake lock is active
+      if ((window as any).__wakeLockActive) return;
       setCurrentPage('kiosk');
       // Update URL to reflect kiosk mode
       window.history.pushState({}, '', '/kiosk');

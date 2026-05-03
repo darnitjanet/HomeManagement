@@ -60,8 +60,10 @@ export function RecipeDetail({ recipe, onClose, onEdit, onAddToShopping, onDelet
         if ('wakeLock' in navigator) {
           wakeLockRef.current = await navigator.wakeLock.request('screen');
         }
+        (window as any).__wakeLockActive = true;
       } catch (err) {
         console.log('Wake Lock request failed:', err);
+        (window as any).__wakeLockActive = true; // Still prevent kiosk switch
       }
     };
 
@@ -72,6 +74,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onAddToShopping, onDelet
         wakeLockRef.current.release();
         wakeLockRef.current = null;
       }
+      (window as any).__wakeLockActive = false;
     };
   }, []);
 
