@@ -459,6 +459,45 @@ Warranty tracking integrated into Home Inventory (Assets):
 - `notifications.controller.ts` - API endpoints
 - `notifications.routes.ts` - Route definitions
 
+## Recent Work: Goal Chores & Recipe Wake Lock (COMPLETED)
+
+### Goal Chores (Payback System)
+Added "Goal Chores" tab to the Chores page for tracking chores done to earn money toward a goal/debt.
+
+**Features:**
+- Payback accounts with total owed/earned/remaining balance and progress bar
+- Add chores with description and dollar amount ($1/$5 quick buttons)
+- Chore log with delete capability
+- "Add to Debt" and "Reset Account" options
+- Default account created for Cameron
+- Integrated as "Goal Chores" tab in existing Chores page (alongside "Routine - Today" and "Routine - Upcoming")
+
+**Files Created:**
+- `packages/backend/database/migrations/20260502000000_create_payback_chores.js` — `payback_accounts` and `payback_chores` tables
+- `packages/backend/src/repositories/payback.repository.ts`
+- `packages/backend/src/controllers/payback.controller.ts`
+- `packages/backend/src/routes/payback.routes.ts` — mounted at `/api/payback`
+- `packages/frontend/src/components/Payback/PaybackTracker.tsx`
+- `packages/frontend/src/components/Payback/PaybackTracker.css`
+
+**Files Modified:**
+- `packages/frontend/src/components/Chores/ChoresList.tsx` — Added "Goal Chores" tab, renders PaybackTracker
+- `packages/frontend/src/services/api.ts` — Added paybackApi
+- `packages/backend/src/app.ts` — Mounted payback routes
+
+### Recipe Wake Lock
+Prevents screen sleep and kiosk mode switch while a recipe modal is open.
+
+**How it works:**
+- `RecipeDetail.tsx` acquires a Wake Lock on mount, releases on unmount
+- Sets `window.__wakeLockActive` flag that the inactivity timer in `App.tsx` checks before switching to kiosk mode
+
+**Files Modified:**
+- `packages/frontend/src/components/Recipes/RecipeDetail.tsx` — Wake Lock API + global flag
+- `packages/frontend/src/App.tsx` — Inactivity timer checks `__wakeLockActive` before kiosk switch
+
+---
+
 ## Recent Work: Misc Fixes & Pi Network Stability (COMPLETED)
 
 **Fixes:**
