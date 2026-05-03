@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Clock, Users, Edit, Trash2, ShoppingCart, ExternalLink, X } from 'lucide-react';
 import { decimalToFraction } from '../../utils/fractions';
 import './RecipeDetail.css';
@@ -50,6 +51,30 @@ interface RecipeDetailProps {
 }
 
 export function RecipeDetail({ recipe, onClose, onEdit, onAddToShopping, onDelete }: RecipeDetailProps) {
+  // Keep screen awake while recipe is open (for cooking)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('Wake Lock request failed:', err);
+      }
+    };
+
+    requestWakeLock();
+
+    return () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
+    };
+  }, []);
+
   const formatTime = (prepMinutes?: number, cookMinutes?: number): string => {
     const total = (prepMinutes || 0) + (cookMinutes || 0);
     if (total === 0) return '-';
