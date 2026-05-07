@@ -1443,7 +1443,8 @@ export function KioskDashboard({ onExit }: KioskDashboardProps) {
 
         {/* Meal Plan Widget */}
         {(() => {
-          const today = new Date().getDay(); // 0 = Sunday
+          const jsDay = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+          const today = jsDay === 0 ? 7 : jsDay; // Convert to 1=Mon, ..., 7=Sun
           const todayMeals = mealPlan.filter(m => m.day_of_week === today);
           if (todayMeals.length === 0) return null;
 
