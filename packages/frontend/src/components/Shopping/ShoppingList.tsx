@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ExternalLink, ChevronRight, Check, ScanBarcode, Package, Heart, ShoppingCart, Printer, Trash2, CheckCheck } from 'lucide-react';
 import { shoppingApi, pantryApi } from '../../services/api';
-import { MicButton } from '../common/MicButton';
 import './ShoppingList.css';
 
 type ListType = 'grocery' | 'other';
@@ -473,10 +472,6 @@ export function ShoppingList() {
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           className="item-input"
-          disabled={adding}
-        />
-        <MicButton
-          onResult={(text) => setNewItemName(text)}
           disabled={adding}
         />
         <button type="submit" className="add-btn primary" disabled={adding}>

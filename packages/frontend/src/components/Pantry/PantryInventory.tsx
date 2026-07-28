@@ -3,7 +3,6 @@ import { Plus, Search, AlertTriangle, ChefHat, Package, Barcode, Undo2, Shopping
 import { pantryApi, recipesApi, shoppingApi } from '../../services/api';
 import { PantryItemForm } from './PantryItemForm';
 import { QuickScanModal } from './QuickScanModal';
-import { MicButton } from '../common/MicButton';
 import './Pantry.css';
 
 interface PantryItem {
@@ -381,7 +380,6 @@ export function PantryInventory() {
               &times;
             </button>
           )}
-          <MicButton onResult={(text) => { setSearchQuery(text); }} />
         </div>
         <select
           value={filterCategory}

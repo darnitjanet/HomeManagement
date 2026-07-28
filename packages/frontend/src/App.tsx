@@ -32,6 +32,24 @@ import './App.css';
 function App() {
   const { isAuthenticated, setAuthenticated } = useCalendarStore();
   const [checking, setChecking] = useState(true);
+  // Local access: use the app (recipes, shopping, etc.) without Google sign-in.
+  // Google login is only needed for Calendar/Contacts/Gmail sync.
+  const [localAccess, setLocalAccess] = useState(() => {
+    try {
+      return localStorage.getItem('localAccess') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLocalAccess = () => {
+    try {
+      localStorage.setItem('localAccess', 'true');
+    } catch {
+      // ignore storage errors (e.g. private mode)
+    }
+    setLocalAccess(true);
+  };
   // Check URL for kiosk mode on initial load
   const initialPage = window.location.pathname === '/kiosk' ? 'kiosk' : 'home';
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -160,7 +178,7 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !localAccess) {
     return (
       <div className="login-container">
         <div className="login-card">
@@ -186,11 +204,15 @@ function App() {
               </svg>
               Sign in with Google
             </button>
+
+            <button className="login-button local-access-button" onClick={handleLocalAccess}>
+              Continue without Google
+            </button>
           </div>
 
           <div className="login-footer">
             <p>First time using this app?</p>
-            <p>Once signed in, you'll be able to view and manage your Google Calendar</p>
+            <p>Sign in with Google for Calendar, Contacts &amp; email sync — or continue without it to use Recipes, Shopping, Chores and everything else.</p>
           </div>
         </div>
       </div>

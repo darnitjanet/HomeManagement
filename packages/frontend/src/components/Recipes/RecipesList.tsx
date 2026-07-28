@@ -7,7 +7,6 @@ import { RecipeDetail } from './RecipeDetail';
 import { RecipeSuggestions } from './RecipeSuggestions';
 import { RecipeImport } from './RecipeImport';
 import { MealPlanner } from './MealPlanner';
-import { MicButton } from '../common/MicButton';
 import './RecipesList.css';
 
 interface RecipeIngredient {
@@ -313,7 +312,6 @@ export function RecipesList() {
             onChange={(e) => handleSearch(e.target.value)}
             className="search-input"
           />
-          <MicButton onResult={(text) => handleSearch(text)} />
         </div>
 
         <select value={selectedCuisine} onChange={(e) => setSelectedCuisine(e.target.value)}>

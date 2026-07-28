@@ -120,6 +120,22 @@
   flex-shrink: 0;
 }
 
+.local-access-button {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  justify-content: center;
+  background: transparent;
+  color: #5b768a;
+  border: 2px solid #5b768a;
+}
+
+.local-access-button:hover,
+.local-access-button:active {
+  background: #5b768a;
+  color: #fff;
+}
+
 .login-footer {
   background: var(--slate-50);
   padding: 24px 32px;
