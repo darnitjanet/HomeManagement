@@ -24,6 +24,44 @@ Monorepo with packages:
 - SQLite with Knex.js migrations
 - Database file: `packages/backend/database/home_management.db`
 
+---
+
+## ⚠️ OPEN ITEMS / SESSION NOTES (2026-07-28 → 29)
+
+### 1. PENDING DEPLOY — "Continue without Google" login + build fix
+Committed & pushed to GitHub (`main`, commit `70fa120`) but **NOT yet built/deployed on the Pi.**
+Once the Pi is reachable again, deploy with:
+```bash
+cd ~/HomeManagement && git pull && cd packages/frontend && npx vite build
+# then refresh the browser (frontend-only change, no backend restart needed)
+```
+**What changed:**
+- `App.tsx` / `App.css`: Added a **"Continue without Google"** button to the login screen. It sets `localStorage 'localAccess'='true'` and lets the app be used **without** Google sign-in. Everything local (Recipes, Shopping, Chores, Kids, Movies, Books, Pantry, Plants, Meal Plan, etc.) works with no auth. Google login is only needed for **Calendar / Contacts / Gmail sync** (the only routes behind `requireAuth`). This lets any device on the LAN use the app without the OAuth dance below.
+- Removed leftover `MicButton` imports from `RecipesList.tsx`, `ShoppingList.tsx`, `PantryInventory.tsx`. They imported a **deleted** `../common/MicButton` (dropped speech-to-text feature) which was breaking the **entire `vite build`**. The build was silently broken in git; the Pi only kept running on an older `dist`. **Do not re-add MicButton/useSpeechInput.**
+
+### 2. Logging into the app FROM A DEVICE OTHER THAN THE PI (OAuth workaround)
+`GOOGLE_REDIRECT_URI` = `http://localhost:3000/api/auth/google/callback`. This only resolves correctly **on the Pi itself** (where `localhost` = the app). From a PC/phone, after Google login the browser is sent to `localhost:3000` → **ERR_CONNECTION_REFUSED**.
+**Workaround:** On the "localhost refused to connect" page, edit the browser address bar and replace **`localhost`** with **`192.168.68.58`** (leave the rest — the `?code=...` — identical), press Enter. That delivers the auth code to the Pi, completes sign-in, and lands you back in the app logged in. The code is single-use and expires in ~1–2 min, so do it quickly.
+**Why not just register the Pi's IP as a redirect URI:** Google rejects raw private IPs (192.168.x.x) and non-HTTPS non-localhost URLs as authorized redirect URIs. A true multi-device fix needs HTTPS (reverse proxy / Cloudflare Tunnel / Tailscale). The "Continue without Google" button (item 1) sidesteps this for all non-Google features.
+
+### 3. Pi keyboard-over-VNC broken + network flapping (UNRESOLVED)
+Symptoms observed this session:
+- **Physical keyboard typed through RealVNC does NOT enter text into app fields** (used to work). Likely a Wayland/`wayvnc` keyboard-input regression after an OS update — mouse works, keys don't reach the Chromium/Wayland app.
+- After a **reboot**, VNC stopped connecting at all ("connection closed remotely", then "timed out"). Port 5900 is open (VNC server running) but the handshake dies because…
+- **The Pi is flapping on the network (~50% packet loss)** — app on `:3000` alternates UP/DOWN every few seconds. A power-cycle did **not** fix it. This matches the known **WiFi power-save drop** issue (previously fixed via `nmcli ... wifi.powersave 2` + static IP on Deco UUID `90b5aff8-ca23-4c2d-bba5-28eb82edba8a`); a reboot likely reverted it.
+
+**Access constraints during this session:** no USB keyboard on the Pi, VNC won't hold, and **SSH is OFF** (port 22 closed/filtered from the LAN). No remote command channel available.
+
+**How to recover (need ONE of these):**
+- **Ethernet cable** Pi→router: bypasses flaky WiFi; connection goes solid; reconnect via **RealVNC account** (finds the device regardless of IP — wired gets a different DHCP IP than the WiFi static `192.168.68.58`). Also diagnostic: if wired *also* flaps, suspect power supply / SD card, not WiFi.
+- **USB keyboard** on the Pi: press **Ctrl+Alt+F2** to drop to a text console (TTY) OUTSIDE the fullscreen Chromium kiosk; **Ctrl+Alt+F1 (or F7)** returns to the kiosk. From the TTY, log in and fix WiFi power-save + **enable SSH** (`sudo raspi-config` → Interface Options → SSH) so future fixes can be done remotely from the PC.
+
+**Once back in, do all of:** re-disable WiFi power-save (persist it), enable SSH, run the pending deploy (item 1), and investigate the wayvnc keyboard-input regression.
+
+**Note:** `RASPBERRY_PI_SETUP.md` references an older DB path/IP; the live values are IP `192.168.68.58`, DB `~/HomeManagement/packages/backend/database/homemanagement.db` (no underscore).
+
+---
+
 ## Known Issues & Fixes
 
 ### Google OAuth Login 400 Error (Fixed 2026-04-13)
